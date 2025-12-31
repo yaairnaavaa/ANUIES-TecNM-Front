@@ -1,0 +1,50 @@
+<header
+  class="w-full bg-[#1a2e4c] text-white px-4 md:px-8 py-3 flex items-center justify-between shadow-lg sticky top-0 z-50"
+>
+  <div class="flex items-center gap-3 sm:gap-5">
+    <div
+      class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl flex items-center justify-center text-[#1a2e4c] font-bold text-lg md:text-xl shadow-sm"
+    >
+      TN
+    </div>
+
+    <div class="flex flex-col max-w-[150px] sm:max-w-none">
+      <h1 class="text-sm md:text-lg font-bold leading-tight truncate">
+        {{ titulo }}
+      </h1>
+      <span class="text-[10px] md:text-xs text-gray-400 font-medium truncate">
+        {{ subtitulo }}
+      </span>
+    </div>
+
+    <div
+      class="hidden lg:flex items-center bg-white/10 border border-white/20 px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap"
+    >
+      {{ evento }}
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2 md:gap-4">
+    <div
+      class="bg-white/10 px-3 py-1.5 md:px-4 rounded-full flex items-center gap-2 border border-white/5"
+    >
+      <span class="text-sm md:text-lg font-bold">{{ registrosHoy }}</span>
+      <span class="hidden sm:inline text-[10px] md:text-xs text-gray-300">registros hoy</span>
+    </div>
+
+    <button
+      (click)="verQR()"
+      class="flex items-center justify-center gap-2 bg-transparent border border-white/20 hover:bg-white/10 active:scale-95 transition-all p-2 md:px-4 md:py-1.5 rounded-lg text-sm font-semibold"
+    >
+      <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+        />
+      </svg>
+      <span class="hidden md:inline">Ver QR</span>
+    </button>
+  </div>
+</header>
