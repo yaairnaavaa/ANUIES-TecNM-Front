@@ -7,14 +7,6 @@ import { SidebarComponent } from '../../components/sidebar-component/sidebar-com
   selector: 'app-admin-layout',
   standalone: true,
   imports: [CommonModule, RouterOutlet, SidebarComponent],
-  template: `
-    <div class="flex min-h-screen bg-slate-50">
-      <app-sidebar-component></app-sidebar-component>
-
-      <main class="flex-1 h-screen overflow-y-auto pt-16 lg:pt-0">
-        <router-outlet></router-outlet>
-      </main>
-    </div>
-  `,
+  templateUrl:  './admin-layout.html'
 })
 export class AdminLayout {}

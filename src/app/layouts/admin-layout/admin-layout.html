@@ -1,1 +1,7 @@
-<p>admin-layout works!</p>
+<div class="flex min-h-screen bg-slate-50">
+  <app-sidebar-component></app-sidebar-component>
+
+  <main class="flex-1 h-screen overflow-y-auto pt-16 lg:pt-0">
+    <router-outlet></router-outlet>
+  </main>
+</div>
