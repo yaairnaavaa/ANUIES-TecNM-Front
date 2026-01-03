@@ -227,7 +227,7 @@
       >
         <button
           type="button"
-          class="w-full sm:w-auto px-10 py-4 text-gray-400 font-extrabold hover:text-gray-600 transition-all uppercase text-xs tracking-widest"
+          class="w-full sm:w-auto px-6 py-3.5 text-gray-400 font-extrabold hover:text-gray-600 transition-all uppercase text-[10px] tracking-widest"
         >
           <i class="fas fa-times mr-2"></i> Cancelar
         </button>
@@ -235,13 +235,71 @@
         <button
           type="submit"
           [disabled]="!registrationForm.valid || selectedMajors.length === 0 || isLoading"
-          class="w-full sm:w-auto px-12 py-5 bg-blue-600 text-white font-black rounded-2xl shadow-2xl shadow-blue-500/30 hover:bg-blue-700 disabled:opacity-30 disabled:shadow-none transition-all flex items-center justify-center gap-3 uppercase text-xs tracking-[0.1em]"
+          class="w-full sm:w-auto min-w-[200px] px-8 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 hover:bg-blue-700 disabled:opacity-30 disabled:shadow-none transition-all flex items-center justify-center gap-3 uppercase text-[10px] tracking-widest"
         >
-          <i *ngIf="isLoading" class="fas fa-circle-notch animate-spin text-lg"></i>
-          <i *ngIf="!isLoading" class="fas fa-check-circle text-lg"></i>
+          <i *ngIf="isLoading" class="fas fa-circle-notch animate-spin text-base"></i>
+          <i *ngIf="!isLoading" class="fas fa-check-circle text-base"></i>
           {{ isLoading ? 'Procesando...' : 'Registrar Aspirante' }}
         </button>
       </footer>
     </form>
   </div>
 </div>
+
+@if (showSuccess) {
+<div class="fixed inset-0 z-[120] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-[#1a2e4c]/80 backdrop-blur-md animate-fade-in"></div>
+
+  <div
+    class="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-zoom-in"
+  >
+    <div class="p-8 text-center">
+      <div
+        class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-200"
+      >
+        <i class="fas fa-check text-4xl"></i>
+      </div>
+
+      <h2 class="text-2xl font-black text-gray-800 mb-2">¡Registro Exitoso!</h2>
+      <p class="text-sm text-gray-500 font-medium mb-8 leading-relaxed">
+        El aspirante ha sido registrado correctamente. Recibirá un correo de bienvenida en breve.
+      </p>
+
+      <div class="bg-gray-50 rounded-[2rem] p-6 mb-8 space-y-3 border border-gray-100">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-gray-400 uppercase tracking-wider">Nombre</span>
+          <span class="font-black text-gray-700 text-right">{{ successData?.fullName }}</span>
+        </div>
+        <div class="flex justify-between items-center text-xs border-t border-gray-200/50 pt-3">
+          <span class="font-bold text-gray-400 uppercase tracking-wider">IEMS</span>
+          <span class="font-black text-gray-700 text-right">{{ successData?.school }}</span>
+        </div>
+        <div class="flex justify-between items-center text-xs border-t border-gray-200/50 pt-3">
+          <span class="font-bold text-gray-400 uppercase tracking-wider">1ª Opción</span>
+          <span class="font-black text-blue-600 text-right">{{ successData?.firstChoice }}</span>
+        </div>
+        <div class="flex justify-between items-center text-xs border-t border-gray-200/50 pt-3">
+          <span class="font-bold text-gray-400 uppercase tracking-wider">Folio</span>
+          <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg font-black">{{
+            successData?.folio
+          }}</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button
+          (click)="resetForm()"
+          class="flex items-center justify-center gap-2 px-6 py-4 bg-gray-100 text-gray-600 font-black rounded-2xl hover:bg-gray-200 transition-all text-[10px] uppercase tracking-widest"
+        >
+          <i class="fas fa-plus"></i> Nuevo
+        </button>
+        <button
+          class="flex items-center justify-center gap-2 px-6 py-4 bg-green-500 text-white font-black rounded-2xl shadow-lg shadow-green-200 hover:bg-green-600 transition-all text-[10px] uppercase tracking-widest"
+        >
+          <i class="fab fa-whatsapp"></i> WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}

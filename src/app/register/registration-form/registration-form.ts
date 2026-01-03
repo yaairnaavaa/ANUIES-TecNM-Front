@@ -20,6 +20,8 @@ export class RegistrationForm {
   selectedMajors: string[] = [];
   isLoading = false;
   errorMessage: string | null = null;
+  showSuccess = false;
+  successData: any = null; // Guardará el resumen del registro
 
   registrationForm = new FormGroup({
     fullName: new FormControl('Juan Martínez López', [Validators.required]),
@@ -34,12 +36,32 @@ export class RegistrationForm {
 
   // Los nombres están en ESPAÑOL (vista), pero los IDs se quedan en inglés (para la base de datos)
   majorsList = [
-    { id: 'industrial', name: 'Ingeniería Industrial', meta: 'Optimización de procesos · Alta demanda' },
-    { id: 'systems', name: 'Ingeniería en Sistemas Computacionales', meta: 'Desarrollo de software · TI' },
-    { id: 'mechatronics', name: 'Ingeniería Mecatrónica', meta: 'Robótica y automatización · Industria 4.0' },
-    { id: 'electronics', name: 'Ingeniería Electrónica', meta: 'Circuitos y sistemas electrónicos' },
+    {
+      id: 'industrial',
+      name: 'Ingeniería Industrial',
+      meta: 'Optimización de procesos · Alta demanda',
+    },
+    {
+      id: 'systems',
+      name: 'Ingeniería en Sistemas Computacionales',
+      meta: 'Desarrollo de software · TI',
+    },
+    {
+      id: 'mechatronics',
+      name: 'Ingeniería Mecatrónica',
+      meta: 'Robótica y automatización · Industria 4.0',
+    },
+    {
+      id: 'electronics',
+      name: 'Ingeniería Electrónica',
+      meta: 'Circuitos y sistemas electrónicos',
+    },
     { id: 'civil', name: 'Ingeniería Civil', meta: 'Construcción e infraestructura' },
-    { id: 'management', name: 'Ingeniería en Gestión Empresarial', meta: 'Administración y negocios' },
+    {
+      id: 'management',
+      name: 'Ingeniería en Gestión Empresarial',
+      meta: 'Administración y negocios',
+    },
   ];
 
   channelsList = [
@@ -68,33 +90,36 @@ export class RegistrationForm {
   onSubmit() {
     if (this.registrationForm.valid && this.selectedMajors.length > 0) {
       this.isLoading = true;
-      this.errorMessage = null;
 
-      // Mapeamos los datos al formato de la interfaz
-      const payload: ApplicantRegistration = {
-        fullName: this.registrationForm.value.fullName!,
-        email: this.registrationForm.value.email!,
-        phoneNumber: this.registrationForm.value.phoneNumber!,
-        previousSchool: this.registrationForm.value.previousSchool!,
-        currentSemester: this.registrationForm.value.currentSemester || undefined,
-        technicalMajor: this.registrationForm.value.technicalMajor || undefined,
-        interestedMajors: this.selectedMajors,
-        marketingChannel: this.registrationForm.value.marketingChannel!
+      // Simulamos los datos que vería el resumen
+      const summary = {
+        fullName: this.registrationForm.value.fullName,
+        school: this.registrationForm.value.previousSchool,
+        firstChoice: this.majorsList.find((m) => m.id === this.selectedMajors[0])?.name,
+        folio: `ASP-2025-${Math.floor(1000 + Math.random() * 9000)}`, // Folio simulado
       };
 
-      this.registrationService.submitRegistration(payload).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          console.log('Registro exitoso:', response);
-          // Emitimos el evento para que el stepper del padre avance al paso 2
-          this.onRegistrationSuccess.emit();
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.errorMessage = 'Ocurrió un error al procesar tu registro. Por favor, intenta de nuevo.';
-          console.error('Registration error:', error);
-        },
-      });
+      // Simulación de llamada a API (Sustituir por this.registrationService cuando esté lista)
+      setTimeout(() => {
+        this.isLoading = false;
+        this.successData = summary;
+        this.showSuccess = true;
+
+        // Opcional: Avisar al padre
+        this.onRegistrationSuccess.emit();
+      }, 1500);
     }
+  }
+
+  resetForm() {
+    this.showSuccess = false;
+    this.registrationForm.reset({
+      fullName: '',
+      email: '',
+      phoneNumber: '',
+      privacyPolicy: false,
+    });
+    this.selectedMajors = [];
+    this.successData = null;
   }
 }
