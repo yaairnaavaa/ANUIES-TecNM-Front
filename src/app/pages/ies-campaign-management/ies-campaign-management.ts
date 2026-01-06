@@ -10,6 +10,7 @@ interface Campaign {
   cost: number;
   impact: number;
   status: 'Active' | 'Finished' | 'Draft';
+  institution: string; // Nueva propiedad
 }
 
 @Component({
@@ -29,6 +30,7 @@ export class IesCampaignManagementComponent {
       cost: 12500,
       impact: 8.5,
       status: 'Active',
+      institution: 'Instituto Tecnológico de Tepic',
     },
     {
       id: 2,
@@ -38,6 +40,7 @@ export class IesCampaignManagementComponent {
       cost: 5000,
       impact: 12.2,
       status: 'Finished',
+      institution: 'Instituto Tecnológico de Pachuca',
     },
     {
       id: 3,
@@ -47,6 +50,7 @@ export class IesCampaignManagementComponent {
       cost: 22000,
       impact: 15.4,
       status: 'Finished',
+      institution: 'Instituto Tecnológico de Tepic',
     },
     {
       id: 4,
@@ -56,6 +60,7 @@ export class IesCampaignManagementComponent {
       cost: 1200,
       impact: 4.1,
       status: 'Active',
+      institution: 'Instituto Tecnológico de Tepic',
     },
     {
       id: 5,
@@ -65,6 +70,7 @@ export class IesCampaignManagementComponent {
       cost: 8900,
       impact: 9.7,
       status: 'Finished',
+      institution: 'Instituto Tecnológico de Tepic',
     },
     {
       id: 6,
@@ -74,6 +80,7 @@ export class IesCampaignManagementComponent {
       cost: 3500,
       impact: 77.5,
       status: 'Draft',
+      institution: 'Instituto Tecnológico de Tepic',
     },
   ]);
 
@@ -111,21 +118,29 @@ export class IesCampaignManagementComponent {
   // Ajustamos el label de displayMetrics para que sea en español
   displayMetrics = computed(() => {
     const selected = this.selectedCampaign();
+    const data = this.filteredCampaigns();
+
+    // Cálculo de escuelas únicas (para métricas globales)
+    const uniqueInstitutions = new Set(data.map((c) => c.institution)).size;
+
     if (selected) {
       return {
         reach: selected.reach,
         cost: selected.cost,
         impact: selected.impact,
         label: `Enfoque: ${selected.name}`,
+        institutionName: selected.institution,
+        isGlobal: false,
       };
     }
 
-    const data = this.filteredCampaigns();
     return {
       reach: data.reduce((acc, c) => acc + c.reach, 0),
       cost: data.reduce((acc, c) => acc + c.cost, 0),
       impact: data.length ? data.reduce((acc, c) => acc + c.impact, 0) / data.length : 0,
       label: 'Métricas Globales (Total Filtrado)',
+      institutionCount: uniqueInstitutions,
+      isGlobal: true,
     };
   });
 
@@ -146,6 +161,4 @@ export class IesCampaignManagementComponent {
   goToPage(page: number) {
     this.currentPage.set(page);
   }
-
-  
 }

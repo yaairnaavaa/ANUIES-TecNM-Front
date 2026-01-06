@@ -22,7 +22,21 @@
        }
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      
+      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all" [class.border-blue-500]="selectedCampaign()">
+        <div class="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl shadow-lg shadow-blue-100">
+          <i class="fas" [class.fa-university]="!displayMetrics().isGlobal" [class.fa-network-wired]="displayMetrics().isGlobal"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            {{ displayMetrics().isGlobal ? 'Cobertura' : 'Institución' }}
+          </p>
+<h3 class="text-sm md:text-base font-black text-slate-900 leading-tight uppercase break-words">            {{ displayMetrics().isGlobal ? (displayMetrics().institutionCount + ' Escuelas') : displayMetrics().institutionName }}
+          </h3>
+        </div>
+      </div>
+
       <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all" [class.border-blue-500]="selectedCampaign()">
         <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl"><i class="fas fa-bullseye"></i></div>
         <div>
@@ -30,6 +44,7 @@
           <h3 class="text-2xl font-black text-slate-900">{{ displayMetrics().reach | number }}</h3>
         </div>
       </div>
+
       <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all" [class.border-blue-500]="selectedCampaign()">
         <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl"><i class="fas fa-dollar-sign"></i></div>
         <div>
@@ -37,6 +52,7 @@
           <h3 class="text-2xl font-black text-slate-900">{{ displayMetrics().cost | currency:'MXN':'symbol-narrow' }}</h3>
         </div>
       </div>
+
       <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all" [class.border-blue-500]="selectedCampaign()">
         <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl"><i class="fas fa-chart-line"></i></div>
         <div>
@@ -70,7 +86,7 @@
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-widest font-black">
-            <th class="px-8 py-5">Campaña / Fecha Inicio</th>
+            <th class="px-8 py-5">Campaña / Institución</th>
             <th class="px-8 py-5">Estado</th>
             <th class="px-8 py-5">Costo</th>
             <th class="px-8 py-5">Impacto</th>
@@ -83,8 +99,11 @@
                 class="cursor-pointer transition-all group"
                 [class.bg-blue-50/50]="selectedCampaign()?.id === c.id">
               <td class="px-8 py-5">
-                <div class="font-bold text-slate-800 leading-tight">{{ c.name }}</div>
-                <div class="text-xs text-slate-400 mt-1 italic">{{ c.startDate | date:'dd/MM/yyyy' }}</div>
+                <div class="font-bold text-slate-800 leading-tight uppercase">{{ c.name }}</div>
+                <div class="text-[10px] text-blue-600 font-black uppercase tracking-tighter mt-1 italic">
+                  <i class="fas fa-university mr-1"></i>{{ c.institution }}
+                </div>
+                <div class="text-xs text-slate-400 mt-0.5 italic">{{ c.startDate | date:'dd/MM/yyyy' }}</div>
               </td>
               <td class="px-8 py-5">
                 <span [ngClass]="{
@@ -118,7 +137,7 @@
             <tr>
               <td colspan="5" class="px-8 py-20 text-center opacity-40">
                 <i class="fas fa-search text-4xl mb-4"></i>
-                <p class="font-bold">No se encontraron campañas registradas</p>
+                <p class="font-bold uppercase tracking-widest">No se encontraron campañas registradas</p>
               </td>
             </tr>
           }
