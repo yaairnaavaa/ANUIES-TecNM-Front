@@ -2,15 +2,19 @@ import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IES } from '../../models/ies.model';
-
+import { IesUserManagement } from '../ies-user-management/ies-user-management';
 @Component({
   selector: 'app-ies-gestion',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IesUserManagement], // Añadido aquí  templateUrl: './ies-gestion.html',
   templateUrl: './ies-gestion.html',
 })
 export class IesGestion {
-  // Estados de vista
+  // Estado para controlar qué vista mostrar
+  // 'list' para la tabla, 'users' para la gestión de operativos
+  currentView = signal<'list' | 'users'>('list');
+  selectedIes = signal<IES | null>(null);
+
   isAdding = signal(false);
   isLoading = signal(false);
   searchQuery = signal('');
@@ -81,7 +85,18 @@ export class IesGestion {
     // Simula más datos para probar la paginación si lo deseas agregando objetos aquí
   ]);
 
-  // 1. Filtrado por búsqueda
+  // Métodos para cambiar de vista
+  manageUsers(ies: IES) {
+    this.selectedIes.set(ies);
+    this.currentView.set('users');
+  }
+
+  backToList() {
+    this.currentView.set('list');
+    this.selectedIes.set(null);
+  }
+
+  // --- Lógica de filtrado y paginación (Mantenida igual) ---
   allFilteredResults = computed(() => {
     const query = this.searchQuery().toLowerCase();
     return this.iesList().filter(
@@ -90,14 +105,12 @@ export class IesGestion {
     );
   });
 
-  // 2. Paginación de los resultados filtrados
   pagedIes = computed(() => {
     const startIndex = (this.currentPage() - 1) * this.itemsPerPage();
     const endIndex = startIndex + this.itemsPerPage();
     return this.allFilteredResults().slice(startIndex, endIndex);
   });
 
-  // 3. Cálculos de apoyo para la UI
   totalPages = computed(() => Math.ceil(this.allFilteredResults().length / this.itemsPerPage()));
 
   showingRange = computed(() => {
@@ -120,7 +133,6 @@ export class IesGestion {
     };
   }
 
-  // Navegación
   goToPage(page: number) {
     if (page >= 1 && page <= this.totalPages()) {
       this.currentPage.set(page);
@@ -129,12 +141,12 @@ export class IesGestion {
 
   onSearchChange(query: string) {
     this.searchQuery.set(query);
-    this.currentPage.set(1); // Reiniciar a página 1 al buscar
+    this.currentPage.set(1);
   }
 
   onItemsPerPageChange(value: number) {
     this.itemsPerPage.set(value);
-    this.currentPage.set(1); // Reiniciar al cambiar el tamaño de página
+    this.currentPage.set(1);
   }
 
   toggleAdd() {

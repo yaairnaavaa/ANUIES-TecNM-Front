@@ -1,0 +1,133 @@
+<div class="h-full flex flex-col bg-white">
+  <div class="px-8 py-6 border-b border-slate-100 bg-white/50 backdrop-blur-sm sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="relative w-full md:w-96 group">
+        <i
+          class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors text-sm"
+        ></i>
+        <input
+          type="text"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Buscar operativo..."
+          class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 focus:border-blue-400 focus:bg-white rounded-xl outline-none transition-all text-sm font-medium text-slate-600 placeholder:text-slate-400"
+        />
+      </div>
+
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-3 pr-6 border-r border-slate-200">
+          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+            <span class="text-slate-900 text-lg mr-1">{{ totalUsers() }}</span> Operativos Activos
+          </span>
+        </div>
+
+        <button
+          (click)="toggleAddUser()"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all active:scale-95"
+        >
+          <i class="fas fa-plus text-[10px]"></i> NUEVO OPERATIVO
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main class="flex-1 p-8 overflow-y-auto">
+    <div class="max-w-7xl mx-auto">
+      <div class="w-full overflow-hidden">
+        <table class="w-full border-separate border-spacing-y-3">
+          <thead>
+            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              <th class="px-6 py-4 font-black">Personal</th>
+              <th class="px-6 py-4 font-black">Cargo</th>
+              <th class="px-6 py-4 font-black text-center">Último Acceso</th>
+              <th class="px-6 py-4 font-black text-center">Estatus</th>
+              <th class="px-6 py-4 font-black text-right">Gestión</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for(user of filteredUsers(); track user.id) {
+            <tr class="group hover:bg-slate-50 transition-colors">
+              <td
+                class="px-6 py-4 bg-white first:rounded-l-2xl border-y border-l border-slate-100 group-hover:border-blue-100 transition-colors"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-500 text-xs transition-colors group-hover:bg-blue-100 group-hover:text-blue-600"
+                  >
+                    {{ getInitials(user.fullName) }}
+                  </div>
+                  <div>
+                    <div
+                      class="text-sm font-bold text-slate-700 uppercase group-hover:text-blue-600 transition-colors"
+                    >
+                      {{ user.fullName }}
+                    </div>
+                    <div class="text-[10px] text-slate-400 font-medium">
+                      enlace.operativo&#64;ies.edu.mx
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <td class="px-6 py-4 bg-white border-y border-slate-100 group-hover:border-blue-100">
+                <span
+                  class="text-[10px] font-black text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg uppercase tracking-tight group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors"
+                >
+                  {{ user.jobTitle }}
+                </span>
+              </td>
+
+              <td
+                class="px-6 py-4 bg-white border-y border-slate-100 group-hover:border-blue-100 text-center"
+              >
+                <span class="text-[11px] font-mono text-slate-400 font-medium">
+                  {{ user.lastAccess || '---' }}
+                </span>
+              </td>
+
+              <td
+                class="px-6 py-4 bg-white border-y border-slate-100 group-hover:border-blue-100 text-center"
+              >
+                <div
+                  class="inline-flex items-center gap-1.5 px-2 py-1 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-black uppercase tracking-tighter"
+                >
+                  {{ user.status }}
+                </div>
+              </td>
+
+              <td
+                class="px-6 py-4 bg-white last:rounded-r-2xl border-y border-r border-slate-100 group-hover:border-blue-100 text-right"
+              >
+                <div class="flex justify-end gap-2">
+                  <button
+                    title="Reenviar"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-blue-600 hover:text-white transition-all"
+                  >
+                    <i class="fas fa-paper-plane text-[10px]"></i>
+                  </button>
+                  <button
+                    (click)="deleteUser(user.id)"
+                    title="Eliminar"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-red-500 hover:text-white transition-all"
+                  >
+                    <i class="fas fa-trash-alt text-[10px]"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (filteredUsers().length === 0) {
+        <div class="py-20 text-center">
+          <p class="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">
+            No se encontraron registros
+          </p>
+        </div>
+        }
+      </div>
+    </div>
+  </main>
+</div>

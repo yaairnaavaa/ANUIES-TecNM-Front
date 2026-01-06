@@ -1,8 +1,10 @@
-<div class="p-6 lg:p-10 space-y-8 animate-fade-in">
+<div class="p-6 lg:p-10 space-y-8 animate-fade-in bg-slate-50/50 min-h-screen">
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
     <div>
-      <h1 class="text-3xl font-black text-slate-900 tracking-tight">Gestión Nacional de IES</h1>
-      <p class="text-slate-500 font-medium">
+      <h1 class="text-3xl font-black text-slate-900 tracking-tight italic">
+        Gestión Nacional de IES
+      </h1>
+      <p class="text-slate-500 font-medium italic">
         Panel de administración de Instituciones de Educación Superior
       </p>
     </div>
@@ -19,101 +21,108 @@
 
   @if (isAdding()) {
   <div
-    class="bg-white rounded-3xl border-2 border-blue-50 p-8 shadow-xl shadow-blue-900/5 animate-slide-down"
+    class="bg-white rounded-[2.5rem] border-2 border-blue-50 p-8 shadow-xl shadow-blue-900/5 animate-slide-down"
   >
-    <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center gap-4 mb-8">
       <div
-        class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200"
+        class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200"
       >
-        <i class="fas fa-university text-xl"></i>
+        <i class="fas fa-university text-2xl"></i>
       </div>
       <div>
-        <h2 class="text-xl font-bold text-slate-800">Registro de Nueva Institución</h2>
-        <p class="text-sm text-slate-500">Complete todos los campos para dar de alta la IES.</p>
+        <h2 class="text-xl font-black text-slate-800">Registro de Nueva Institución</h2>
+        <p class="text-sm text-slate-500 italic">Complete el expediente base de la IES</p>
       </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div class="space-y-2">
-        <label class="text-xs font-bold text-slate-600 uppercase ml-1">Nombre de la IES</label>
+        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
+          >Nombre de la IES</label
+        >
         <div class="relative">
-          <i class="fas fa-school absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <i class="fas fa-school absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
           <input
             [(ngModel)]="newIes().nombre"
             type="text"
-            placeholder="Ej. Instituto Tecnológico de..."
-            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+            placeholder="Ej. Instituto..."
+            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
           />
         </div>
       </div>
-
       <div class="space-y-2">
-        <label class="text-xs font-bold text-slate-600 uppercase ml-1">Clave Oficial</label>
+        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
+          >Clave Oficial</label
+        >
         <div class="relative">
-          <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
           <input
             [(ngModel)]="newIes().claveOficial"
             type="text"
             placeholder="13MSU0010Z"
-            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-mono"
+            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-mono"
           />
         </div>
       </div>
-
       <div class="space-y-2">
-        <label class="text-xs font-bold text-slate-600 uppercase ml-1">Responsable</label>
+        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
+          >Responsable</label
+        >
         <div class="relative">
-          <i class="fas fa-user-tie absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <i class="fas fa-user-tie absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
           <input
             [(ngModel)]="newIes().contacto.responsable"
             type="text"
             placeholder="Nombre completo"
-            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
           />
         </div>
       </div>
-
       <div class="space-y-2">
-        <label class="text-xs font-bold text-slate-600 uppercase ml-1">Email Institucional</label>
+        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
+          >Email</label
+        >
         <div class="relative">
-          <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
           <input
             [(ngModel)]="newIes().contacto.email"
             type="email"
             placeholder="correo@institucion.mx"
-            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
           />
         </div>
       </div>
-
       <div class="space-y-2">
-        <label class="text-xs font-bold text-slate-600 uppercase ml-1">Teléfono</label>
+        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
+          >Teléfono</label
+        >
         <div class="relative">
-          <i class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <i class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
           <input
             [(ngModel)]="newIes().contacto.telefono"
             type="tel"
             placeholder="10 dígitos"
-            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
           />
         </div>
       </div>
-
       <div class="flex items-end">
         <button
           (click)="saveIES()"
           [disabled]="isLoading()"
-          class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-emerald-200 transition-all flex justify-center items-center gap-2"
+          class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-lg shadow-emerald-100 transition-all flex justify-center items-center gap-2 active:scale-95 disabled:opacity-50"
         >
           @if(isLoading()){ <i class="fas fa-circle-notch animate-spin"></i> }
-          {{ isLoading() ? 'Guardando...' : 'Guardar Institución' }}
+          {{ isLoading() ? 'Procesando...' : 'Guardar Institución' }}
         </button>
       </div>
     </div>
   </div>
   }
 
-  <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+  <div
+    class="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col animate-fade-in"
+  >
     <div
       class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4"
     >
@@ -124,19 +133,19 @@
           (ngModelChange)="onSearchChange($event)"
           type="text"
           placeholder="Buscar por nombre o clave..."
-          class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+          class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium"
         />
       </div>
 
       <div class="flex items-center gap-3">
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-tighter">Ver:</span>
+        <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Mostrar:</span>
         <select
           [ngModel]="itemsPerPage()"
           (ngModelChange)="onItemsPerPageChange($event)"
           class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-all"
         >
           @for(option of pageSizeOptions; track option) {
-          <option [value]="option">{{ option }} por página</option>
+          <option [value]="option">{{ option }} filas</option>
           }
         </select>
       </div>
@@ -145,8 +154,10 @@
     <div class="overflow-x-auto min-h-[400px]">
       <table class="w-full text-left border-collapse">
         <thead>
-          <tr class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-widest font-bold">
-            <th class="px-8 py-5">Institución e Información</th>
+          <tr
+            class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-widest font-black"
+          >
+            <th class="px-8 py-5">Institución</th>
             <th class="px-8 py-5">Clave Oficial</th>
             <th class="px-8 py-5">Contacto Principal</th>
             <th class="px-8 py-5">Estatus</th>
@@ -159,34 +170,46 @@
             <td class="px-8 py-5">
               <div class="flex items-center gap-4">
                 <div
-                  class="w-10 h-10 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center font-bold group-hover:bg-blue-600 group-hover:text-white transition-all"
+                  class="w-12 h-12 bg-slate-100 text-slate-500 rounded-2xl flex items-center justify-center font-black shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all"
                 >
                   {{ ies.nombre.substring(0, 2) }}
                 </div>
-                <div>
-                  <div class="font-bold text-slate-800 leading-tight">{{ ies.nombre }}</div>
-                  <div class="text-xs text-slate-400 mt-1">Sede Central</div>
+                <div class="font-black text-slate-800 leading-tight uppercase text-sm">
+                  {{ ies.nombre }}
                 </div>
               </div>
             </td>
-            <td class="px-8 py-5 font-mono text-xs font-bold text-slate-600">
-              <span class="px-3 py-1.5 bg-slate-100 rounded-lg">{{ ies.claveOficial }}</span>
-            </td>
-            <td class="px-8 py-5">
-              <div class="text-sm font-semibold text-slate-700">{{ ies.contacto.responsable }}</div>
-              <div class="text-xs text-slate-400">{{ ies.contacto.email }}</div>
-            </td>
             <td class="px-8 py-5">
               <span
-                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700"
+                class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-mono text-xs font-bold border border-slate-200"
               >
-                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> ACTIVA
+                {{ ies.claveOficial }}
               </span>
             </td>
             <td class="px-8 py-5">
+              <div class="text-sm font-bold text-slate-700">{{ ies.contacto.responsable }}</div>
+              <div class="text-xs text-slate-400 italic">{{ ies.contacto.email }}</div>
+            </td>
+            <td class="px-8 py-5">
+              <span
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700 uppercase tracking-tighter"
+              >
+                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                {{ ies.estatus }}
+              </span>
+            </td>
+            <td class="px-8 py-5 text-center">
               <div class="flex items-center justify-center gap-2">
                 <button
-                  class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-blue-600 hover:text-white transition-all"
+                  (click)="manageUsers(ies)"
+                  title="Gestionar Usuarios Operativos"
+                  class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-blue-100"
+                >
+                  <i class="fas fa-users-cog"></i>
+                </button>
+                <button
+                  title="Editar Institución"
+                  class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-800 hover:text-white transition-all shadow-sm border border-slate-200"
                 >
                   <i class="fas fa-edit"></i>
                 </button>
@@ -196,9 +219,9 @@
           } @empty {
           <tr>
             <td colspan="5" class="px-8 py-20 text-center">
-              <div class="flex flex-col items-center opacity-40">
-                <i class="fas fa-search text-4xl mb-4"></i>
-                <p class="font-bold">No se encontraron resultados</p>
+              <div class="flex flex-col items-center opacity-30">
+                <i class="fas fa-search text-5xl mb-4"></i>
+                <p class="font-black text-xl uppercase tracking-tighter">Sin coincidencias</p>
               </div>
             </td>
           </tr>
@@ -210,35 +233,76 @@
     <div
       class="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4"
     >
-      <div class="text-sm text-slate-500 font-medium order-2 md:order-1">
-        Mostrando <span class="text-slate-900 font-bold">{{ showingRange() }}</span> de
-        <span class="text-slate-900 font-bold">{{ allFilteredResults().length }}</span>
-        instituciones
+      <div class="text-sm text-slate-500 font-bold order-2 md:order-1">
+        Mostrando <span class="text-blue-600 font-black">{{ showingRange() }}</span> de
+        <span class="text-slate-900 font-black">{{ allFilteredResults().length }}</span> IES
+        registradas
       </div>
-
       <div class="flex items-center gap-2 order-1 md:order-2">
         <button
           (click)="goToPage(currentPage() - 1)"
           [disabled]="currentPage() === 1"
-          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white hover:border-blue-600 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
         >
           <i class="fas fa-chevron-left"></i>
         </button>
-
         <div
-          class="flex items-center bg-white border border-slate-200 rounded-xl px-4 h-10 font-bold text-sm text-slate-700 shadow-sm"
+          class="flex items-center bg-white border border-slate-200 rounded-xl px-4 h-10 font-black text-xs text-slate-700 shadow-sm uppercase"
         >
-          Página {{ currentPage() }} de {{ totalPages() || 1 }}
+          Pág. {{ currentPage() }} / {{ totalPages() || 1 }}
         </div>
-
         <button
           (click)="goToPage(currentPage() + 1)"
           [disabled]="currentPage() >= totalPages()"
-          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white hover:border-blue-600 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
         >
           <i class="fas fa-chevron-right"></i>
         </button>
       </div>
     </div>
   </div>
+
+  @if (currentView() === 'users' && selectedIes()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 animate-fade-in">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="backToList()"></div>
+
+    <div
+      class="relative w-full max-w-7xl h-[92vh] bg-white rounded-[3rem] shadow-2xl animate-slide-up flex flex-col overflow-hidden border border-white/20"
+    >
+      <div class="flex items-center justify-between p-8 bg-white border-b border-slate-100">
+        <div class="flex items-center gap-5">
+          <div
+            class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg"
+          >
+            <i class="fas fa-users-cog text-xl"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight">
+              Gestión Operativa
+            </h2>
+            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">
+              {{ selectedIes()?.nombre }}
+            </p>
+          </div>
+        </div>
+
+        <button
+          (click)="backToList()"
+          class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all active:scale-90"
+        >
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-hidden bg-slate-50/50">
+        <app-ies-user-management
+          [iesName]="selectedIes()!.nombre"
+          [iesClave]="selectedIes()!.claveOficial"
+          (close)="backToList()"
+        >
+        </app-ies-user-management>
+      </div>
+    </div>
+  </div>
+  }
 </div>

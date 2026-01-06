@@ -1,0 +1,149 @@
+<div class="p-6 lg:p-10 space-y-8 animate-fade-in bg-slate-50/50 min-h-screen">
+  
+  <header class="flex flex-col md:flex-row justify-between items-center gap-6">
+    <div>
+      <h1 class="text-3xl font-black text-slate-900 tracking-tight italic">Campañas e Impacto</h1>
+      <p class="text-slate-500 font-medium italic">Análisis de rendimiento y retorno de inversión institucional</p>
+    </div>
+    <button (click)="isAdding.set(!isAdding())"
+      [class]="isAdding() ? 'bg-slate-800' : 'bg-blue-600 shadow-blue-200'"
+      class="flex items-center gap-2 px-6 py-3 text-white font-bold rounded-2xl transition-all shadow-lg active:scale-95">
+      <i class="fas" [class.fa-plus]="!isAdding()" [class.fa-times]="isAdding()"></i>
+      {{ isAdding() ? 'Cancelar Registro' : 'Nueva Campaña' }}
+    </button>
+  </header>
+
+  <div class="space-y-4">
+    <div class="flex items-center gap-2 px-2">
+       <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+       <span class="text-xs font-black text-slate-400 uppercase tracking-widest">{{ displayMetrics().label }}</span>
+       @if(selectedCampaign()){
+         <button (click)="selectedCampaign.set(null)" class="text-[10px] bg-slate-200 px-2 py-0.5 rounded-md hover:bg-slate-300 transition-colors font-bold text-slate-600">LIMPIAR SELECCIÓN</button>
+       }
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all" [class.border-blue-500]="selectedCampaign()">
+        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl"><i class="fas fa-bullseye"></i></div>
+        <div>
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Alcance Total</p>
+          <h3 class="text-2xl font-black text-slate-900">{{ displayMetrics().reach | number }}</h3>
+        </div>
+      </div>
+      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all" [class.border-blue-500]="selectedCampaign()">
+        <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl"><i class="fas fa-dollar-sign"></i></div>
+        <div>
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inversión</p>
+          <h3 class="text-2xl font-black text-slate-900">{{ displayMetrics().cost | currency:'MXN':'symbol-narrow' }}</h3>
+        </div>
+      </div>
+      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all" [class.border-blue-500]="selectedCampaign()">
+        <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl"><i class="fas fa-chart-line"></i></div>
+        <div>
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Impacto Estimado</p>
+          <h3 class="text-2xl font-black text-slate-900">{{ displayMetrics().impact | number:'1.1-2' }}%</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+    
+    <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="relative w-full md:w-96">
+        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input type="text" [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)"
+          placeholder="Buscar por nombre de campaña..."
+          class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-tighter">Mostrar:</span>
+        <select [ngModel]="itemsPerPage()" (ngModelChange)="itemsPerPage.set($event)"
+          class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none cursor-pointer">
+          @for(opt of pageSizeOptions; track opt){ <option [value]="opt">{{opt}} registros</option> }
+        </select>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-widest font-black">
+            <th class="px-8 py-5">Campaña / Fecha Inicio</th>
+            <th class="px-8 py-5">Estado</th>
+            <th class="px-8 py-5">Costo</th>
+            <th class="px-8 py-5">Impacto</th>
+            <th class="px-8 py-5 text-center">Ver Detalle</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for(c of pagedCampaigns(); track c.id) {
+            <tr (click)="selectCampaign(c)" 
+                class="cursor-pointer transition-all group"
+                [class.bg-blue-50/50]="selectedCampaign()?.id === c.id">
+              <td class="px-8 py-5">
+                <div class="font-bold text-slate-800 leading-tight">{{ c.name }}</div>
+                <div class="text-xs text-slate-400 mt-1 italic">{{ c.startDate | date:'dd/MM/yyyy' }}</div>
+              </td>
+              <td class="px-8 py-5">
+                <span [ngClass]="{
+                  'bg-emerald-100 text-emerald-700': c.status === 'Active',
+                  'bg-slate-100 text-slate-500': c.status === 'Finished',
+                  'bg-amber-100 text-amber-700': c.status === 'Draft'
+                }" class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">
+                  {{ statusMap[c.status] }}
+                </span>
+              </td>
+              <td class="px-8 py-5 font-mono text-xs font-bold text-slate-600">
+                {{ c.cost | currency:'MXN' }}
+              </td>
+              <td class="px-8 py-5">
+                <div class="flex items-center gap-3">
+                   <div class="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div [style.width.%]="c.impact" class="h-full bg-blue-500"></div>
+                   </div>
+                   <span class="text-xs font-bold text-slate-700">{{ c.impact }}%</span>
+                </div>
+              </td>
+              <td class="px-8 py-5 text-center">
+                <div class="w-6 h-6 rounded-full border-2 border-slate-200 mx-auto flex items-center justify-center transition-all"
+                     [class.bg-blue-600]="selectedCampaign()?.id === c.id"
+                     [class.border-blue-600]="selectedCampaign()?.id === c.id">
+                  @if(selectedCampaign()?.id === c.id){ <i class="fas fa-check text-white text-[10px]"></i> }
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="px-8 py-20 text-center opacity-40">
+                <i class="fas fa-search text-4xl mb-4"></i>
+                <p class="font-bold">No se encontraron campañas registradas</p>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-slate-500 font-medium">
+        Mostrando <span class="text-slate-900 font-bold">{{ pagedCampaigns().length }}</span> de <span class="text-slate-900 font-bold">{{ filteredCampaigns().length }}</span> resultados
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 disabled:opacity-20 transition-all hover:bg-slate-100">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="bg-white border border-slate-200 rounded-xl px-4 h-10 flex items-center font-bold text-sm text-slate-700">
+          Página {{ currentPage() }} de {{ totalPages() || 1 }}
+        </div>
+        <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() >= totalPages()"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 disabled:opacity-20 transition-all hover:bg-slate-100">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
