@@ -1,6 +1,9 @@
-import { Component, signal, computed } from '@angular/core';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { Component, signal, computed, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { IesService } from '../../services/ies.service';
+import { AuthService } from '../../services/auth.service';
+import { IES } from '../../models/api.models';
 
 @Component({
   selector: 'app-ies-perfil-admin',
@@ -10,33 +13,68 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
   imports: [
     CommonModule, 
     FormsModule, 
-    ReactiveFormsModule,
-    DecimalPipe
+    ReactiveFormsModule
   ],
   templateUrl: './ies-perfil-admin.html',
   styleUrl: './ies-perfil-admin.css',
 })
-export class IesPerfilAdmin {
+export class IesPerfilAdmin implements OnInit {
+  private iesService = inject(IesService);
+  private authService = inject(AuthService);
+
   // --- ESTADOS DE LA INTERFAZ ---
   section = signal<'info' | 'carreras' | 'branding' | 'campanas' | 'usuarios'>('info');
   isLoading = signal(false);
+  errorMessage = signal<string>('');
+  
+  // Datos de la IES actual
+  currentIES = signal<IES | null>(null);
 
   // --- 5.5.3 PERSONALIZACIÓN DE COLORES ---
-  colorPrimario = signal('#0f213e');
-  colorSecundario = signal('#10b981');
+  colorPrimario = signal<string>('#0f213e');
+  colorSecundario = signal<string>('#10b981');
 
   // --- 5.5.1 CARGA DE LOGO ---
-  logoPreview = signal<string | null>(null);
+  logoPreview = computed(() => this.currentIES()?.institutionalImage?.logo || null);
 
-  // --- MODELOS PARA PUNTOS 5.1, 5.3, 5.7 (Simulando estructura de base de datos) ---
-  iesInfo = signal({
-    mision: '',
-    vision: '',
-    historia: '',
-    directorioIems: [] // Para punto 5.9
-  });
+  ngOnInit(): void {
+    this.loadIESData();
+  }
 
-  carreras = signal<any[]>([]); // Para punto 5.3 y 5.4
+  /**
+   * Cargar datos de la IES del usuario autenticado
+   */
+  loadIESData(): void {
+    const user = this.authService.currentUser();
+    if (!user || !user.ies) {
+      this.errorMessage.set('No se encontró la IES del usuario');
+      return;
+    }
+
+    this.isLoading.set(true);
+    const iesId = typeof user.ies === 'string' ? user.ies : user.ies._id;
+
+    if (!iesId) {
+      this.errorMessage.set('ID de IES no válido');
+      this.isLoading.set(false);
+      return;
+    }
+
+    this.iesService.getIESById(iesId).subscribe({
+      next: (response) => {
+        this.currentIES.set(response.data ?? null);
+        // Sincronizar los colores
+        this.colorPrimario.set(response.data?.branding?.primaryColor || '#0f213e');
+        this.colorSecundario.set(response.data?.branding?.secondaryColor || '#10b981');
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error cargando IES:', error);
+        this.errorMessage.set('Error al cargar los datos de la IES');
+        this.isLoading.set(false);
+      }
+    });
+  }
 
   // --- MÉTODOS ---
 
@@ -50,12 +88,24 @@ export class IesPerfilAdmin {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        this.logoPreview.set(reader.result as string);
+        // Preview local
+        const ies = this.currentIES();
+        if (ies) {
+          this.currentIES.set({
+            ...ies,
+            institutionalImage: {
+              ...ies.institutionalImage,
+              logo: reader.result as string
+            }
+          });
+        }
       };
       reader.readAsDataURL(file);
       
-      // NOTA: Cuando el backend esté listo, aquí usarás FormData 
-      // para enviar el 'file' al endpoint 5.5.2
+      // TODO: Implementar endpoint de subida de imagen en el backend
+      // const formData = new FormData();
+      // formData.append('logo', file);
+      // this.iesService.uploadLogo(iesId, formData).subscribe(...);
     }
   }
 
@@ -63,15 +113,45 @@ export class IesPerfilAdmin {
    * Punto 5.2 & 5.4: Guardar información en Backend
    */
   async saveChanges() {
-    this.isLoading.set(true);
-    
-    // Simulación de llamada a API
-    try {
-      console.log('Enviando datos a los endpoints 5.2/5.4...');
-      // await this.iesService.update(this.iesInfo());
-    } finally {
-      setTimeout(() => this.isLoading.set(false), 1000);
+    const ies = this.currentIES();
+    if (!ies || !ies._id) {
+      alert('No hay datos para guardar');
+      return;
     }
+
+    // Actualizar los colores en el objeto IES antes de guardar
+    const updatedIES = {
+      ...ies,
+      branding: {
+        ...ies.branding,
+        primaryColor: this.colorPrimario(),
+        secondaryColor: this.colorSecundario()
+      }
+    };
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    
+    if (!updatedIES._id) {
+      this.errorMessage.set('ID de IES no válido');
+      this.isLoading.set(false);
+      return;
+    }
+    
+    this.iesService.updateIES(updatedIES._id, updatedIES).subscribe({
+      next: (response) => {
+        this.currentIES.set(response.data ?? null);
+        this.colorPrimario.set(response.data?.branding?.primaryColor || '#0f213e');
+        this.colorSecundario.set(response.data?.branding?.secondaryColor || '#10b981');
+        this.isLoading.set(false);
+        alert('Cambios guardados exitosamente');
+      },
+      error: (error) => {
+        console.error('Error guardando cambios:', error);
+        this.errorMessage.set('Error al guardar los cambios');
+        this.isLoading.set(false);
+      }
+    });
   }
 
   /**

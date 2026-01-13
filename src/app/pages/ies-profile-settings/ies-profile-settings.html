@@ -61,19 +61,19 @@
           <div class="grid grid-cols-1 gap-6">
             <div class="space-y-2">
               <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Misión</label>
-              <textarea [(ngModel)]="institutionData().mission" placeholder="..." 
+              <textarea [(ngModel)]="currentIES()!.mision" placeholder="..." 
                 class="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl h-28 outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"></textarea>
             </div>
             <div class="space-y-2">
               <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Visión</label>
-              <textarea [(ngModel)]="institutionData().vision" placeholder="..."
+              <textarea [(ngModel)]="currentIES()!.vision" placeholder="..."
                 class="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl h-28 outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"></textarea>
             </div>
 
             <div class="border-t border-slate-100 pt-6">
               <h3 class="text-sm font-bold text-slate-700 mb-4 italic">Medios de Comunicación & Directorio (5.9 / 5.10)</h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" [(ngModel)]="institutionData().website" placeholder="URL Sitio Web" class="p-4 bg-slate-50 rounded-2xl border border-slate-200 outline-none">
+                <input type="text" [(ngModel)]="currentIES()!.contact.website" placeholder="URL Sitio Web" class="p-4 bg-slate-50 rounded-2xl border border-slate-200 outline-none">
                 <button class="p-4 bg-slate-50 border border-dashed border-slate-300 rounded-2xl text-slate-500 font-bold text-xs hover:bg-slate-100 transition-all">
                   <i class="fas fa-address-book mr-2"></i> Configurar Directorio IEMS
                 </button>
@@ -103,11 +103,11 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50">
-                @for(program of academicPrograms(); track program.id){
+                @for(program of academicPrograms(); track program.name){
                   <tr class="hover:bg-slate-50/50">
                     <td class="px-6 py-4 font-bold text-slate-700">{{program.name}}</td>
                     <td class="px-6 py-4 italic text-slate-500">{{program.modality}}</td>
-                    <td class="px-6 py-4 font-mono text-xs">{{program.rvoe}}</td>
+                    <td class="px-6 py-4 font-mono text-xs">{{program.code || 'N/A'}}</td>
                     <td class="px-6 py-4 text-center">
                       <button class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
                     </td>

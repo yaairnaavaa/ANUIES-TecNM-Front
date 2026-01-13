@@ -1,15 +1,19 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { IES } from '../../models/ies.model';
+import { IES } from '../../models/api.models';
+import { IesService } from '../../services/ies.service';
+import { AuthService } from '../../services/auth.service';
 import { IesUserManagement } from '../ies-user-management/ies-user-management';
 @Component({
   selector: 'app-ies-gestion',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IesUserManagement], // Añadido aquí  templateUrl: './ies-gestion.html',
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IesUserManagement],
   templateUrl: './ies-gestion.html',
 })
-export class IesGestion {
+export class IesGestion implements OnInit {
+  private iesService = inject(IesService);
+  private authService = inject(AuthService);
   // Estado para controlar qué vista mostrar
   // 'list' para la tabla, 'users' para la gestión de operativos
   currentView = signal<'list' | 'users'>('list');
@@ -24,66 +28,33 @@ export class IesGestion {
   itemsPerPage = signal(5);
   pageSizeOptions = [5, 10, 20, 50];
 
-  // Datos (Se llenará con servicio después)
-  iesList = signal<IES[]>([
-    {
-      nombre: 'Tecnológico Nacional de México',
-      claveOficial: '13MSU0010Z',
-      estatus: 'Activa',
-      contacto: { email: 'ies@tecnm.mx', telefono: '5551234567', responsable: 'Jorge Betancourt' },
-    },
-    {
-      nombre: 'Instituto Tecnológico de Pachuca',
-      claveOficial: '13DIT0001D',
-      estatus: 'Activa',
-      contacto: {
-        email: 'contacto@itpachuca.edu.mx',
-        telefono: '7711234567',
-        responsable: 'Maria Garcia',
+  // Datos desde backend
+  iesList = signal<IES[]>([]);
+  errorMessage = signal<string>('');
+
+  ngOnInit(): void {
+    this.loadIES();
+  }
+
+  /**
+   * Cargar IES desde el backend
+   */
+  loadIES(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    this.iesService.getAllIES().subscribe({
+      next: (response) => {
+        this.iesList.set(response.data || []);
+        this.isLoading.set(false);
       },
-    },
-    {
-      nombre: 'Instituto Tecnológico de Pachuca',
-      claveOficial: '13DIT0001D',
-      estatus: 'Activa',
-      contacto: {
-        email: 'contacto@itpachuca.edu.mx',
-        telefono: '7711234567',
-        responsable: 'Maria Garcia',
-      },
-    },
-    {
-      nombre: 'Instituto Tecnológico de Pachuca',
-      claveOficial: '13DIT0001D',
-      estatus: 'Activa',
-      contacto: {
-        email: 'contacto@itpachuca.edu.mx',
-        telefono: '7711234567',
-        responsable: 'Maria Garcia',
-      },
-    },
-    {
-      nombre: 'Instituto Tecnológico de Pachuca',
-      claveOficial: '13DIT0001D',
-      estatus: 'Activa',
-      contacto: {
-        email: 'contacto@itpachuca.edu.mx',
-        telefono: '7711234567',
-        responsable: 'Maria Garcia',
-      },
-    },
-    {
-      nombre: 'Instituto Tecnológico de Pachuca',
-      claveOficial: '13DIT0001D',
-      estatus: 'Activa',
-      contacto: {
-        email: 'contacto@itpachuca.edu.mx',
-        telefono: '7711234567',
-        responsable: 'Maria Garcia',
-      },
-    },
-    // Simula más datos para probar la paginación si lo deseas agregando objetos aquí
-  ]);
+      error: (error) => {
+        console.error('Error cargando IES:', error);
+        this.errorMessage.set('Error al cargar las IES');
+        this.isLoading.set(false);
+      }
+    });
+  }
 
   // Métodos para cambiar de vista
   manageUsers(ies: IES) {
@@ -101,7 +72,7 @@ export class IesGestion {
     const query = this.searchQuery().toLowerCase();
     return this.iesList().filter(
       (ies) =>
-        ies.nombre.toLowerCase().includes(query) || ies.claveOficial.toLowerCase().includes(query)
+        ies.name?.toLowerCase().includes(query) || ies.code?.toLowerCase().includes(query)
     );
   });
 
@@ -122,14 +93,23 @@ export class IesGestion {
     return this.allFilteredResults().length > 0 ? `${start} - ${end}` : '0';
   });
 
-  newIes = signal<IES>(this.resetForm());
+  newIes = signal<Partial<IES>>(this.resetForm());
 
-  resetForm(): IES {
+  resetForm(): Partial<IES> {
     return {
-      nombre: '',
-      claveOficial: '',
-      estatus: 'Activa',
-      contacto: { email: '', telefono: '', responsable: '' },
+      code: '',
+      name: '',
+      shortName: '',
+      address: {
+        municipality: '',
+        state: '',
+        country: 'México'
+      },
+      contact: {
+        email: '',
+        generalPhone: ''
+      },
+      active: true
     };
   }
 
@@ -156,10 +136,38 @@ export class IesGestion {
 
   saveIES() {
     this.isLoading.set(true);
-    setTimeout(() => {
-      this.iesList.update((list) => [...list, { ...this.newIes() }]);
-      this.isLoading.set(false);
-      this.toggleAdd();
-    }, 1500);
+    this.errorMessage.set('');
+
+    this.iesService.createIES(this.newIes()).subscribe({
+      next: (response) => {
+        this.loadIES(); // Recargar lista
+        this.isLoading.set(false);
+        this.toggleAdd();
+      },
+      error: (error) => {
+        console.error('Error creando IES:', error);
+        this.errorMessage.set('Error al crear la IES');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  /**
+   * Eliminar IES
+   */
+  deleteIES(iesId: string) {
+    if (!confirm('¿Está seguro de eliminar esta IES?')) {
+      return;
+    }
+
+    this.iesService.deleteIES(iesId).subscribe({
+      next: () => {
+        this.loadIES(); // Recargar lista
+      },
+      error: (error) => {
+        console.error('Error eliminando IES:', error);
+        alert('Error al eliminar la IES');
+      }
+    });
   }
 }

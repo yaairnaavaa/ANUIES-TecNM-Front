@@ -25,9 +25,9 @@ export class SidebarComponent {
       items: [
         { label: 'Dashboard', icon: 'fas fa-th-large', route: '/dashboard' },
         { label: 'Aspirantes', icon: 'fas fa-user-graduate', route: '/aspirantes', badge: 1247 },
-        { label: 'IMS', icon: 'fas fa-school', route: '/admin/ies-gestion', badge: 12 },
+        { label: 'IES', icon: 'fas fa-school', route: '/admin/ies-gestion', badge: 12 },
+        { label: 'IEMS', icon: 'fas fa-graduation-cap', route: '/admin/iems' },
         { label: 'Campañas', icon: 'fas fa-bullhorn', route: '/admin/campaigns' },
-        { label: 'IEMS', icon: 'fas fa-school', route: '/iems' },
       ],
     },
     {

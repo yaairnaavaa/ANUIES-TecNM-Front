@@ -126,7 +126,7 @@
               >Misión Institucional</label
             >
             <textarea
-              [(ngModel)]="iesInfo().mision"
+              [(ngModel)]="currentIES()!.mision"
               placeholder="Redacte la misión..."
               class="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl h-32 outline-none focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all"
             ></textarea>
@@ -136,7 +136,7 @@
               >Visión Institucional</label
             >
             <textarea
-              [(ngModel)]="iesInfo().vision"
+              [(ngModel)]="currentIES()!.vision"
               placeholder="Redacte la visión..."
               class="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl h-32 outline-none focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all"
             ></textarea>
