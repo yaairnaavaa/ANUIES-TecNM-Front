@@ -1,0 +1,153 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { Campaign, ApiResponse } from '../models/api.models';
+
+export interface CampaignFilters {
+  ies?: string;
+  type?: 'Presencial' | 'Tradicional' | 'Digital';
+  status?: 'Planificada' | 'En Curso' | 'Finalizada' | 'Cancelada' | 'Pausada';
+}
+
+export interface CreateCampaignDto {
+  ies: string;
+  name: string;
+  description?: string;
+  type: 'Presencial' | 'Tradicional' | 'Digital';
+  specificModality: string;
+  period: {
+    startDate: string | Date;
+    endDate: string | Date;
+  };
+  reach: {
+    estimated: number;
+    unit?: 'Personas' | 'Impresiones' | 'Clics' | 'Vistas' | 'Asistentes';
+  };
+  costs: {
+    total: number;
+  };
+  targetedIEMS?: string[];
+  targetedCareers?: string[];
+  responsible?: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class CampaignService {
+  private http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiUrl}/campaigns`;
+
+  /**
+   * Obtener todas las campañas con filtros opcionales
+   */
+  getCampaigns(filters?: CampaignFilters): Observable<ApiResponse<Campaign[]>> {
+    let params = new HttpParams();
+    
+    if (filters) {
+      if (filters.ies) params = params.set('ies', filters.ies);
+      if (filters.type) params = params.set('type', filters.type);
+      if (filters.status) params = params.set('status', filters.status);
+    }
+
+    return this.http.get<ApiResponse<Campaign[]>>(this.baseUrl, { params });
+  }
+
+  /**
+   * Obtener una campaña por ID
+   */
+  getCampaignById(id: string): Observable<ApiResponse<Campaign>> {
+    return this.http.get<ApiResponse<Campaign>>(`${this.baseUrl}/${id}`);
+  }
+
+  /**
+   * Crear nueva campaña
+   */
+  createCampaign(campaign: CreateCampaignDto): Observable<ApiResponse<Campaign>> {
+    return this.http.post<ApiResponse<Campaign>>(this.baseUrl, campaign);
+  }
+
+  /**
+   * Actualizar campaña
+   */
+  updateCampaign(id: string, campaign: Partial<CreateCampaignDto>): Observable<ApiResponse<Campaign>> {
+    return this.http.put<ApiResponse<Campaign>>(`${this.baseUrl}/${id}`, campaign);
+  }
+
+  /**
+   * Eliminar campaña
+   */
+  deleteCampaign(id: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.baseUrl}/${id}`);
+  }
+
+  /**
+   * Actualizar estado de la campaña
+   */
+  updateStatus(
+    id: string, 
+    status: 'Planificada' | 'En Curso' | 'Finalizada' | 'Cancelada' | 'Pausada'
+  ): Observable<ApiResponse<Campaign>> {
+    return this.http.put<ApiResponse<Campaign>>(`${this.baseUrl}/${id}/status`, { status });
+  }
+
+  /**
+   * Actualizar métricas de la campaña
+   */
+  updateMetrics(id: string, metrics: {
+    impressions?: number;
+    clicks?: number;
+    conversions?: number;
+  }): Observable<ApiResponse<Campaign>> {
+    return this.http.put<ApiResponse<Campaign>>(`${this.baseUrl}/${id}/metrics`, metrics);
+  }
+
+  /**
+   * Obtener modalidades específicas por tipo de campaña
+   */
+  getModalitiesByType(type: 'Presencial' | 'Tradicional' | 'Digital'): string[] {
+    const modalities = {
+      'Presencial': [
+        'Conferencias',
+        'Proyectos de innovación',
+        'Visitas a IEMS',
+        'Visitas guiadas a campus',
+        'Volanteo',
+        'Open house',
+        'Ferias universitarias',
+        'Participación en eventos académicos y deportivos',
+        'Transporte institucional a actividades del campus',
+        'Difusión en talleres y laboratorios',
+        'Actividades culturales y demostraciones'
+      ],
+      'Tradicional': [
+        'Radio institucional y comercial',
+        'Televisión local o estatal',
+        'Publicidad impresa en periódico',
+        'Espectaculares digitales y analógicos',
+        'Revistas especializadas en educación',
+        'Perifoneo'
+      ],
+      'Digital': [
+        'Facebook',
+        'Instagram',
+        'TikTok',
+        'YouTube y videoblogs',
+        'Telegram',
+        'WhatsApp',
+        'Mensajería SMS',
+        'Reels y Trends',
+        'Publicaciones fotográficas especializadas',
+        'Videoconferencias en plataformas educativas'
+      ]
+    };
+
+    return modalities[type] || [];
+  }
+
+  /**
+   * Obtener unidades de medida para el alcance
+   */
+  getReachUnits(): string[] {
+    return ['Personas', 'Impresiones', 'Clics', 'Vistas', 'Asistentes'];
+  }
+}

@@ -139,7 +139,7 @@
         </div>
 
         <div class="grid grid-cols-1 gap-3">
-          @for (major of majorsList; track major.id) {
+          @for (major of majorsList(); track major.id) {
           <div
             (click)="toggleMajor(major.id)"
             [ngClass]="{
