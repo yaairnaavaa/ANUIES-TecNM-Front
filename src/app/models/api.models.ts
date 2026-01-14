@@ -140,7 +140,15 @@ export interface Prospect {
   };
   ies: string | IES;
   campaign?: string | Campaign;
-  status: 'Nuevo' | 'Contactado' | 'En Seguimiento' | 'Aplicó' | 'Aceptado' | 'Rechazado' | 'Inscrito' | 'Descartado';
+  status:
+    | 'Nuevo'
+    | 'Contactado'
+    | 'En Seguimiento'
+    | 'Aplicó'
+    | 'Aceptado'
+    | 'Rechazado'
+    | 'Inscrito'
+    | 'Descartado';
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -162,7 +170,16 @@ export interface Permission {
   name: string;
   displayName: string;
   description?: string;
-  module: 'Usuarios' | 'IES' | 'IEMS' | 'Campañas' | 'Prospectos' | 'Periodos' | 'Reportes' | 'Configuración' | 'Sistema';
+  module:
+    | 'Usuarios'
+    | 'IES'
+    | 'IEMS'
+    | 'Campañas'
+    | 'Prospectos'
+    | 'Periodos'
+    | 'Reportes'
+    | 'Configuración'
+    | 'Sistema';
   action: 'create' | 'read' | 'update' | 'delete' | 'execute' | 'export' | 'import';
   resource: string;
   active?: boolean;
@@ -186,10 +203,39 @@ export interface Period {
   isCurrent?: boolean;
 }
 
+export interface MenuItem {
+  id: string;
+  label: string;
+  icon: string;
+  routerLink: string;
+  category: string;
+}
+
+export interface RoleAuth {
+  id: string;
+  name: string;
+  displayName: string;
+  level: number;
+  scope: 'Nacional' | 'IES' | 'IEMS' | 'General';
+}
+
+export interface UserAuth {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: RoleAuth;
+  menu: MenuItem[];
+  ies?: string | IES; // 👈 agregar
+  active: boolean;
+  createdAt: string;
+}
+
 export interface AuthResponse {
   success: boolean;
   token?: string;
   user?: User;
+  data?: UserAuth;
   message?: string;
 }
 
@@ -205,7 +251,15 @@ export interface IEMS {
   _id?: string;
   code: string;
   name: string;
-  type: 'CBTis' | 'CETis' | 'CONALEP' | 'Bachillerato General' | 'Bachillerato Tecnológico' | 'Telebachillerato' | 'Preparatoria' | 'Otro';
+  type:
+    | 'CBTis'
+    | 'CETis'
+    | 'CONALEP'
+    | 'Bachillerato General'
+    | 'Bachillerato Tecnológico'
+    | 'Telebachillerato'
+    | 'Preparatoria'
+    | 'Otro';
   address: {
     street?: string;
     number?: string;

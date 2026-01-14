@@ -34,42 +34,47 @@ export class Login {
   }
 
   onLogin() {
-    if (this.loginForm.valid) {
-      this.isLoading.set(true);
-      this.errorMessage.set('');
-      
-      const { email, password } = this.loginForm.value;
-      
-      console.log('Intentando login con:', email); // Debug
-      
-      this.authService.login(email, password).subscribe({
-        next: (response) => {
-          console.log('Respuesta del login:', response); // Debug
-          this.isLoading.set(false);
-          if (response.success) {
-            // Redirigir según el rol del usuario
-            const user = this.authService.currentUser();
-            console.log('Usuario autenticado:', user); // Debug
-            if (user && ['Admin Nacional', 'Admin IES', 'Operativo IES'].includes(user.role)) {
-              console.log('Redirigiendo a /admin'); // Debug
-              this.router.navigate(['/admin']);
-            } else {
-              console.log('Redirigiendo a /register'); // Debug
-              this.router.navigate(['/register']);
-            }
-          } else {
-            this.errorMessage.set('Error de autenticación');
-          }
-        },
-        error: (error) => {
-          this.isLoading.set(false);
-          console.error('Error completo en login:', error); // Debug detallado
-          this.errorMessage.set(error.error?.message || 'Error al iniciar sesión. Verifica tus credenciales.');
-        }
-      });
-    } else {
+    if (this.loginForm.invalid) {
       this.errorMessage.set('Por favor completa todos los campos correctamente');
+      return;
     }
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    const { email, password } = this.loginForm.value;
+
+    this.authService.login(email, password).subscribe({
+      next: (response) => {
+        this.isLoading.set(false);
+
+        if (!response.success) {
+          this.errorMessage.set(response.message || 'Error de autenticación');
+          return;
+        }
+
+        const user = this.authService.currentUser();
+
+        if (!user) {
+          this.errorMessage.set('No se pudo cargar la sesión');
+          return;
+        }
+
+        const roleName = user.role.name;
+
+        if (['Admin Nacional', 'Admin IES', 'Operativo IES'].includes(roleName)) {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/register']);
+        }
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.errorMessage.set(
+          err.error?.message || 'Error al iniciar sesión. Verifica tus credenciales.'
+        );
+      },
+    });
   }
 
   onForgot() {

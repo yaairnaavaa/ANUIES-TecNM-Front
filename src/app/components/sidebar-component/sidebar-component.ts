@@ -1,42 +1,80 @@
-import { Component, input, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+
+interface MenuItem {
+  label: string;
+  icon: string;
+  routerLink: string;
+  category: string;
+}
+
+interface MenuSection {
+  title: string;
+  items: MenuItem[];
+}
+
 @Component({
   selector: 'app-sidebar-component',
+  standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './sidebar-component.html',
   styleUrl: './sidebar-component.css',
 })
-export class SidebarComponent {
-  //Cuando llegue el endpoint, solo inyectarás los datos aquí
-  userName = signal('Jorge Betancourt');
-  userRole = signal('Admin. Plantel');
-  userInitials = signal('JB');
+export class SidebarComponent implements OnInit {
+  userName = signal('');
+  userRole = signal('');
+  userInitials = signal('');
   isOpen = signal(false);
+
+  menuSections = signal<MenuSection[]>([]);
+
+  ngOnInit(): void {
+    this.loadUserFromStorage();
+  }
 
   toggleSidebar() {
     this.isOpen.update((v) => !v);
   }
 
-  // Ejemplo de cómo vendrían los datos agrupados
-  menuSections = signal([
-    {
-      title: 'PRINCIPAL',
-      items: [
-        { label: 'Dashboard', icon: 'fas fa-th-large', route: '/dashboard' },
-        { label: 'Aspirantes', icon: 'fas fa-user-graduate', route: '/aspirantes', badge: 1247 },
-        { label: 'IES', icon: 'fas fa-school', route: '/admin/ies-gestion', badge: 12 },
-        { label: 'IEMS', icon: 'fas fa-graduation-cap', route: '/admin/iems' },
-        { label: 'Campañas', icon: 'fas fa-bullhorn', route: '/admin/campaigns' },
-      ],
-    },
-    {
-      title: 'GESTIÓN',
-      items: [
-        { label: 'Admisión', icon: 'fas fa-clipboard-check', route: '/admision' },
-        { label: 'Documentos', icon: 'fas fa-file-alt', route: '/documentos', badge: 12 },
-        { label: 'Pagos', icon: 'fas fa-credit-card', route: '/pagos' },
-      ],
-    },
-  ]);
+  private loadUserFromStorage(): void {
+    const rawUser = localStorage.getItem('anuies_user');
+
+    if (!rawUser) {
+      console.warn('No existe anuies_user en localStorage');
+      return;
+    }
+
+    const user = JSON.parse(rawUser);
+
+    // Nombre
+    const fullName = `${user.firstName} ${user.lastName}`;
+    this.userName.set(fullName);
+
+    // Rol
+    this.userRole.set(user.role?.displayName ?? '');
+
+    // Iniciales
+    const initials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase();
+    this.userInitials.set(initials);
+
+    // Menú
+    this.menuSections.set(this.buildMenuSections(user.menu));
+  }
+
+  private buildMenuSections(menu: MenuItem[]): MenuSection[] {
+    const grouped: Record<string, MenuItem[]> = {};
+
+    for (const item of menu) {
+      if (!grouped[item.category]) {
+        grouped[item.category] = [];
+      }
+      grouped[item.category].push(item);
+    }
+
+    return Object.keys(grouped).map((category) => ({
+      title: category.toUpperCase(),
+      items: grouped[category],
+    }));
+  }
 }

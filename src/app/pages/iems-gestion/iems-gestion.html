@@ -1,331 +1,453 @@
-<div class="iems-container">
-  <!-- Header -->
-  <div class="page-header">
+<div class="p-6 lg:p-10 space-y-8 bg-slate-50/50 min-h-screen animate-fade-in">
+  <!-- HEADER -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
     <div>
-      <h1><i class="fas fa-school"></i> Gestión de IEMS</h1>
-      <p class="subtitle">Instituciones de Educación Media Superior</p>
+      <h1 class="text-3xl font-black text-slate-900 tracking-tight italic flex items-center gap-3">
+        <i class="fas fa-school text-blue-600"></i>
+        Gestión de IEMS
+      </h1>
+      <p class="text-slate-500 font-medium italic">Instituciones de Educación Media Superior</p>
     </div>
-    <div class="header-actions">
-      <button class="btn-add" (click)="openAddIEMS()">
-        <i class="fas fa-plus"></i> Agregar IEMS
+
+    <div class="flex gap-3">
+      <button
+        (click)="openAddIEMS()"
+        class="px-6 py-3 bg-blue-600 text-white font-black rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 flex items-center gap-2"
+      >
+        <i class="fas fa-plus"></i>
+        Agregar IEMS
       </button>
-      <button class="btn-refresh" (click)="loadIEMS()">
+
+      <button
+        (click)="loadIEMS()"
+        class="w-12 h-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center text-slate-500 hover:bg-slate-800 hover:text-white transition-all shadow-sm"
+      >
         <i class="fas fa-sync-alt"></i>
       </button>
     </div>
   </div>
 
-  <!-- Filters -->
-  <div class="filters-section">
-    <div class="search-box">
-      <i class="fas fa-search"></i>
-      <input 
-        type="text" 
-        placeholder="Buscar por nombre, clave o municipio..."
+  <!-- FILTROS -->
+  <div
+    class="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 flex flex-wrap gap-4 items-center"
+  >
+    <div class="relative w-full md:w-80">
+      <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+      <input
+        type="text"
         [(ngModel)]="searchQuery"
         (ngModelChange)="currentPage.set(1)"
+        placeholder="Buscar por nombre, clave o municipio..."
+        class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-medium focus:ring-4 focus:ring-blue-500/10 outline-none"
       />
     </div>
 
-    <select class="filter-select" [(ngModel)]="selectedType" (ngModelChange)="currentPage.set(1)">
-      <option [value]="opt.value" *ngFor="let opt of typeOptions">{{ opt.label }}</option>
+    <select
+      [(ngModel)]="selectedType"
+      (ngModelChange)="currentPage.set(1)"
+      class="px-4 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-700"
+    >
+      <option [value]="opt.value" *ngFor="let opt of typeOptions">
+        {{ opt.label }}
+      </option>
     </select>
 
-    <select class="filter-select" [(ngModel)]="selectedState" (ngModelChange)="currentPage.set(1)">
+    <select
+      [(ngModel)]="selectedState"
+      (ngModelChange)="currentPage.set(1)"
+      class="px-4 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-700"
+    >
       <option value="all">Todos los estados</option>
-      <option [value]="state" *ngFor="let state of stateOptions.slice(1)">{{ state }}</option>
+      <option [value]="state" *ngFor="let state of stateOptions.slice(1)">
+        {{ state }}
+      </option>
     </select>
 
-    <button class="btn-reset" (click)="resetFilters()">
-      <i class="fas fa-redo"></i> Limpiar filtros
+    <button
+      (click)="resetFilters()"
+      class="px-5 py-3 bg-slate-100 text-slate-600 font-black rounded-2xl hover:bg-slate-800 hover:text-white transition-all"
+    >
+      <i class="fas fa-redo mr-2"></i>
+      Limpiar filtros
     </button>
   </div>
 
-  <!-- Stats -->
-  <div class="stats-bar">
-    <span><strong>Total:</strong> {{ filteredIEMS().length }} IEMS</span>
-    <span><strong>Mostrando:</strong> {{ showingRange() }}</span>
+  <!-- STATS -->
+  <div class="flex flex-wrap gap-6 text-sm font-bold text-slate-600">
+    <span> <strong>Total:</strong> {{ filteredIEMS().length }} IEMS </span>
+    <span> <strong>Mostrando:</strong> {{ showingRange() }} </span>
   </div>
 
-  <!-- Loading -->
+  <!-- LOADING -->
   @if (isLoading()) {
-    <div class="loading-container">
-      <div class="spinner"></div>
-      <p>Cargando IEMS...</p>
-    </div>
+  <div class="flex flex-col items-center py-20 opacity-60">
+    <i class="fas fa-circle-notch animate-spin text-3xl mb-4"></i>
+    <p class="font-black uppercase tracking-widest text-sm">Cargando IEMS...</p>
+  </div>
   }
 
-  <!-- Error -->
+  <!-- ERROR -->
   @if (errorMessage() && !isLoading()) {
-    <div class="error-alert">
-      <i class="fas fa-exclamation-circle"></i>
-      {{ errorMessage() }}
-    </div>
+  <div
+    class="bg-red-50 border border-red-200 rounded-2xl p-6 text-red-600 font-bold flex items-center gap-3"
+  >
+    <i class="fas fa-exclamation-circle"></i>
+    {{ errorMessage() }}
+  </div>
   }
 
-  <!-- Table -->
+  <!-- TABLA -->
   @if (!isLoading() && !errorMessage()) {
-    <div class="table-container">
-      <table class="iems-table">
+  <div class="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
         <thead>
-          <tr>
-            <th>Clave</th>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>Municipio</th>
-            <th>Estado</th>
-            <th>Contacto</th>
-            <th>Estado</th>
-            <th>Acciones</th>
+          <tr
+            class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-widest font-black"
+          >
+            <th class="px-8 py-5">Clave</th>
+            <th class="px-8 py-5">Nombre</th>
+            <th class="px-8 py-5">Tipo</th>
+            <th class="px-8 py-5">Municipio</th>
+            <th class="px-8 py-5">Estado</th>
+            <th class="px-8 py-5">Contacto</th>
+            <th class="px-8 py-5">Estado</th>
+            <th class="px-8 py-5 text-center">Acciones</th>
           </tr>
         </thead>
-        <tbody>
+
+        <tbody class="divide-y divide-slate-100">
           @for (iems of pagedIEMS(); track iems._id) {
-            <tr>
-              <td class="code-cell">{{ iems.code }}</td>
-              <td class="name-cell">
-                <strong>{{ iems.name }}</strong>
-              </td>
-              <td>
-                <span class="type-badge">{{ iems.type }}</span>
-              </td>
-              <td>{{ iems.address.municipality }}</td>
-              <td>{{ iems.address.state }}</td>
-              <td>
-                @if (iems.contact.email) {
-                  <div class="contact-info">
-                    <i class="fas fa-envelope"></i> {{ iems.contact.email }}
-                  </div>
-                }
-                @if (iems.contact.generalPhone) {
-                  <div class="contact-info">
-                    <i class="fas fa-phone"></i> {{ iems.contact.generalPhone }}
-                  </div>
-                }
-              </td>
-              <td>
-                <span class="status-badge" [class.active]="iems.active">
-                  {{ iems.active ? 'Activa' : 'Inactiva' }}
-                </span>
-              </td>
-              <td>
-                <div class="actions-cell">
-                  <button class="btn-icon" (click)="openEditIEMS(iems)" title="Editar">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="btn-icon btn-delete" (click)="deleteIEMS(iems._id!)" title="Eliminar">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
+          <tr class="hover:bg-blue-50/30 transition-colors">
+            <td class="px-8 py-5 font-mono text-xs font-bold">
+              {{ iems.code }}
+            </td>
+
+            <td class="px-8 py-5 font-black uppercase text-sm text-slate-800">
+              {{ iems.name }}
+            </td>
+
+            <td class="px-8 py-5">
+              <span class="px-3 py-1 rounded-lg bg-slate-100 text-xs font-black">
+                {{ iems.type }}
+              </span>
+            </td>
+
+            <td class="px-8 py-5 font-bold text-sm">
+              {{ iems.address.municipality }}
+            </td>
+
+            <td class="px-8 py-5 font-bold text-sm">
+              {{ iems.address.state }}
+            </td>
+
+            <td class="px-8 py-5 text-xs space-y-1">
+              @if (iems.contact.email) {
+              <div><i class="fas fa-envelope mr-1 text-slate-400"></i>{{ iems.contact.email }}</div>
+              } @if (iems.contact.generalPhone) {
+              <div>
+                <i class="fas fa-phone mr-1 text-slate-400"></i>{{ iems.contact.generalPhone }}
+              </div>
+              }
+            </td>
+
+            <td class="px-8 py-5">
+              <span
+                class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase"
+                [ngClass]="
+                  iems.active ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                "
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full"
+                  [ngClass]="iems.active ? 'bg-emerald-500' : 'bg-red-500'"
+                ></span>
+                {{ iems.active ? 'Activa' : 'Inactiva' }}
+              </span>
+            </td>
+
+            <td class="px-8 py-5 text-center">
+              <div class="flex justify-center gap-2">
+                <button
+                  (click)="openEditIEMS(iems)"
+                  class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-800 hover:text-white transition-all"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+
+                <button
+                  (click)="deleteIEMS(iems._id!)"
+                  class="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-600 hover:text-white transition-all"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
           } @empty {
-            <tr>
-              <td colspan="8" class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <p>No se encontraron IEMS</p>
-              </td>
-            </tr>
+          <tr>
+            <td colspan="8" class="px-8 py-20 text-center opacity-40">
+              <i class="fas fa-inbox text-5xl mb-4"></i>
+              <p class="font-black uppercase">No se encontraron IEMS</p>
+            </td>
+          </tr>
           }
         </tbody>
       </table>
     </div>
+  </div>
 
-    <!-- Pagination -->
-    <div class="pagination-container">
-      <div class="page-size-selector">
-        <label>Mostrar:</label>
-        <select 
-          [value]="itemsPerPage()" 
-          (change)="onItemsPerPageChange(+$any($event.target).value)"
-        >
-          <option [value]="size" *ngFor="let size of pageSizeOptions">{{ size }}</option>
-        </select>
-        <span>por página</span>
-      </div>
-
-      <div class="pagination-controls">
-        <button 
-          class="page-btn" 
-          [disabled]="currentPage() === 1"
-          (click)="goToPage(currentPage() - 1)"
-        >
-          <i class="fas fa-chevron-left"></i>
-        </button>
-
-        @for (page of [].constructor(totalPages()); track $index) {
-          @if (totalPages() <= 7 || $index === 0 || $index === totalPages() - 1 || Math.abs(currentPage() - ($index + 1)) <= 2) {
-            <button 
-              class="page-btn" 
-              [class.active]="currentPage() === $index + 1"
-              (click)="goToPage($index + 1)"
-            >
-              {{ $index + 1 }}
-            </button>
-          } @else if (Math.abs(currentPage() - ($index + 1)) === 3) {
-            <span class="ellipsis">...</span>
-          }
-        }
-
-        <button 
-          class="page-btn" 
-          [disabled]="currentPage() === totalPages()"
-          (click)="goToPage(currentPage() + 1)"
-        >
-          <i class="fas fa-chevron-right"></i>
-        </button>
-      </div>
+  <!-- PAGINACIÓN -->
+  <div class="flex flex-wrap items-center justify-between gap-6 pt-6">
+    <div class="flex items-center gap-3 text-sm font-bold text-slate-600">
+      <label>Mostrar</label>
+      <select
+        [value]="itemsPerPage()"
+        (change)="onItemsPerPageChange(+$any($event.target).value)"
+        class="px-3 py-2 border border-slate-200 rounded-xl"
+      >
+        <option [value]="size" *ngFor="let size of pageSizeOptions">
+          {{ size }}
+        </option>
+      </select>
+      <span>por página</span>
     </div>
-  }
-</div>
 
-<!-- Modal Crear/Editar -->
-@if (isAddingIEMS()) {
-  <div class="modal-overlay" (click)="closeModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>
-          <i class="fas fa-school"></i>
+    <div class="flex items-center gap-2">
+      <button
+        (click)="goToPage(currentPage() - 1)"
+        [disabled]="currentPage() === 1"
+        class="w-10 h-10 rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-30"
+      >
+        <i class="fas fa-chevron-left"></i>
+      </button>
+
+      @for (page of [].constructor(totalPages()); track $index) { @if (totalPages() <= 7 || $index
+      === 0 || $index === totalPages() - 1 || Math.abs(currentPage() - ($index + 1)) <= 2) {
+      <button
+        (click)="goToPage($index + 1)"
+        class="w-10 h-10 rounded-xl font-black"
+        [ngClass]="
+          currentPage() === $index + 1
+            ? 'bg-slate-800 text-white'
+            : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+        "
+      >
+        {{ $index + 1 }}
+      </button>
+      } @else if (Math.abs(currentPage() - ($index + 1)) === 3) {
+      <span class="px-2">…</span>
+      } }
+
+      <button
+        (click)="goToPage(currentPage() + 1)"
+        [disabled]="currentPage() === totalPages()"
+        class="w-10 h-10 rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-30"
+      >
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+  }
+
+  <!-- MODAL COMPLETO (FORM ORIGINAL) -->
+  @if (isAddingIEMS()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-6">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="closeModal()"></div>
+
+    <div class="relative w-full max-w-5xl bg-white rounded-[3rem] shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between p-8 border-b">
+        <h2 class="text-xl font-black flex items-center gap-3">
+          <i class="fas fa-school text-blue-600"></i>
           {{ editingIEMS() ? 'Editar IEMS' : 'Nueva IEMS' }}
         </h2>
-        <button class="close-btn" (click)="closeModal()">
+
+        <button
+          (click)="closeModal()"
+          class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 hover:text-red-500"
+        >
           <i class="fas fa-times"></i>
         </button>
       </div>
 
-      <div class="modal-body">
-        <form>
-          <!-- Información Básica -->
-          <div class="form-section">
-            <h3>Información Básica</h3>
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Clave <span class="required">*</span></label>
-                <input 
-                  type="text" 
-                  [(ngModel)]="iemsForm().code"
-                  name="code"
-                  placeholder="Ej: 13DIT0001D"
-                  required
-                />
-              </div>
+      <div class="p-8 space-y-10 max-h-[70vh] overflow-y-auto">
+        <!-- INFORMACIÓN BÁSICA -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-black text-slate-800 uppercase tracking-wide">
+            Información Básica
+          </h3>
 
-              <div class="form-group">
-                <label>Tipo <span class="required">*</span></label>
-                <select [(ngModel)]="iemsForm().type" name="type">
-                  <option [value]="opt.value" *ngFor="let opt of typeOptions.slice(1)">
-                    {{ opt.label }}
-                  </option>
-                </select>
-              </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-xs font-black uppercase text-slate-500 mb-2">
+                Clave <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="iemsForm().code"
+                name="code"
+                placeholder="Ej: 13DIT0001D"
+                required
+                class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold focus:ring-4 focus:ring-blue-500/10 outline-none"
+              />
+            </div>
 
-              <div class="form-group full-width">
-                <label>Nombre <span class="required">*</span></label>
-                <input 
-                  type="text" 
-                  [(ngModel)]="iemsForm().name"
-                  name="name"
-                  placeholder="Nombre completo de la IEMS"
-                  required
-                />
-              </div>
+            <div>
+              <label class="block text-xs font-black uppercase text-slate-500 mb-2">
+                Tipo <span class="text-red-500">*</span>
+              </label>
+              <select
+                [(ngModel)]="iemsForm().type"
+                name="type"
+                class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-white font-bold focus:ring-4 focus:ring-blue-500/10 outline-none"
+              >
+                <option [value]="opt.value" *ngFor="let opt of typeOptions.slice(1)">
+                  {{ opt.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-xs font-black uppercase text-slate-500 mb-2">
+                Nombre <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="iemsForm().name"
+                name="name"
+                placeholder="Nombre completo de la IEMS"
+                required
+                class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold focus:ring-4 focus:ring-blue-500/10 outline-none"
+              />
             </div>
           </div>
+        </div>
 
-          <!-- Dirección -->
-          <div class="form-section">
-            <h3>Dirección</h3>
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Municipio <span class="required">*</span></label>
-                <input 
-                  type="text" 
-                  [(ngModel)]="iemsForm().address!.municipality"
-                  name="municipality"
-                  required
-                />
-              </div>
+        <!-- DIRECCIÓN -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-black text-slate-800 uppercase tracking-wide">Dirección</h3>
 
-              <div class="form-group">
-                <label>Estado <span class="required">*</span></label>
-                <select [(ngModel)]="iemsForm().address!.state" name="state">
-                  <option [value]="state" *ngFor="let state of stateOptions.slice(1)">
-                    {{ state }}
-                  </option>
-                </select>
-              </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label class="block text-xs font-black uppercase text-slate-500 mb-2">
+                Municipio <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="iemsForm().address!.municipality"
+                name="municipality"
+                required
+                class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
+              />
+            </div>
 
-              <div class="form-group">
-                <label>Calle</label>
-                <input 
-                  type="text" 
-                  [(ngModel)]="iemsForm().address!.street"
-                  name="street"
-                />
-              </div>
+            <div>
+              <label class="block text-xs font-black uppercase text-slate-500 mb-2">
+                Estado <span class="text-red-500">*</span>
+              </label>
+              <select
+                [(ngModel)]="iemsForm().address!.state"
+                name="state"
+                class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-white font-bold outline-none"
+              >
+                <option [value]="state" *ngFor="let state of stateOptions.slice(1)">
+                  {{ state }}
+                </option>
+              </select>
+            </div>
 
-              <div class="form-group">
-                <label>Número</label>
-                <input 
-                  type="text" 
-                  [(ngModel)]="iemsForm().address!.number"
-                  name="number"
-                />
-              </div>
+            <div>
+              <label class="block text-xs font-black uppercase text-slate-500 mb-2">
+                Código Postal
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="iemsForm().address!.postalCode"
+                name="postalCode"
+                class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
+              />
+            </div>
 
-              <div class="form-group">
-                <label>Código Postal</label>
-                <input 
-                  type="text" 
-                  [(ngModel)]="iemsForm().address!.postalCode"
-                  name="postalCode"
-                />
-              </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-black uppercase text-slate-500 mb-2"> Calle </label>
+              <input
+                type="text"
+                [(ngModel)]="iemsForm().address!.street"
+                name="street"
+                class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-black uppercase text-slate-500 mb-2"> Número </label>
+              <input
+                type="text"
+                [(ngModel)]="iemsForm().address!.number"
+                name="number"
+                class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
+              />
             </div>
           </div>
+        </div>
 
-          <!-- Contacto -->
-          <div class="form-section">
-            <h3>Información de Contacto</h3>
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Email</label>
-                <input 
-                  type="email" 
-                  [(ngModel)]="iemsForm().contact!.email"
-                  name="email"
-                />
-              </div>
+        <!-- CONTACTO -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-black text-slate-800 uppercase tracking-wide">
+            Información de Contacto
+          </h3>
 
-              <div class="form-group">
-                <label>Teléfono</label>
-                <input 
-                  type="tel" 
-                  [(ngModel)]="iemsForm().contact!.generalPhone"
-                  name="phone"
-                />
-              </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-xs font-black uppercase text-slate-500 mb-2"> Email </label>
+              <input
+                type="email"
+                [(ngModel)]="iemsForm().contact!.email"
+                name="email"
+                class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
+              />
+            </div>
 
-              <div class="form-group full-width">
-                <label>Nombre del Director</label>
-                <input 
-                  type="text" 
-                  [(ngModel)]="iemsForm().contact!.directorName"
-                  name="directorName"
-                />
-              </div>
+            <div>
+              <label class="block text-xs font-black uppercase text-slate-500 mb-2">
+                Teléfono
+              </label>
+              <input
+                type="tel"
+                [(ngModel)]="iemsForm().contact!.generalPhone"
+                name="phone"
+                class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
+              />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-xs font-black uppercase text-slate-500 mb-2">
+                Nombre del Director
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="iemsForm().contact!.directorName"
+                name="directorName"
+                class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
+              />
             </div>
           </div>
-        </form>
+        </div>
       </div>
 
-      <div class="modal-footer">
-        <button class="btn-cancel" (click)="closeModal()">Cancelar</button>
-        <button class="btn-save" (click)="saveIEMS()">
-          <i class="fas fa-save"></i>
+      <div class="p-6 border-t flex justify-end gap-3">
+        <button (click)="closeModal()" class="px-6 py-3 rounded-2xl bg-slate-100 font-black">
+          Cancelar
+        </button>
+
+        <button
+          (click)="saveIEMS()"
+          class="px-6 py-3 rounded-2xl bg-emerald-600 text-white font-black"
+        >
+          <i class="fas fa-save mr-2"></i>
           {{ editingIEMS() ? 'Actualizar' : 'Guardar' }}
         </button>
       </div>
     </div>
   </div>
-}
+  }
+</div>
