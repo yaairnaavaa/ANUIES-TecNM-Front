@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { Register } from './register/pages/register/register';
 import { Login } from './components/login/login';
-import { SidebarComponent } from './components/sidebar-component/sidebar-component';
 import { AdminLayout } from './layouts/admin-layout/admin-layout';
 import { IesGestion } from './pages/ies-gestion/ies-gestion';
 import { IesProfileSettings } from './pages/ies-profile-settings/ies-profile-settings';
@@ -11,15 +10,15 @@ import { authGuard } from './guards/auth.guard';
 import { loginGuard } from './guards/login.guard';
 
 export const routes: Routes = [
-  { 
-    path: 'login', 
+  {
+    path: 'login',
     component: Login,
-    canActivate: [loginGuard]
+    canActivate: [loginGuard],
   },
   {
     path: 'register',
     component: Register,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
   {
     path: 'admin',
