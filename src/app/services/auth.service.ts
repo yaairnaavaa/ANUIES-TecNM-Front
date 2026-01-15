@@ -14,8 +14,8 @@ export class AuthService {
   currentUser = signal<UserAuth | null>(null);
   isAuthenticated = signal<boolean>(false);
 
-  private readonly TOKEN_KEY = 'anuies_token';
-  private readonly USER_KEY = 'anuies_user';
+  private readonly MENU_KEY = 'anuies_menu';
+  private readonly ROLE_KEY = 'anuies_role';
 
   constructor() {
     this.restoreSession();
@@ -30,16 +30,29 @@ export class AuthService {
       .post<AuthResponse>(`${environment.apiUrl}/auth/login`, { email, password })
       .pipe(
         tap((res) => {
-          if (res.success && res.token && res.data) {
-            this.startSession(res.token, res.data);
+          if (res.success && res.data) {
+            this.startSession(res.data);
           }
         })
       );
   }
 
   logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
+    // Llamar al backend para limpiar la cookie
+    this.http.post(`${environment.apiUrl}/auth/logout`, {}).subscribe({
+      next: () => {
+        this.clearSession();
+      },
+      error: () => {
+        // Aunque falle, limpiar la sesión local
+        this.clearSession();
+      }
+    });
+  }
+
+  private clearSession(): void {
+    localStorage.removeItem(this.MENU_KEY);
+    localStorage.removeItem(this.ROLE_KEY);
 
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
@@ -51,36 +64,48 @@ export class AuthService {
    * SESSION
    * ============================ */
 
-  private startSession(token: string, user: UserAuth): void {
-    localStorage.setItem(this.TOKEN_KEY, token);
-    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+  private startSession(user: UserAuth): void {
+    // Solo guardar menú y rol en localStorage
+    localStorage.setItem(this.MENU_KEY, JSON.stringify(user.menu));
+    localStorage.setItem(this.ROLE_KEY, JSON.stringify(user.role));
 
     this.currentUser.set(user);
     this.isAuthenticated.set(true);
   }
 
   private restoreSession(): void {
-    const token = localStorage.getItem(this.TOKEN_KEY);
-    const userStr = localStorage.getItem(this.USER_KEY);
+    const menuStr = localStorage.getItem(this.MENU_KEY);
+    const roleStr = localStorage.getItem(this.ROLE_KEY);
 
-    if (!token || !userStr) return;
+    if (!menuStr || !roleStr) return;
 
     try {
-      const user = JSON.parse(userStr) as UserAuth;
-      this.currentUser.set(user);
-      this.isAuthenticated.set(true);
+      const menu = JSON.parse(menuStr);
+      const role = JSON.parse(roleStr);
+
+      // Verificar la sesión con el backend (la cookie se envía automáticamente)
+      this.http.get<{ success: boolean; data: UserAuth }>(`${environment.apiUrl}/auth/me`)
+        .subscribe({
+          next: (response) => {
+            if (response.success && response.data) {
+              this.currentUser.set(response.data);
+              this.isAuthenticated.set(true);
+            } else {
+              this.clearSession();
+            }
+          },
+          error: () => {
+            this.clearSession();
+          }
+        });
     } catch {
-      this.logout();
+      this.clearSession();
     }
   }
 
   /* ============================
    * HELPERS
    * ============================ */
-
-  getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
-  }
 
   getMenu() {
     return this.currentUser()?.menu ?? [];

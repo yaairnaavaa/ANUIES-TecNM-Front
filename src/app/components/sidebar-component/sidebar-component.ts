@@ -1,6 +1,7 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 interface MenuItem {
   label: string;
@@ -22,6 +23,8 @@ interface MenuSection {
   styleUrl: './sidebar-component.css',
 })
 export class SidebarComponent implements OnInit {
+  private authService = inject(AuthService);
+
   userName = signal('');
   userRole = signal('');
   userInitials = signal('');
@@ -30,22 +33,24 @@ export class SidebarComponent implements OnInit {
   menuSections = signal<MenuSection[]>([]);
 
   ngOnInit(): void {
-    this.loadUserFromStorage();
+    this.loadUserFromService();
   }
 
   toggleSidebar() {
     this.isOpen.update((v) => !v);
   }
 
-  private loadUserFromStorage(): void {
-    const rawUser = localStorage.getItem('anuies_user');
+  logout(): void {
+    this.authService.logout();
+  }
 
-    if (!rawUser) {
-      console.warn('No existe anuies_user en localStorage');
+  private loadUserFromService(): void {
+    const user = this.authService.currentUser();
+
+    if (!user) {
+      console.warn('No hay usuario autenticado');
       return;
     }
-
-    const user = JSON.parse(rawUser);
 
     // Nombre
     const fullName = `${user.firstName} ${user.lastName}`;

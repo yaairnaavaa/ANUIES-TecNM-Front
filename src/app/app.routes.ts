@@ -7,20 +7,26 @@ import { IesGestion } from './pages/ies-gestion/ies-gestion';
 import { IesProfileSettings } from './pages/ies-profile-settings/ies-profile-settings';
 import { IesCampaignManagementComponent } from './pages/ies-campaign-management/ies-campaign-management';
 import { IemsGestion } from './pages/iems-gestion/iems-gestion';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: 'register', component: Register },
   { path: 'login', component: Login },
   {
+    path: 'register',
+    component: Register,
+    canActivate: [authGuard]
+  },
+  {
     path: 'admin',
-    component: AdminLayout, // El contenedor con el Sidebar
+    component: AdminLayout,
+    canActivate: [authGuard],
     children: [
-      { path: 'ies-gestion', component: IesGestion }, // Gestión Nacional (lo que ya tenías)
-      { path: 'perfil-ies', component: IesProfileSettings }, // El nuevo componente para los puntos 5.x
+      { path: 'ies-gestion', component: IesGestion },
+      { path: 'perfil-ies', component: IesProfileSettings },
       { path: 'campaigns', component: IesCampaignManagementComponent },
-      { path: 'iems', component: IemsGestion }, // Gestión de IEMS
+      { path: 'iems', component: IemsGestion },
       { path: '', redirectTo: 'ies-gestion', pathMatch: 'full' },
     ],
   },
-  { path: '', redirectTo: 'ies-gestion', pathMatch: 'full' },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
 ];
