@@ -16,6 +16,7 @@ export class AuthService {
 
   private readonly MENU_KEY = 'anuies_menu';
   private readonly ROLE_KEY = 'anuies_role';
+  private readonly USER_INFO_KEY = 'anuies_user_info';
 
   constructor() {
     this.restoreSession();
@@ -53,6 +54,7 @@ export class AuthService {
   private clearSession(): void {
     localStorage.removeItem(this.MENU_KEY);
     localStorage.removeItem(this.ROLE_KEY);
+    localStorage.removeItem(this.USER_INFO_KEY);
 
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
@@ -65,9 +67,16 @@ export class AuthService {
    * ============================ */
 
   private startSession(user: UserAuth): void {
-    // Solo guardar menú y rol en localStorage
+    // Guardar menú, rol e info básica del usuario en localStorage
     localStorage.setItem(this.MENU_KEY, JSON.stringify(user.menu));
     localStorage.setItem(this.ROLE_KEY, JSON.stringify(user.role));
+    localStorage.setItem(this.USER_INFO_KEY, JSON.stringify({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      secondLastName: user.secondLastName,
+      email: user.email
+    }));
 
     this.currentUser.set(user);
     this.isAuthenticated.set(true);
@@ -76,20 +85,43 @@ export class AuthService {
   private restoreSession(): void {
     const menuStr = localStorage.getItem(this.MENU_KEY);
     const roleStr = localStorage.getItem(this.ROLE_KEY);
+    const userInfoStr = localStorage.getItem(this.USER_INFO_KEY);
 
-    if (!menuStr || !roleStr) return;
+    if (!menuStr || !roleStr || !userInfoStr) return;
 
     try {
       const menu = JSON.parse(menuStr);
       const role = JSON.parse(roleStr);
+      const userInfo = JSON.parse(userInfoStr);
 
-      // Verificar la sesión con el backend (la cookie se envía automáticamente)
+      // Setear autenticado inmediatamente con datos de localStorage
+      this.isAuthenticated.set(true);
+      
+      // Crear usuario con datos de localStorage
+      const restoredUser: UserAuth = {
+        ...userInfo,
+        menu: menu,
+        role: role
+      };
+      this.currentUser.set(restoredUser);
+
+      // Verificar la sesión con el backend y obtener datos completos
       this.http.get<{ success: boolean; data: UserAuth }>(`${environment.apiUrl}/auth/me`)
         .subscribe({
           next: (response) => {
             if (response.success && response.data) {
+              // Actualizar con datos completos del backend
               this.currentUser.set(response.data);
-              this.isAuthenticated.set(true);
+              // Actualizar localStorage con datos frescos
+              localStorage.setItem(this.MENU_KEY, JSON.stringify(response.data.menu));
+              localStorage.setItem(this.ROLE_KEY, JSON.stringify(response.data.role));
+              localStorage.setItem(this.USER_INFO_KEY, JSON.stringify({
+                id: response.data.id,
+                firstName: response.data.firstName,
+                lastName: response.data.lastName,
+                secondLastName: response.data.secondLastName,
+                email: response.data.email
+              }));
             } else {
               this.clearSession();
             }

@@ -8,9 +8,14 @@ import { IesProfileSettings } from './pages/ies-profile-settings/ies-profile-set
 import { IesCampaignManagementComponent } from './pages/ies-campaign-management/ies-campaign-management';
 import { IemsGestion } from './pages/iems-gestion/iems-gestion';
 import { authGuard } from './guards/auth.guard';
+import { loginGuard } from './guards/login.guard';
 
 export const routes: Routes = [
-  { path: 'login', component: Login },
+  { 
+    path: 'login', 
+    component: Login,
+    canActivate: [loginGuard]
+  },
   {
     path: 'register',
     component: Register,

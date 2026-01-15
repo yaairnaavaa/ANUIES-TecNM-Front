@@ -223,10 +223,11 @@ export interface UserAuth {
   id: string;
   firstName: string;
   lastName: string;
+  secondLastName?: string;
   email: string;
   role: RoleAuth;
   menu: MenuItem[];
-  ies?: string | IES; // 👈 agregar
+  ies?: string | IES;
   active: boolean;
   createdAt: string;
 }
