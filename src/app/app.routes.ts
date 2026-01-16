@@ -8,6 +8,7 @@ import { IesCampaignManagementComponent } from './pages/ies-campaign-management/
 import { IemsGestion } from './pages/iems-gestion/iems-gestion';
 import { authGuard } from './guards/auth.guard';
 import { loginGuard } from './guards/login.guard';
+import { Aspirant } from './pages/aspirant/aspirant';
 
 export const routes: Routes = [
   {
@@ -28,6 +29,7 @@ export const routes: Routes = [
       { path: 'perfil-ies', component: IesProfileSettings },
       { path: 'campaigns', component: IesCampaignManagementComponent },
       { path: 'iems', component: IemsGestion },
+      { path: 'aspirant', component: Aspirant},
       { path: '', redirectTo: 'ies-gestion', pathMatch: 'full' },
     ],
   },
