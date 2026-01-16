@@ -111,19 +111,19 @@ export interface Campaign {
 
 export interface Prospect {
   _id?: string;
-  
+
   // Datos personales
   firstName: string;
   lastName: string;
   secondLastName?: string;
-  
+
   // Datos de contacto
   email: string;
   phone: {
     landline?: string;
     mobile: string;
   };
-  
+
   // Dirección
   address: {
     street?: string;
@@ -134,30 +134,42 @@ export interface Prospect {
     state?: string;
     postalCode?: string;
   };
-  
+
   // Procedencia académica
   originIEMS?: string;
+  originIEMSName?: string;
   iemsCareer?: string;
   iemsAverage?: number;
   currentSemester?: number;
   estimatedGraduationDate?: Date | string;
-  
+
   // Interés en TecNM
   firstChoiceIES?: string;
   careerInterests?: Array<{
     career: string;
     priority: number;
   }>;
-  
+
   // Canal de captación
-  contactChannel?: 'Conferencia' | 'Visita a IEMS' | 'Facebook' | 'Instagram' | 'TikTok' | 
-    'WhatsApp' | 'Feria universitaria' | 'Familiar o amigo' | 'Docente de IEMS' | 
-    'Sitio web' | 'YouTube' | 'Open House' | 'Otro';
+  contactChannel?:
+    | 'Conferencia'
+    | 'Visita a IEMS'
+    | 'Facebook'
+    | 'Instagram'
+    | 'TikTok'
+    | 'WhatsApp'
+    | 'Feria universitaria'
+    | 'Familiar o amigo'
+    | 'Docente de IEMS'
+    | 'Sitio web'
+    | 'YouTube'
+    | 'Open House'
+    | 'Otro';
   originCampaign?: string;
-  
+
   // Clasificación del interés
   classification?: 'Curioso' | 'Prospecto' | 'Aspirante Activo';
-  
+
   // Redes sociales e intereses
   socialMedia?: {
     facebook?: string;
@@ -166,7 +178,7 @@ export interface Prospect {
     twitter?: string;
   };
   personalInterests?: string[];
-  
+
   // Estado del proceso
   processStatus?: {
     registrationComplete?: boolean;
@@ -177,15 +189,15 @@ export interface Prospect {
     }>;
     lastInteraction?: Date | string;
   };
-  
+
   // Seguimiento
   observations?: string;
   assignedTo?: string;
-  
+
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  
+
   // Virtual
   fullName?: string;
 }

@@ -1,6 +1,7 @@
 import { Component, inject, Output, EventEmitter, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { finalize } from 'rxjs/operators';
 import { curpValidator } from '../../validators/curp.validator';
 
 import { ProspectService } from '../../services/prospect.service';
@@ -27,9 +28,9 @@ export class RegistrationForm implements OnInit {
 
   // UI state
   selectedMajors: string[] = [];
-  isLoading = false;
-  showSuccess = false;
-  errorMessage: string | null = null;
+  isLoading = signal(false);
+  showSuccess = signal(false);
+  errorMessage = signal<string | null>(null);
   successData: any = null;
 
   // IEMS autocomplete
@@ -129,18 +130,18 @@ export class RegistrationForm implements OnInit {
 
   onSubmit(): void {
     if (this.registrationForm.invalid || this.selectedMajors.length === 0) {
-      this.errorMessage = 'Por favor completa todos los campos requeridos y selecciona al menos una carrera.';
+      this.errorMessage.set('Por favor completa todos los campos requeridos y selecciona al menos una carrera.');
       return;
     }
 
     // Validar que se haya seleccionado una IES
     if (!this.selectedIES()?._id) {
-      this.errorMessage = 'Por favor selecciona un Tecnológico (IES) de interés.';
+      this.errorMessage.set('Por favor selecciona un Tecnológico (IES) de interés.');
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = null;
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
     const formValue = this.registrationForm.value;
     const firstCareer = this.majorsList().find((c) => c.id === this.selectedMajors[0]);
 
@@ -174,45 +175,51 @@ export class RegistrationForm implements OnInit {
       originCampaign: formValue.campaign || undefined,
     };
 
-    this.prospectService.createProspect(prospectData).subscribe({
-      next: (res) => {
-        this.isLoading = false;
-        console.log('Respuesta del registro:', res);
-        
-        if (res.success && res.data) {
-          const data = res.data as any;
-          const prospectId = data.id || data._id;
+    this.prospectService.createProspect(prospectData)
+      .pipe(
+        finalize(() => {
+          // Asegurar que isLoading siempre se restablezca, incluso si hay errores
+          this.isLoading.set(false);
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          console.log('Respuesta del registro:', res);
           
-          this.successData = {
-            fullName: data.fullName,
-            school: prospectData.originIEMSName,
-            firstChoice: firstCareer?.name || 'N/A',
-            folio: prospectId?.toString().substring(0, 8).toUpperCase() || 'N/A',
-          };
-          
-          console.log('Mostrando mensaje de éxito con datos:', this.successData);
-          this.showSuccess = true;
-          this.onRegistrationSuccess.emit();
-        } else {
-          console.error('Registro sin éxito:', res);
-          this.errorMessage = res.message || 'Error al registrar';
+          if (res.success && res.data) {
+            const data = res.data as any;
+            const prospectId = data.id || data._id;
+            
+            this.successData = {
+              fullName: data.fullName,
+              school: prospectData.originIEMSName,
+              firstChoice: firstCareer?.name || 'N/A',
+              folio: prospectId?.toString().substring(0, 8).toUpperCase() || 'N/A',
+            };
+            
+            console.log('Mostrando mensaje de éxito con datos:', this.successData);
+            this.showSuccess.set(true);
+            this.onRegistrationSuccess.emit();
+          } else {
+            console.error('Registro sin éxito:', res);
+            this.errorMessage.set(res.message || 'Error al registrar');
+          }
+        },
+        error: (err) => {
+          console.error('Error en el registro:', err);
+          this.errorMessage.set(err.error?.message || 'Error al registrar el aspirante');
         }
-      },
-      error: (err) => {
-        this.isLoading = false;
-        console.error('Error en el registro:', err);
-        this.errorMessage = err.error?.message || 'Error al registrar el aspirante';
-      }
-    });
+      });
   }
 
   resetForm(): void {
-    this.showSuccess = false;
+    this.showSuccess.set(false);
     this.registrationForm.reset({
       privacyPolicy: false,
     });
     this.selectedMajors = [];
     this.successData = null;
+    this.errorMessage.set(null);
   }
 
   defaultMajorsList = [

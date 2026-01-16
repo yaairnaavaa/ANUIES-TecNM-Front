@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Prospect, ApiResponse } from '../models/api.models';
@@ -16,6 +16,14 @@ export class ProspectService {
   private http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/prospects`;
 
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('anuies_token');
+
+    return new HttpHeaders({
+      Authorization: token ? `Bearer ${token}` : '',
+    });
+  }
+
   /**
    * Obtener todos los prospectos
    */
@@ -30,7 +38,12 @@ export class ProspectService {
         params = params.set('interestedCareer', filters.interestedCareer);
     }
 
-    return this.http.get<ApiResponse<Prospect[]>>(this.baseUrl, { params });
+    console.log(this.getAuthHeaders());
+
+    return this.http.get<ApiResponse<Prospect[]>>(this.baseUrl, {
+      params,
+      headers: this.getAuthHeaders(),
+    });
   }
 
   /**
