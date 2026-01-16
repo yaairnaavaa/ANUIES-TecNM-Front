@@ -59,7 +59,7 @@
           <!-- CURP -->
           <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">
-              CURP <span class="text-red-500">*</span>
+              CURP (opcional)
             </label>
             <div class="relative group">
               <i
@@ -69,10 +69,25 @@
                 type="text"
                 formControlName="curp"
                 maxlength="18"
-                class="w-full pl-12 py-4 uppercase bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                class="w-full pl-12 pr-12 py-4 uppercase bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                [class.border-red-300]="registrationForm.get('curp')?.invalid && registrationForm.get('curp')?.touched"
                 placeholder="ABCD001122HDFXYZ09"
               />
+              <i
+                *ngIf="registrationForm.get('curp')?.valid && registrationForm.get('curp')?.value"
+                class="fas fa-check-circle absolute right-4 top-1/2 -translate-y-1/2 text-green-500"
+              ></i>
             </div>
+            <p 
+              *ngIf="registrationForm.get('curp')?.hasError('curpInvalid') && registrationForm.get('curp')?.touched"
+              class="text-red-500 text-xs mt-1 font-medium"
+            >
+              <i class="fas fa-exclamation-circle"></i>
+              {{ registrationForm.get('curp')?.errors?.['curpInvalid']?.reason || 'CURP inválida' }}
+            </p>
+            <p class="text-[11px] text-gray-400 mt-1 italic font-medium">
+              18 caracteres. Ej: MELM850101HDFRRS09
+            </p>
           </div>
 
           <!-- Teléfono -->

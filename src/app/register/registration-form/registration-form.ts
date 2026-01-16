@@ -1,6 +1,7 @@
 import { Component, inject, Output, EventEmitter, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { curpValidator } from '../../validators/curp.validator';
 
 import { ProspectService } from '../../services/prospect.service';
 import { IemsService } from '../../services/iems.service';
@@ -58,7 +59,7 @@ export class RegistrationForm implements OnInit {
     fullName: new FormControl('', Validators.required),
     email: new FormControl('', [Validators.required, Validators.email]),
     phoneNumber: new FormControl('', [Validators.required, Validators.pattern('^[0-9]{10}$')]),
-    curp: new FormControl(''),
+    curp: new FormControl('', [curpValidator()]),
 
     previousSchool: new FormControl('', Validators.required),
     currentSemester: new FormControl(''),
@@ -151,6 +152,8 @@ export class RegistrationForm implements OnInit {
       phone: {
         mobile: formValue.phoneNumber!,
       },
+
+      curp: formValue.curp || undefined,
 
       // El backend espera originIEMSName (string), no originIEMS (ObjectId)
       originIEMSName: formValue.previousSchool!,
