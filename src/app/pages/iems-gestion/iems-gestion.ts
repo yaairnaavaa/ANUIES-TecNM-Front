@@ -43,13 +43,13 @@ export class IemsGestion implements OnInit {
     address: {
       municipality: '',
       state: '',
-      country: 'México'
+      country: 'México',
     },
     contact: {
       email: '',
-      generalPhone: ''
+      generalPhone: '',
     },
-    active: true
+    active: true,
   });
 
   // Opciones
@@ -62,15 +62,45 @@ export class IemsGestion implements OnInit {
     { value: 'Bachillerato Tecnológico', label: 'Bachillerato Tecnológico' },
     { value: 'Telebachillerato', label: 'Telebachillerato' },
     { value: 'Preparatoria', label: 'Preparatoria' },
-    { value: 'Otro', label: 'Otro' }
+    { value: 'Otro', label: 'Otro' },
+    { value: 'TELEBACHCOMUNITARIOS', label: 'Telebachcomunitarios' },
+    { value: 'TELEBACH', label: 'Telebach' },
   ];
 
   stateOptions = [
-    'all', 'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas', 
-    'Chihuahua', 'Ciudad de México', 'Coahuila', 'Colima', 'Durango', 'Guanajuato', 'Guerrero',
-    'Hidalgo', 'Jalisco', 'México', 'Michoacán', 'Morelos', 'Nayarit', 'Nuevo León', 'Oaxaca',
-    'Puebla', 'Querétaro', 'Quintana Roo', 'San Luis Potosí', 'Sinaloa', 'Sonora', 'Tabasco',
-    'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas'
+    'all',
+    'Aguascalientes',
+    'Baja California',
+    'Baja California Sur',
+    'Campeche',
+    'Chiapas',
+    'Chihuahua',
+    'Ciudad de México',
+    'Coahuila',
+    'Colima',
+    'Durango',
+    'Guanajuato',
+    'Guerrero',
+    'Hidalgo',
+    'Jalisco',
+    'México',
+    'Michoacán',
+    'Morelos',
+    'Nayarit',
+    'Nuevo León',
+    'Oaxaca',
+    'Puebla',
+    'Querétaro',
+    'Quintana Roo',
+    'San Luis Potosí',
+    'Sinaloa',
+    'Sonora',
+    'Tabasco',
+    'Tamaulipas',
+    'Tlaxcala',
+    'Veracruz',
+    'Yucatán',
+    'Zacatecas',
   ];
 
   ngOnInit(): void {
@@ -93,7 +123,7 @@ export class IemsGestion implements OnInit {
         console.error('Error cargando IEMS:', error);
         this.errorMessage.set('Error al cargar las IEMS');
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -103,24 +133,27 @@ export class IemsGestion implements OnInit {
   filteredIEMS = computed(() => {
     let filtered = this.iemsList();
 
-    // Filtro por búsqueda
-    const query = this.searchQuery().toLowerCase();
+    // 1. Filtro por búsqueda (Texto libre)
+    const query = this.searchQuery().toLowerCase().trim();
     if (query) {
-      filtered = filtered.filter(iems =>
-        iems.name.toLowerCase().includes(query) ||
-        iems.code.toLowerCase().includes(query) ||
-        iems.address.municipality.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (iems) =>
+          iems.name?.toLowerCase().includes(query) ||
+          iems.code?.toLowerCase().includes(query) ||
+          iems.address?.municipality?.toLowerCase().includes(query)
       );
     }
 
-    // Filtro por tipo
-    if (this.selectedType() !== 'all') {
-      filtered = filtered.filter(iems => iems.type === this.selectedType());
+    // 2. Filtro por tipo (Normalizado a minúsculas)
+    const typeFilter = this.selectedType().toLowerCase();
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter((iems) => iems.type?.toLowerCase() === typeFilter);
     }
 
-    // Filtro por estado
-    if (this.selectedState() !== 'all') {
-      filtered = filtered.filter(iems => iems.address.state === this.selectedState());
+    // 3. Filtro por estado (Normalizado a minúsculas)
+    const stateFilter = this.selectedState().toLowerCase();
+    if (stateFilter !== 'all') {
+      filtered = filtered.filter((iems) => iems.address?.state?.toLowerCase() === stateFilter);
     }
 
     return filtered;
@@ -135,16 +168,11 @@ export class IemsGestion implements OnInit {
     return this.filteredIEMS().slice(startIndex, endIndex);
   });
 
-  totalPages = computed(() => 
-    Math.ceil(this.filteredIEMS().length / this.itemsPerPage())
-  );
+  totalPages = computed(() => Math.ceil(this.filteredIEMS().length / this.itemsPerPage()));
 
   showingRange = computed(() => {
     const start = (this.currentPage() - 1) * this.itemsPerPage() + 1;
-    const end = Math.min(
-      this.currentPage() * this.itemsPerPage(),
-      this.filteredIEMS().length
-    );
+    const end = Math.min(this.currentPage() * this.itemsPerPage(), this.filteredIEMS().length);
     return this.filteredIEMS().length > 0 ? `${start} - ${end}` : '0';
   });
 
@@ -159,13 +187,13 @@ export class IemsGestion implements OnInit {
       address: {
         municipality: '',
         state: '',
-        country: 'México'
+        country: 'México',
       },
       contact: {
         email: '',
-        generalPhone: ''
+        generalPhone: '',
       },
-      active: true
+      active: true,
     });
     this.editingIEMS.set(null);
     this.isAddingIEMS.set(true);
@@ -193,8 +221,13 @@ export class IemsGestion implements OnInit {
    */
   saveIEMS(): void {
     const iemsData = this.iemsForm();
-    
-    if (!iemsData.code || !iemsData.name || !iemsData.address?.municipality || !iemsData.address?.state) {
+
+    if (
+      !iemsData.code ||
+      !iemsData.name ||
+      !iemsData.address?.municipality ||
+      !iemsData.address?.state
+    ) {
       alert('Por favor completa todos los campos requeridos');
       return;
     }
@@ -212,7 +245,7 @@ export class IemsGestion implements OnInit {
           console.error('Error actualizando IEMS:', error);
           alert('Error al actualizar la IEMS');
           this.isLoading.set(false);
-        }
+        },
       });
     } else {
       // Crear
@@ -225,7 +258,7 @@ export class IemsGestion implements OnInit {
           console.error('Error creando IEMS:', error);
           alert('Error al crear la IEMS');
           this.isLoading.set(false);
-        }
+        },
       });
     }
   }
@@ -245,7 +278,7 @@ export class IemsGestion implements OnInit {
       error: (error) => {
         console.error('Error eliminando IEMS:', error);
         alert('Error al eliminar la IEMS');
-      }
+      },
     });
   }
 
@@ -278,46 +311,46 @@ export class IemsGestion implements OnInit {
 
   // Métodos para actualizar el formulario iemsForm
   updateCode(value: string): void {
-    this.iemsForm.update(f => ({...f, code: value}));
+    this.iemsForm.update((f) => ({ ...f, code: value }));
   }
 
   updateType(value: string): void {
-    this.iemsForm.update(f => ({...f, type: value as any}));
+    this.iemsForm.update((f) => ({ ...f, type: value as any }));
   }
 
   updateName(value: string): void {
-    this.iemsForm.update(f => ({...f, name: value}));
+    this.iemsForm.update((f) => ({ ...f, name: value }));
   }
 
   updateMunicipality(value: string): void {
-    this.iemsForm.update(f => ({...f, address: {...f.address!, municipality: value}}));
+    this.iemsForm.update((f) => ({ ...f, address: { ...f.address!, municipality: value } }));
   }
 
   updateState(value: string): void {
-    this.iemsForm.update(f => ({...f, address: {...f.address!, state: value}}));
+    this.iemsForm.update((f) => ({ ...f, address: { ...f.address!, state: value } }));
   }
 
   updatePostalCode(value: string): void {
-    this.iemsForm.update(f => ({...f, address: {...f.address!, postalCode: value}}));
+    this.iemsForm.update((f) => ({ ...f, address: { ...f.address!, postalCode: value } }));
   }
 
   updateStreet(value: string): void {
-    this.iemsForm.update(f => ({...f, address: {...f.address!, street: value}}));
+    this.iemsForm.update((f) => ({ ...f, address: { ...f.address!, street: value } }));
   }
 
   updateNumber(value: string): void {
-    this.iemsForm.update(f => ({...f, address: {...f.address!, number: value}}));
+    this.iemsForm.update((f) => ({ ...f, address: { ...f.address!, number: value } }));
   }
 
   updateEmail(value: string): void {
-    this.iemsForm.update(f => ({...f, contact: {...f.contact!, email: value}}));
+    this.iemsForm.update((f) => ({ ...f, contact: { ...f.contact!, email: value } }));
   }
 
   updatePhone(value: string): void {
-    this.iemsForm.update(f => ({...f, contact: {...f.contact!, generalPhone: value}}));
+    this.iemsForm.update((f) => ({ ...f, contact: { ...f.contact!, generalPhone: value } }));
   }
 
   updateDirectorName(value: string): void {
-    this.iemsForm.update(f => ({...f, contact: {...f.contact!, directorName: value}}));
+    this.iemsForm.update((f) => ({ ...f, contact: { ...f.contact!, directorName: value } }));
   }
 }
