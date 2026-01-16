@@ -35,6 +35,7 @@ export interface IES {
     email?: string;
     website?: string;
     responsable?: string;
+    nombreDirector?: string;
     socialMedia?: {
       facebook?: string;
       instagram?: string;
