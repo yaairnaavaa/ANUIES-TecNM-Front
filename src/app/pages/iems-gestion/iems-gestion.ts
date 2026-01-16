@@ -275,4 +275,49 @@ export class IemsGestion implements OnInit {
     this.selectedState.set('all');
     this.currentPage.set(1);
   }
+
+  // Métodos para actualizar el formulario iemsForm
+  updateCode(value: string): void {
+    this.iemsForm.update(f => ({...f, code: value}));
+  }
+
+  updateType(value: string): void {
+    this.iemsForm.update(f => ({...f, type: value as any}));
+  }
+
+  updateName(value: string): void {
+    this.iemsForm.update(f => ({...f, name: value}));
+  }
+
+  updateMunicipality(value: string): void {
+    this.iemsForm.update(f => ({...f, address: {...f.address!, municipality: value}}));
+  }
+
+  updateState(value: string): void {
+    this.iemsForm.update(f => ({...f, address: {...f.address!, state: value}}));
+  }
+
+  updatePostalCode(value: string): void {
+    this.iemsForm.update(f => ({...f, address: {...f.address!, postalCode: value}}));
+  }
+
+  updateStreet(value: string): void {
+    this.iemsForm.update(f => ({...f, address: {...f.address!, street: value}}));
+  }
+
+  updateNumber(value: string): void {
+    this.iemsForm.update(f => ({...f, address: {...f.address!, number: value}}));
+  }
+
+  updateEmail(value: string): void {
+    this.iemsForm.update(f => ({...f, contact: {...f.contact!, email: value}}));
+  }
+
+  updatePhone(value: string): void {
+    this.iemsForm.update(f => ({...f, contact: {...f.contact!, generalPhone: value}}));
+  }
+
+  updateDirectorName(value: string): void {
+    this.iemsForm.update(f => ({...f, contact: {...f.contact!, directorName: value}}));
+  }
 }

@@ -111,26 +111,83 @@ export interface Campaign {
 
 export interface Prospect {
   _id?: string;
-  fullName: string;
-  curp?: string;
-
+  
+  // Datos personales
+  firstName: string;
+  lastName: string;
+  secondLastName?: string;
+  
+  // Datos de contacto
   email: string;
   phone: {
+    landline?: string;
     mobile: string;
   };
-
-  originIEMSName: string;
-  currentSemester?: string;
-  technicalMajor?: string;
-
-  firstChoiceIES: string;
-
-  careerInterests: {
+  
+  // Dirección
+  address: {
+    street?: string;
+    number?: string;
+    neighborhood?: string;
+    locality?: string;
+    municipality?: string;
+    state?: string;
+    postalCode?: string;
+  };
+  
+  // Procedencia académica
+  originIEMS?: string;
+  iemsCareer?: string;
+  iemsAverage?: number;
+  currentSemester?: number;
+  estimatedGraduationDate?: Date | string;
+  
+  // Interés en TecNM
+  firstChoiceIES?: string;
+  careerInterests?: Array<{
     career: string;
     priority: number;
-  }[];
-
+  }>;
+  
+  // Canal de captación
+  contactChannel?: 'Conferencia' | 'Visita a IEMS' | 'Facebook' | 'Instagram' | 'TikTok' | 
+    'WhatsApp' | 'Feria universitaria' | 'Familiar o amigo' | 'Docente de IEMS' | 
+    'Sitio web' | 'YouTube' | 'Open House' | 'Otro';
   originCampaign?: string;
+  
+  // Clasificación del interés
+  classification?: 'Curioso' | 'Prospecto' | 'Aspirante Activo';
+  
+  // Redes sociales e intereses
+  socialMedia?: {
+    facebook?: string;
+    instagram?: string;
+    tiktok?: string;
+    twitter?: string;
+  };
+  personalInterests?: string[];
+  
+  // Estado del proceso
+  processStatus?: {
+    registrationComplete?: boolean;
+    profileValidated?: boolean;
+    readNotifications?: Array<{
+      date: Date | string;
+      message: string;
+    }>;
+    lastInteraction?: Date | string;
+  };
+  
+  // Seguimiento
+  observations?: string;
+  assignedTo?: string;
+  
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  
+  // Virtual
+  fullName?: string;
 }
 
 export interface Role {

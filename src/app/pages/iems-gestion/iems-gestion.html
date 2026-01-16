@@ -35,16 +35,16 @@
       <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
       <input
         type="text"
-        [(ngModel)]="searchQuery"
-        (ngModelChange)="currentPage.set(1)"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event); currentPage.set(1)"
         placeholder="Buscar por nombre, clave o municipio..."
         class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-medium focus:ring-4 focus:ring-blue-500/10 outline-none"
       />
     </div>
 
     <select
-      [(ngModel)]="selectedType"
-      (ngModelChange)="currentPage.set(1)"
+      [ngModel]="selectedType()"
+      (ngModelChange)="selectedType.set($event); currentPage.set(1)"
       class="px-4 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-700"
     >
       <option [value]="opt.value" *ngFor="let opt of typeOptions">
@@ -53,8 +53,8 @@
     </select>
 
     <select
-      [(ngModel)]="selectedState"
-      (ngModelChange)="currentPage.set(1)"
+      [ngModel]="selectedState()"
+      (ngModelChange)="selectedState.set($event); currentPage.set(1)"
       class="px-4 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-700"
     >
       <option value="all">Todos los estados</option>
@@ -284,7 +284,8 @@
               </label>
               <input
                 type="text"
-                [(ngModel)]="iemsForm().code"
+                [ngModel]="iemsForm().code"
+                (ngModelChange)="updateCode($event)"
                 name="code"
                 placeholder="Ej: 13DIT0001D"
                 required
@@ -297,7 +298,8 @@
                 Tipo <span class="text-red-500">*</span>
               </label>
               <select
-                [(ngModel)]="iemsForm().type"
+                [ngModel]="iemsForm().type"
+                (ngModelChange)="updateType($event)"
                 name="type"
                 class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-white font-bold focus:ring-4 focus:ring-blue-500/10 outline-none"
               >
@@ -313,7 +315,8 @@
               </label>
               <input
                 type="text"
-                [(ngModel)]="iemsForm().name"
+                [ngModel]="iemsForm().name"
+                (ngModelChange)="updateName($event)"
                 name="name"
                 placeholder="Nombre completo de la IEMS"
                 required
@@ -334,7 +337,8 @@
               </label>
               <input
                 type="text"
-                [(ngModel)]="iemsForm().address!.municipality"
+                [ngModel]="iemsForm().address!.municipality"
+                (ngModelChange)="updateMunicipality($event)"
                 name="municipality"
                 required
                 class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
@@ -346,7 +350,8 @@
                 Estado <span class="text-red-500">*</span>
               </label>
               <select
-                [(ngModel)]="iemsForm().address!.state"
+                [ngModel]="iemsForm().address!.state"
+                (ngModelChange)="updateState($event)"
                 name="state"
                 class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-white font-bold outline-none"
               >
@@ -362,7 +367,8 @@
               </label>
               <input
                 type="text"
-                [(ngModel)]="iemsForm().address!.postalCode"
+                [ngModel]="iemsForm().address!.postalCode"
+                (ngModelChange)="updatePostalCode($event)"
                 name="postalCode"
                 class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
               />
@@ -372,7 +378,8 @@
               <label class="block text-xs font-black uppercase text-slate-500 mb-2"> Calle </label>
               <input
                 type="text"
-                [(ngModel)]="iemsForm().address!.street"
+                [ngModel]="iemsForm().address!.street"
+                (ngModelChange)="updateStreet($event)"
                 name="street"
                 class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
               />
@@ -382,7 +389,8 @@
               <label class="block text-xs font-black uppercase text-slate-500 mb-2"> Número </label>
               <input
                 type="text"
-                [(ngModel)]="iemsForm().address!.number"
+                [ngModel]="iemsForm().address!.number"
+                (ngModelChange)="updateNumber($event)"
                 name="number"
                 class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
               />
@@ -401,7 +409,8 @@
               <label class="block text-xs font-black uppercase text-slate-500 mb-2"> Email </label>
               <input
                 type="email"
-                [(ngModel)]="iemsForm().contact!.email"
+                [ngModel]="iemsForm().contact!.email"
+                (ngModelChange)="updateEmail($event)"
                 name="email"
                 class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
               />
@@ -413,7 +422,8 @@
               </label>
               <input
                 type="tel"
-                [(ngModel)]="iemsForm().contact!.generalPhone"
+                [ngModel]="iemsForm().contact!.generalPhone"
+                (ngModelChange)="updatePhone($event)"
                 name="phone"
                 class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
               />
@@ -425,7 +435,8 @@
               </label>
               <input
                 type="text"
-                [(ngModel)]="iemsForm().contact!.directorName"
+                [ngModel]="iemsForm().contact!.directorName"
+                (ngModelChange)="updateDirectorName($event)"
                 name="directorName"
                 class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
               />

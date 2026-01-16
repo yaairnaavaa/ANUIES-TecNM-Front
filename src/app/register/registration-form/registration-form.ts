@@ -123,18 +123,26 @@ export class RegistrationForm implements OnInit {
     const formValue = this.registrationForm.value;
     const firstCareer = this.majorsList().find((c) => c.id === this.selectedMajors[0]);
 
-    const prospectData = {
-      fullName: formValue.fullName!,
-      curp: formValue.curp || undefined,
+    // Separar el nombre completo en partes
+    const nameParts = (formValue.fullName || '').trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts[1] || '';
+    const secondLastName = nameParts.length > 2 ? nameParts.slice(2).join(' ') : '';
+
+    const prospectData: Partial<Prospect> = {
+      firstName,
+      lastName,
+      secondLastName,
 
       email: formValue.email!,
       phone: {
         mobile: formValue.phoneNumber!,
       },
 
-      originIEMSName: formValue.previousSchool!,
-      currentSemester: formValue.currentSemester || undefined,
-      technicalMajor: formValue.technicalMajor || undefined,
+      // Buscar el ID de IEMS si existe
+      originIEMS: undefined, // Podría buscarse por nombre si se necesita
+      currentSemester: formValue.currentSemester ? parseInt(formValue.currentSemester) : undefined,
+      iemsCareer: formValue.technicalMajor || undefined,
 
       firstChoiceIES: this.selectedIES()?._id,
 
@@ -147,6 +155,10 @@ export class RegistrationForm implements OnInit {
       }),
 
       originCampaign: formValue.campaign || undefined,
+      
+      address: {
+        postalCode: '', // Puedes agregar este campo al formulario si es necesario
+      },
     };
 
     this.prospectService.createProspect(prospectData).subscribe({
