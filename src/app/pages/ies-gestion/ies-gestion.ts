@@ -107,7 +107,9 @@ export class IesGestion implements OnInit {
       },
       contact: {
         email: '',
-        generalPhone: ''
+        generalPhone: '',
+        responsable: '',
+        nombreDirector: ''
       },
       active: true
     };

@@ -80,6 +80,20 @@
       </div>
       <div class="space-y-2">
         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
+          >Nombre del Director</label
+        >
+        <div class="relative">
+          <i class="fas fa-user-graduate absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+          <input
+            [(ngModel)]="newIes().contact!.nombreDirector"
+            type="text"
+            placeholder="Director(a) de la institución"
+            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+          />
+        </div>
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
           >Email</label
         >
         <div class="relative">
@@ -106,7 +120,7 @@
           />
         </div>
       </div>
-      <div class="flex items-end">
+      <div class="md:col-span-2 lg:col-span-3">
         <button
           (click)="saveIES()"
           [disabled]="isLoading()"
