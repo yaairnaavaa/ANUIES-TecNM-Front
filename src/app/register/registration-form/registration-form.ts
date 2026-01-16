@@ -154,7 +154,8 @@ export class RegistrationForm implements OnInit {
         mobile: formValue.phoneNumber!,
       },
 
-      curp: formValue.curp || undefined,
+      // Normalizar CURP a mayúsculas y trim
+      curp: formValue.curp?.trim().toUpperCase() || undefined,
 
       // El backend espera originIEMSName (string), no originIEMS (ObjectId)
       originIEMSName: formValue.previousSchool!,
