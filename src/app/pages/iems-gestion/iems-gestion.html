@@ -142,11 +142,11 @@
             </td>
 
             <td class="px-8 py-5 text-xs space-y-1">
-              @if (iems.contact.email) {
-              <div><i class="fas fa-envelope mr-1 text-slate-400"></i>{{ iems.contact.email }}</div>
-              } @if (iems.contact.generalPhone) {
+              @if (iems.contact?.email) {
+              <div><i class="fas fa-envelope mr-1 text-slate-400"></i>{{ iems.contact?.email }}</div>
+              } @if (iems.contact?.generalPhone) {
               <div>
-                <i class="fas fa-phone mr-1 text-slate-400"></i>{{ iems.contact.generalPhone }}
+                <i class="fas fa-phone mr-1 text-slate-400"></i>{{ iems.contact?.generalPhone }}
               </div>
               }
             </td>

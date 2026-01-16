@@ -1,6 +1,6 @@
 import { Component, inject, Output, EventEmitter, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 
 import { ProspectService } from '../../services/prospect.service';
 import { IemsService } from '../../services/iems.service';
@@ -12,7 +12,7 @@ import { IES, Campaign } from '../../models/api.models';
 @Component({
   selector: 'app-registration-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './registration-form.html',
   styleUrl: './registration-form.css',
 })
@@ -71,6 +71,7 @@ export class RegistrationForm implements OnInit {
 
   ngOnInit(): void {
     this.loadIEMS();
+    this.loadIES();
     this.listenSchoolInput();
   }
 
@@ -81,6 +82,17 @@ export class RegistrationForm implements OnInit {
         this.iemsNames = data.map((i) => i.name);
         this.filteredIems = this.iemsNames;
       },
+    });
+  }
+
+  loadIES(): void {
+    this.iesService.getAllIES({ active: true }).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.iesList.set(res.data);
+        }
+      },
+      error: (err) => console.error('Error cargando IES:', err)
     });
   }
 
@@ -116,35 +128,37 @@ export class RegistrationForm implements OnInit {
 
   onSubmit(): void {
     if (this.registrationForm.invalid || this.selectedMajors.length === 0) {
+      this.errorMessage = 'Por favor completa todos los campos requeridos y selecciona al menos una carrera.';
+      return;
+    }
+
+    // Validar que se haya seleccionado una IES
+    if (!this.selectedIES()?._id) {
+      this.errorMessage = 'Por favor selecciona un Tecnológico (IES) de interés.';
       return;
     }
 
     this.isLoading = true;
+    this.errorMessage = null;
     const formValue = this.registrationForm.value;
     const firstCareer = this.majorsList().find((c) => c.id === this.selectedMajors[0]);
 
-    // Separar el nombre completo en partes
-    const nameParts = (formValue.fullName || '').trim().split(' ');
-    const firstName = nameParts[0] || '';
-    const lastName = nameParts[1] || '';
-    const secondLastName = nameParts.length > 2 ? nameParts.slice(2).join(' ') : '';
-
-    const prospectData: Partial<Prospect> = {
-      firstName,
-      lastName,
-      secondLastName,
-
+    const prospectData: any = {
+      // El backend espera fullName, no firstName/lastName por separado
+      fullName: formValue.fullName!,
+      
       email: formValue.email!,
       phone: {
         mobile: formValue.phoneNumber!,
       },
 
-      // Buscar el ID de IEMS si existe
-      originIEMS: undefined, // Podría buscarse por nombre si se necesita
-      currentSemester: formValue.currentSemester ? parseInt(formValue.currentSemester) : undefined,
-      iemsCareer: formValue.technicalMajor || undefined,
+      // El backend espera originIEMSName (string), no originIEMS (ObjectId)
+      originIEMSName: formValue.previousSchool!,
+      currentSemester: formValue.currentSemester || undefined,
+      technicalMajor: formValue.technicalMajor || undefined,
 
-      firstChoiceIES: this.selectedIES()?._id,
+      // firstChoiceIES es requerido en el backend
+      firstChoiceIES: this.selectedIES()!._id,
 
       careerInterests: this.selectedMajors.map((id, index) => {
         const career = this.majorsList().find((c) => c.id === id);
@@ -155,30 +169,37 @@ export class RegistrationForm implements OnInit {
       }),
 
       originCampaign: formValue.campaign || undefined,
-      
-      address: {
-        postalCode: '', // Puedes agregar este campo al formulario si es necesario
-      },
     };
 
     this.prospectService.createProspect(prospectData).subscribe({
       next: (res) => {
         this.isLoading = false;
+        console.log('Respuesta del registro:', res);
+        
         if (res.success && res.data) {
+          const data = res.data as any;
+          const prospectId = data.id || data._id;
+          
           this.successData = {
-            fullName: formValue.fullName,
-            school: formValue.previousSchool,
-            firstChoice: firstCareer?.name,
-            folio: res.data._id?.substring(0, 8).toUpperCase(),
+            fullName: data.fullName,
+            school: prospectData.originIEMSName,
+            firstChoice: firstCareer?.name || 'N/A',
+            folio: prospectId?.toString().substring(0, 8).toUpperCase() || 'N/A',
           };
+          
+          console.log('Mostrando mensaje de éxito con datos:', this.successData);
           this.showSuccess = true;
           this.onRegistrationSuccess.emit();
+        } else {
+          console.error('Registro sin éxito:', res);
+          this.errorMessage = res.message || 'Error al registrar';
         }
       },
       error: (err) => {
         this.isLoading = false;
+        console.error('Error en el registro:', err);
         this.errorMessage = err.error?.message || 'Error al registrar el aspirante';
-      },
+      }
     });
   }
 
