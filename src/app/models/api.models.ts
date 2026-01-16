@@ -308,7 +308,7 @@ export interface IEMS {
     postalCode?: string;
     country?: string;
   };
-  contact: {
+  contact?: {
     directorName?: string;
     generalPhone?: string;
     email?: string;
