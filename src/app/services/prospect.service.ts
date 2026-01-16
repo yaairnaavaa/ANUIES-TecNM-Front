@@ -21,12 +21,13 @@ export class ProspectService {
    */
   getProspects(filters?: ProspectFilters): Observable<ApiResponse<Prospect[]>> {
     let params = new HttpParams();
-    
+
     if (filters) {
       if (filters.ies) params = params.set('ies', filters.ies);
       if (filters.campaign) params = params.set('campaign', filters.campaign);
       if (filters.status) params = params.set('status', filters.status);
-      if (filters.interestedCareer) params = params.set('interestedCareer', filters.interestedCareer);
+      if (filters.interestedCareer)
+        params = params.set('interestedCareer', filters.interestedCareer);
     }
 
     return this.http.get<ApiResponse<Prospect[]>>(this.baseUrl, { params });
@@ -43,7 +44,7 @@ export class ProspectService {
    * Crear nuevo prospecto
    */
   createProspect(prospect: Partial<Prospect>): Observable<ApiResponse<Prospect>> {
-    return this.http.post<ApiResponse<Prospect>>(this.baseUrl, prospect);
+    return this.http.post<ApiResponse<Prospect>>(`${this.baseUrl}/register`, prospect);
   }
 
   /**
@@ -70,10 +71,14 @@ export class ProspectService {
   /**
    * Validar documentos del prospecto
    */
-  validateDocuments(id: string, validated: boolean, validationNotes?: string): Observable<ApiResponse<Prospect>> {
-    return this.http.put<ApiResponse<Prospect>>(`${this.baseUrl}/${id}/validate`, { 
-      validated, 
-      validationNotes 
+  validateDocuments(
+    id: string,
+    validated: boolean,
+    validationNotes?: string
+  ): Observable<ApiResponse<Prospect>> {
+    return this.http.put<ApiResponse<Prospect>>(`${this.baseUrl}/${id}/validate`, {
+      validated,
+      validationNotes,
     });
   }
 }

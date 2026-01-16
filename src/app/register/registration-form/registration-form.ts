@@ -1,9 +1,12 @@
 import { Component, inject, Output, EventEmitter, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+
 import { ProspectService } from '../../services/prospect.service';
+import { IemsService } from '../../services/iems.service';
 import { IesService } from '../../services/ies.service';
 import { CampaignService } from '../../services/campaign.service';
+import { Prospect } from '../../models/api.models';
 import { IES, Campaign } from '../../models/api.models';
 
 @Component({
@@ -15,161 +18,89 @@ import { IES, Campaign } from '../../models/api.models';
 })
 export class RegistrationForm implements OnInit {
   private prospectService = inject(ProspectService);
+  private iemsService = inject(IemsService);
   private iesService = inject(IesService);
   private campaignService = inject(CampaignService);
 
-  // Avisamos al componente padre (Register) que el registro fue exitoso
   @Output() onRegistrationSuccess = new EventEmitter<void>();
 
+  // UI state
   selectedMajors: string[] = [];
   isLoading = false;
-  errorMessage: string | null = null;
   showSuccess = false;
+  errorMessage: string | null = null;
   successData: any = null;
 
-  // Data del backend
+  // IEMS autocomplete
+  iemsNames: string[] = [];
+  filteredIems: string[] = [];
+
+  // Backend data
   iesList = signal<IES[]>([]);
   campaignsList = signal<Campaign[]>([]);
   selectedIES = signal<IES | null>(null);
 
-  // Computed para obtener las carreras disponibles
   majorsList = computed(() => {
     const ies = this.selectedIES();
-    if (ies && ies.careers && ies.careers.length > 0) {
-      return ies.careers.filter(c => c.active).map(c => ({
-        id: c.code || c.name,
-        name: c.name,
-        meta: `${c.modality} · ${c.duration || 9} semestres`
-      }));
+    if (ies?.careers?.length) {
+      return ies.careers
+        .filter((c) => c.active)
+        .map((c) => ({
+          id: c.code || c.name,
+          name: c.name,
+          meta: `${c.modality} · ${c.duration || 9} semestres`,
+        }));
     }
-    // Lista por defecto si no hay IES seleccionada
     return this.defaultMajorsList;
   });
 
   registrationForm = new FormGroup({
-    // Información personal
-    fullName: new FormControl('', [Validators.required]),
-    firstName: new FormControl('', [Validators.required]),
-    lastName: new FormControl('', [Validators.required]),
-    secondLastName: new FormControl(''),
+    fullName: new FormControl('', Validators.required),
     email: new FormControl('', [Validators.required, Validators.email]),
     phoneNumber: new FormControl('', [Validators.required, Validators.pattern('^[0-9]{10}$')]),
-    birthDate: new FormControl('', [Validators.required]),
-    gender: new FormControl('', [Validators.required]),
-    curp: new FormControl('', [Validators.pattern('^[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9A-Z][0-9]$')]),
-    
-    // Información académica
-    previousSchool: new FormControl('', [Validators.required]),
+    curp: new FormControl(''),
+
+    previousSchool: new FormControl('', Validators.required),
     currentSemester: new FormControl(''),
     technicalMajor: new FormControl(''),
-    averageGrade: new FormControl('', [Validators.min(0), Validators.max(10)]),
-    expectedGraduationDate: new FormControl(''),
-    
-    // IES y campaña
-    ies: new FormControl('', [Validators.required]),
+
     campaign: new FormControl(''),
-    
-    // Preferencias
-    interestedShift: new FormControl('', [Validators.required]),
-    marketingChannel: new FormControl(''),
-    privacyPolicy: new FormControl(false, [Validators.requiredTrue]),
+
+    privacyPolicy: new FormControl(false, Validators.requiredTrue),
   });
 
-  ngOnInit() {
-    this.loadIESList();
-    this.loadActiveCampaigns();
+  ngOnInit(): void {
+    this.loadIEMS();
+    this.listenSchoolInput();
   }
 
-  /**
-   * Cargar lista de IES disponibles
-   */
-  loadIESList() {
-    this.iesService.getAllIES({ active: true }).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.iesList.set(response.data);
-        }
+  loadIEMS(): void {
+    this.iemsService.getAllIEMS({ active: true }).subscribe({
+      next: (res) => {
+        const data = res.data ?? [];
+        this.iemsNames = data.map((i) => i.name);
+        this.filteredIems = this.iemsNames;
       },
-      error: (error) => console.error('Error cargando IES:', error)
     });
   }
 
-  /**
-   * Cargar campañas activas
-   */
-  loadActiveCampaigns() {
-    this.campaignService.getCampaigns({ status: 'En Curso' }).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.campaignsList.set(response.data);
-        }
-      },
-      error: (error) => console.error('Error cargando campañas:', error)
+  listenSchoolInput(): void {
+    this.registrationForm.get('previousSchool')?.valueChanges.subscribe((value) => {
+      if (!value) {
+        this.filteredIems = this.iemsNames;
+        return;
+      }
+      const search = value.toLowerCase();
+      this.filteredIems = this.iemsNames.filter((n) => n.toLowerCase().includes(search));
     });
   }
 
-  /**
-   * Cuando selecciona una IES, cargar sus carreras
-   */
-  onIESChange(iesId: string) {
-    const ies = this.iesList().find(i => i._id === iesId);
-    this.selectedIES.set(ies || null);
-    this.selectedMajors = []; // Limpiar carreras seleccionadas al cambiar de IES
+  selectSchool(name: string): void {
+    this.registrationForm.get('previousSchool')?.setValue(name);
+    this.filteredIems = [];
   }
 
-  // Los nombres están en ESPAÑOL (vista), pero los IDs se quedan en inglés (para la base de datos)
-  defaultMajorsList = [
-    {
-      id: 'industrial',
-      name: 'Ingeniería Industrial',
-      meta: 'Optimización de procesos · Alta demanda',
-    },
-    {
-      id: 'systems',
-      name: 'Ingeniería en Sistemas Computacionales',
-      meta: 'Desarrollo de software · TI',
-    },
-    {
-      id: 'mechatronics',
-      name: 'Ingeniería Mecatrónica',
-      meta: 'Robótica y automatización · Industria 4.0',
-    },
-    {
-      id: 'electronics',
-      name: 'Ingeniería Electrónica',
-      meta: 'Circuitos y sistemas electrónicos',
-    },
-    { id: 'civil', name: 'Ingeniería Civil', meta: 'Construcción e infraestructura' },
-    {
-      id: 'management',
-      name: 'Ingeniería en Gestión Empresarial',
-      meta: 'Administración y negocios',
-    },
-  ];
-
-  channelsList = [
-    { id: 'fair', label: 'Feria / Evento', icon: 'fas fa-calendar-star' },
-    { id: 'visit', label: 'Visita a mi escuela', icon: 'fas fa-school' },
-    { id: 'tiktok', label: 'TikTok', icon: 'fab fa-tiktok' },
-    { id: 'instagram', label: 'Instagram', icon: 'fab fa-instagram' },
-    { id: 'facebook', label: 'Facebook', icon: 'fab fa-facebook' },
-    { id: 'referral', label: 'Familiar/Amigo', icon: 'fas fa-user-friends' },
-  ];
-
-  shiftOptions = [
-    { value: 'Matutino', label: 'Matutino (7:00 - 13:00)' },
-    { value: 'Vespertino', label: 'Vespertino (13:00 - 19:00)' },
-    { value: 'Nocturno', label: 'Nocturno (19:00 - 22:00)' }
-  ];
-
-  genderOptions = [
-    { value: 'Masculino', label: 'Masculino' },
-    { value: 'Femenino', label: 'Femenino' },
-    { value: 'Otro', label: 'Otro' },
-    { value: 'Prefiero no decir', label: 'Prefiero no decir' }
-  ];
-
-  toggleMajor(id: string) {
+  toggleMajor(id: string): void {
     const index = this.selectedMajors.indexOf(id);
     if (index > -1) {
       this.selectedMajors.splice(index, 1);
@@ -183,81 +114,74 @@ export class RegistrationForm implements OnInit {
     return index !== -1 ? `${index + 1}ª` : '';
   }
 
-  onSubmit() {
-    if (this.registrationForm.valid && this.selectedMajors.length > 0) {
-      this.isLoading = true;
-      this.errorMessage = null;
-
-      const formValue = this.registrationForm.value;
-      const firstCareer = this.majorsList().find((c: { id: string; name: string; meta: string }) => c.id === this.selectedMajors[0]);
-
-      // Preparar datos para el backend
-      const prospectData = {
-        personalInfo: {
-          firstName: formValue.firstName || '',
-          lastName: formValue.lastName || '',
-          secondLastName: formValue.secondLastName || '',
-          birthDate: formValue.birthDate || '',
-          gender: formValue.gender as any || 'Prefiero no decir',
-          curp: formValue.curp || ''
-        },
-        contact: {
-          email: formValue.email || '',
-          phone: formValue.phoneNumber || '',
-          address: {
-            municipality: '', // Puedes agregarlo al formulario si lo necesitas
-            state: ''
-          }
-        },
-        academicInfo: {
-          currentSchool: formValue.previousSchool || '',
-          expectedGraduationDate: formValue.expectedGraduationDate || undefined,
-          averageGrade: formValue.averageGrade ? Number(formValue.averageGrade) : undefined,
-          interestedCareer: firstCareer?.name || this.selectedMajors[0],
-          interestedShift: formValue.interestedShift ? [formValue.interestedShift as any] : []
-        },
-        ies: formValue.ies || '',
-        campaign: formValue.campaign || undefined,
-        status: 'Nuevo' as const
-      };
-
-      // Llamar al backend
-      this.prospectService.createProspect(prospectData).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          if (response.success && response.data) {
-            this.successData = {
-              fullName: `${formValue.firstName} ${formValue.lastName}`,
-              school: formValue.previousSchool,
-              firstChoice: firstCareer?.name,
-              folio: response.data._id?.substring(0, 8).toUpperCase() || 'N/A',
-              ies: this.selectedIES()?.name || 'TecNM'
-            };
-            this.showSuccess = true;
-            this.onRegistrationSuccess.emit();
-          }
-        },
-        error: (error) => {
-          this.isLoading = false;
-          console.error('Error en registro:', error);
-          this.errorMessage = error.error?.message || 'Error al procesar el registro. Por favor intenta de nuevo.';
-        }
-      });
-    } else {
-      this.errorMessage = 'Por favor completa todos los campos requeridos y selecciona al menos una carrera.';
+  onSubmit(): void {
+    if (this.registrationForm.invalid || this.selectedMajors.length === 0) {
+      return;
     }
+
+    this.isLoading = true;
+    const formValue = this.registrationForm.value;
+    const firstCareer = this.majorsList().find((c) => c.id === this.selectedMajors[0]);
+
+    const prospectData = {
+      fullName: formValue.fullName!,
+      curp: formValue.curp || undefined,
+
+      email: formValue.email!,
+      phone: {
+        mobile: formValue.phoneNumber!,
+      },
+
+      originIEMSName: formValue.previousSchool!,
+      currentSemester: formValue.currentSemester || undefined,
+      technicalMajor: formValue.technicalMajor || undefined,
+
+      firstChoiceIES: this.selectedIES()?._id,
+
+      careerInterests: this.selectedMajors.map((id, index) => {
+        const career = this.majorsList().find((c) => c.id === id);
+        return {
+          career: career?.name ?? id,
+          priority: index + 1,
+        };
+      }),
+
+      originCampaign: formValue.campaign || undefined,
+    };
+
+    this.prospectService.createProspect(prospectData).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res.success && res.data) {
+          this.successData = {
+            fullName: formValue.fullName,
+            school: formValue.previousSchool,
+            firstChoice: firstCareer?.name,
+            folio: res.data._id?.substring(0, 8).toUpperCase(),
+          };
+          this.showSuccess = true;
+          this.onRegistrationSuccess.emit();
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = err.error?.message || 'Error al registrar el aspirante';
+      },
+    });
   }
 
-  resetForm() {
+  resetForm(): void {
     this.showSuccess = false;
     this.registrationForm.reset({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phoneNumber: '',
       privacyPolicy: false,
     });
     this.selectedMajors = [];
     this.successData = null;
   }
+
+  defaultMajorsList = [
+    { id: 'industrial', name: 'Ingeniería Industrial', meta: 'Procesos' },
+    { id: 'systems', name: 'Ingeniería en Sistemas', meta: 'Software' },
+    { id: 'mechatronics', name: 'Ingeniería Mecatrónica', meta: 'Robótica' },
+  ];
 }

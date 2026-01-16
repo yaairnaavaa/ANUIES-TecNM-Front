@@ -110,47 +110,26 @@ export interface Campaign {
 
 export interface Prospect {
   _id?: string;
-  personalInfo: {
-    firstName: string;
-    lastName: string;
-    secondLastName?: string;
-    birthDate: Date | string;
-    gender: 'Masculino' | 'Femenino' | 'Otro' | 'Prefiero no decir';
-    curp?: string;
+  fullName: string;
+  curp?: string;
+
+  email: string;
+  phone: {
+    mobile: string;
   };
-  contact: {
-    email: string;
-    phone: string;
-    address?: {
-      street?: string;
-      number?: string;
-      neighborhood?: string;
-      municipality: string;
-      state: string;
-      postalCode?: string;
-    };
-  };
-  academicInfo: {
-    currentSchool?: string;
-    iems?: string;
-    expectedGraduationDate?: Date | string;
-    averageGrade?: number;
-    interestedCareer: string;
-    interestedShift?: Array<'Matutino' | 'Vespertino' | 'Nocturno'>;
-  };
-  ies: string | IES;
-  campaign?: string | Campaign;
-  status:
-    | 'Nuevo'
-    | 'Contactado'
-    | 'En Seguimiento'
-    | 'Aplicó'
-    | 'Aceptado'
-    | 'Rechazado'
-    | 'Inscrito'
-    | 'Descartado';
-  createdAt?: Date;
-  updatedAt?: Date;
+
+  originIEMSName: string;
+  currentSemester?: string;
+  technicalMajor?: string;
+
+  firstChoiceIES: string;
+
+  careerInterests: {
+    career: string;
+    priority: number;
+  }[];
+
+  originCampaign?: string;
 }
 
 export interface Role {
