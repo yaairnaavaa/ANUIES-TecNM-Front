@@ -9,6 +9,7 @@ import { IemsGestion } from './pages/iems-gestion/iems-gestion';
 import { authGuard } from './guards/auth.guard';
 import { loginGuard } from './guards/login.guard';
 import { Aspirant } from './pages/aspirant/aspirant';
+import { Home } from './pages/home/home';
 
 export const routes: Routes = [
   {
@@ -25,6 +26,7 @@ export const routes: Routes = [
     component: AdminLayout,
     canActivate: [authGuard],
     children: [
+      { path: 'home', component: Home},
       { path: 'ies-gestion', component: IesGestion },
       { path: 'perfil-ies', component: IesProfileSettings },
       { path: 'campaigns', component: IesCampaignManagementComponent },

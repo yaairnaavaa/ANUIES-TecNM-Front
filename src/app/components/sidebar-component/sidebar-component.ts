@@ -1,15 +1,10 @@
-import { Component, signal, OnInit, inject } from '@angular/core';
+import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { MenuItem } from '../../models/api.models';
 
-interface MenuItem {
-  label: string;
-  icon: string;
-  routerLink: string;
-  category: string;
-}
-
+// Definimos la interfaz aquí mismo para que esté disponible
 interface MenuSection {
   title: string;
   items: MenuItem[];
@@ -22,19 +17,41 @@ interface MenuSection {
   templateUrl: './sidebar-component.html',
   styleUrl: './sidebar-component.css',
 })
-export class SidebarComponent implements OnInit {
-  private authService = inject(AuthService);
-
-  userName = signal('');
-  userRole = signal('');
-  userInitials = signal('');
+export class SidebarComponent {
+  public authService = inject(AuthService);
   isOpen = signal(false);
 
-  menuSections = signal<MenuSection[]>([]);
+  // Datos del usuario (Signals Computados)
+  userInitials = computed(() => {
+    const user = this.authService.currentUser();
+    if (!user) return '';
+    return `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase();
+  });
 
-  ngOnInit(): void {
-    this.loadUserFromService();
-  }
+  userName = computed(() => {
+    const user = this.authService.currentUser();
+    return user ? `${user.firstName} ${user.lastName}` : '';
+  });
+
+  userRole = computed(() => this.authService.currentUser()?.role?.displayName ?? '');
+
+  // Lógica de agrupación del menú
+  menuSections = computed<MenuSection[]>(() => {
+    const rawMenu = this.authService.menu() as MenuItem[];
+    const grouped: Record<string, MenuItem[]> = {};
+
+    rawMenu.forEach((item) => {
+      // Si la categoría viene nula o vacía, la mandamos a 'GENERAL'
+      const category = item.category || 'General';
+      if (!grouped[category]) grouped[category] = [];
+      grouped[category].push(item);
+    });
+
+    return Object.keys(grouped).map((category) => ({
+      title: category.toUpperCase(),
+      items: grouped[category],
+    }));
+  });
 
   toggleSidebar() {
     this.isOpen.update((v) => !v);
@@ -42,44 +59,5 @@ export class SidebarComponent implements OnInit {
 
   logout(): void {
     this.authService.logout();
-  }
-
-  private loadUserFromService(): void {
-    const user = this.authService.currentUser();
-
-    if (!user) {
-      console.warn('No hay usuario autenticado');
-      return;
-    }
-
-    // Nombre
-    const fullName = `${user.firstName} ${user.lastName}`;
-    this.userName.set(fullName);
-
-    // Rol
-    this.userRole.set(user.role?.displayName ?? '');
-
-    // Iniciales
-    const initials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase();
-    this.userInitials.set(initials);
-
-    // Menú
-    this.menuSections.set(this.buildMenuSections(user.menu));
-  }
-
-  private buildMenuSections(menu: MenuItem[]): MenuSection[] {
-    const grouped: Record<string, MenuItem[]> = {};
-
-    for (const item of menu) {
-      if (!grouped[item.category]) {
-        grouped[item.category] = [];
-      }
-      grouped[item.category].push(item);
-    }
-
-    return Object.keys(grouped).map((category) => ({
-      title: category.toUpperCase(),
-      items: grouped[category],
-    }));
   }
 }

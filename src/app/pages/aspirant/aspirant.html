@@ -147,7 +147,47 @@
               </td>
             </tr>
           }
+
         </tbody>
+
+        <div class="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4">
+  
+  <div class="flex items-center gap-3">
+    <span class="text-sm text-slate-500 font-medium">Mostrar</span>
+    <select 
+      (change)="onItemsPerPageChange($event)"
+      class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20">
+      <option value="5" selected>5</option>
+      <option value="10">10</option>
+      <option value="25">25</option>
+      <option value="50">50</option>
+    </select>
+    <span class="text-sm text-slate-500 font-medium italic">aspirantes</span>
+  </div>
+
+  <div class="flex items-center gap-6">
+    <div class="text-sm text-slate-500 font-medium">
+      Página <span class="text-slate-900 font-bold">{{ currentPage() }}</span> de 
+      <span class="text-slate-900 font-bold">{{ totalPages() }}</span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button 
+        (click)="prevPage()"
+        [disabled]="currentPage() === 1"
+        class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 transition-all hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed">
+        <i class="fas fa-chevron-left text-xs"></i>
+      </button>
+
+      <button 
+        (click)="nextPage()"
+        [disabled]="currentPage() === totalPages()"
+        class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 transition-all hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed">
+        <i class="fas fa-chevron-right text-xs"></i>
+      </button>
+    </div>
+  </div>
+</div>
       </table>
     </div>
 

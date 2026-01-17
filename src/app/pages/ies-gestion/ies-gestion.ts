@@ -52,7 +52,7 @@ export class IesGestion implements OnInit {
         console.error('Error cargando IES:', error);
         this.errorMessage.set('Error al cargar las IES');
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -71,8 +71,7 @@ export class IesGestion implements OnInit {
   allFilteredResults = computed(() => {
     const query = this.searchQuery().toLowerCase();
     return this.iesList().filter(
-      (ies) =>
-        ies.name?.toLowerCase().includes(query) || ies.code?.toLowerCase().includes(query)
+      (ies) => ies.name?.toLowerCase().includes(query) || ies.code?.toLowerCase().includes(query)
     );
   });
 
@@ -103,15 +102,15 @@ export class IesGestion implements OnInit {
       address: {
         municipality: '',
         state: '',
-        country: 'México'
+        country: 'México',
       },
       contact: {
         email: '',
         generalPhone: '',
         responsable: '',
-        nombreDirector: ''
+        nombreDirector: '',
       },
-      active: true
+      active: true,
     };
   }
 
@@ -136,6 +135,19 @@ export class IesGestion implements OnInit {
     if (!this.isAdding()) this.newIes.set(this.resetForm());
   }
 
+  // En tu componente .ts
+  isFormValid(): boolean {
+    const ies = this.newIes();
+    return !!(
+      ies.name &&
+      ies.code &&
+      ies.contact?.responsable &&
+      ies.contact?.nombreDirector &&
+      ies.contact?.email &&
+      ies.contact?.generalPhone
+    );
+  }
+
   saveIES() {
     this.isLoading.set(true);
     this.errorMessage.set('');
@@ -150,7 +162,7 @@ export class IesGestion implements OnInit {
         console.error('Error creando IES:', error);
         this.errorMessage.set('Error al crear la IES');
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -169,7 +181,7 @@ export class IesGestion implements OnInit {
       error: (error) => {
         console.error('Error eliminando IES:', error);
         alert('Error al eliminar la IES');
-      }
+      },
     });
   }
 }
