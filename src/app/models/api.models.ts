@@ -58,6 +58,12 @@ export interface IES {
     accentColor?: string;
     fontFamily?: string;
   };
+  socialMedia?: {
+    facebook?: string;
+    instagram?: string;
+    tiktok?: string;
+    website?: string;
+  };
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
