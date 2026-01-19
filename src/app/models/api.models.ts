@@ -364,6 +364,7 @@ export interface IEMS {
     tecNMRelationship?: 'Fuerte' | 'Moderada' | 'Débil' | 'Sin relación';
   };
   active?: boolean;
+  showMenu?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

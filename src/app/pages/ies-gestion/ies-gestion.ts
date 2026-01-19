@@ -71,7 +71,7 @@ export class IesGestion implements OnInit {
   allFilteredResults = computed(() => {
     const query = this.searchQuery().toLowerCase();
     return this.iesList().filter(
-      (ies) => ies.name?.toLowerCase().includes(query) || ies.code?.toLowerCase().includes(query)
+      (ies) => ies.name?.toLowerCase().includes(query) || ies.code?.toLowerCase().includes(query),
     );
   });
 
@@ -87,7 +87,7 @@ export class IesGestion implements OnInit {
     const start = (this.currentPage() - 1) * this.itemsPerPage() + 1;
     const end = Math.min(
       this.currentPage() * this.itemsPerPage(),
-      this.allFilteredResults().length
+      this.allFilteredResults().length,
     );
     return this.allFilteredResults().length > 0 ? `${start} - ${end}` : '0';
   });
@@ -164,6 +164,12 @@ export class IesGestion implements OnInit {
         this.isLoading.set(false);
       },
     });
+  }
+
+  openEdit(ies: any): void {
+    console.log('Editando institución:', ies);
+    // Aquí va tu lógica para abrir el modal de edición
+    // Ejemplo: this.selectedIes = ies; this.showEditModal = true;
   }
 
   /**

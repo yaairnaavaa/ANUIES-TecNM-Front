@@ -51,14 +51,16 @@
           </div>
         </div>
 
-        <button
-          *ngIf="editModes.general"
-          type="button"
-          (click)="saveGeneral()"
-          class="w-full py-4 bg-slate-900 text-white rounded-xl font-bold"
-        >
-          Guardar Filosofía
-        </button>
+        <div class="flex justify-end">
+          <button
+            *ngIf="editModes.general"
+            type="button"
+            (click)="saveGeneral()"
+            class="px-6 py-2 bg-slate-900 text-white rounded-xl font-bold"
+          >
+            Guardar
+          </button>
+        </div>
       </div>
     </section>
 
@@ -432,14 +434,15 @@
           </div>
         </div>
       </div>
+      
 
-      <div *ngIf="editModes.social" class="mt-10 pt-6 border-t border-slate-100 flex gap-3">
+      <div *ngIf="editModes.social" class="mt-10 pt-6 border-t border-slate-100 flex justify-end">
         <button
           type="button"
           (click)="saveSocial()"
-          class="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition shadow-lg shadow-slate-200"
+          class="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition shadow-lg shadow-slate-200"
         >
-          Guardar cambios
+          Guardar
         </button>
       </div>
     </section>

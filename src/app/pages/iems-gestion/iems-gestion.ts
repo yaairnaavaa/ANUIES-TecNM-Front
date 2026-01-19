@@ -54,7 +54,7 @@ export class IemsGestion implements OnInit {
 
   // Opciones
   typeOptions = [
-    { value: 'all', label: 'Todos los tipos' },
+    { value: 'all', label: 'Tipo de IEMS' },
     { value: 'CBTis', label: 'CBTis' },
     { value: 'CETis', label: 'CETis' },
     { value: 'CONALEP', label: 'CONALEP' },
@@ -140,7 +140,7 @@ export class IemsGestion implements OnInit {
         (iems) =>
           iems.name?.toLowerCase().includes(query) ||
           iems.code?.toLowerCase().includes(query) ||
-          iems.address?.municipality?.toLowerCase().includes(query)
+          iems.address?.municipality?.toLowerCase().includes(query),
       );
     }
 
@@ -278,6 +278,26 @@ export class IemsGestion implements OnInit {
       error: (error) => {
         console.error('Error eliminando IEMS:', error);
         alert('Error al eliminar la IEMS');
+      },
+    });
+  }
+
+  toggleStatus(iems: any): void {
+    const nuevoEstado = !iems.active;
+
+    // Actualización optimista: cambiamos el valor en memoria de inmediato
+    iems.active = nuevoEstado;
+
+    // Enviamos la petición al servidor en segundo plano
+    this.iemsService.updateIEMS(iems._id!, { active: nuevoEstado }).subscribe({
+      next: () => {
+        // No llamamos a loadIEMS() para evitar peticiones extra y parpadeos
+        console.log('Estado actualizado en servidor');
+      },
+      error: (error) => {
+        // Si falla, revertimos el cambio para que la UI sea veraz
+        iems.active = !nuevoEstado;
+        console.error('Error al actualizar:', error);
       },
     });
   }
