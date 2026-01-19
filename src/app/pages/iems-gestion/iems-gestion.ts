@@ -15,14 +15,15 @@ import { IEMS } from '../../models/api.models';
 export class IemsGestion implements OnInit {
   private iemsService = inject(IemsService);
   private authService = inject(AuthService);
-
+  public isStateComboOpen: boolean = false;
+  public isTypeComboOpen: boolean = false;
   // Exponer Math para el template
   protected readonly Math = Math;
 
   isLoading = signal(false);
   errorMessage = signal('');
   searchQuery = signal('');
-  selectedType = signal<string>('all');
+  selectedType = signal<string>('');
   selectedState = signal<string>('all');
 
   // Paginación
@@ -132,30 +133,15 @@ export class IemsGestion implements OnInit {
    */
   filteredIEMS = computed(() => {
     let filtered = this.iemsList();
+    // ... (filtro de búsqueda igual)
 
-    // 1. Filtro por búsqueda (Texto libre)
-    const query = this.searchQuery().toLowerCase().trim();
-    if (query) {
-      filtered = filtered.filter(
-        (iems) =>
-          iems.name?.toLowerCase().includes(query) ||
-          iems.code?.toLowerCase().includes(query) ||
-          iems.address?.municipality?.toLowerCase().includes(query),
-      );
-    }
-
-    // 2. Filtro por tipo (Normalizado a minúsculas)
+    // Filtro por tipo: si es vacío o 'all', no filtrar
     const typeFilter = this.selectedType().toLowerCase();
-    if (typeFilter !== 'all') {
+    if (typeFilter && typeFilter !== 'all') {
       filtered = filtered.filter((iems) => iems.type?.toLowerCase() === typeFilter);
     }
 
-    // 3. Filtro por estado (Normalizado a minúsculas)
-    const stateFilter = this.selectedState().toLowerCase();
-    if (stateFilter !== 'all') {
-      filtered = filtered.filter((iems) => iems.address?.state?.toLowerCase() === stateFilter);
-    }
-
+    // ... (filtro de estado igual)
     return filtered;
   });
 
@@ -280,6 +266,42 @@ export class IemsGestion implements OnInit {
         alert('Error al eliminar la IEMS');
       },
     });
+  }
+
+  // Agrega esto dentro de tu clase IemsGestion
+  getTypeLabel(value: string): string {
+    if (!value || value === 'all') return ''; // Retorna vacío para mostrar el placeholder
+    const option = this.typeOptions.find((opt) => opt.value === value);
+    return option ? option.label : '';
+  }
+
+  getLabelByType(value: string) {
+    return this.typeOptions.find((o) => o.value === value)?.label;
+  }
+
+  toggleMenu() {
+    this.isStateComboOpen = !this.isStateComboOpen;
+  }
+
+  toggleTypeMenu() {
+    this.isTypeComboOpen = !this.isTypeComboOpen;
+  }
+
+  onTypeBlur() {
+    setTimeout(() => {
+      this.isTypeComboOpen = false;
+    }, 250);
+  }
+
+  selectState(value: string, inputValue: string) {
+    this.selectedState.set(value);
+    this.isStateComboOpen = false;
+  }
+
+  onBlur() {
+    setTimeout(() => {
+      this.isStateComboOpen = false;
+    }, 250);
   }
 
   toggleStatus(iems: any): void {

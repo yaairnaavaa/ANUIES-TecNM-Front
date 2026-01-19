@@ -43,51 +43,112 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <select
-        [ngModel]="selectedType()"
-        (ngModelChange)="selectedType.set($event); currentPage.set(1)"
-        class="appearance-none px-5 py-4 bg-slate-700 border border-slate-100 rounded-2xl font-semibold text-slate-300 hover:border-slate-50 transition-colors cursor-pointer outline-none"
-      >
-        <option [value]="opt.value" *ngFor="let opt of typeOptions">
-          {{ opt.label }}
-        </option>
-      </select>
-
-      <div class="relative inline-block text-left w-64">
-        <button
-          type="button"
-          (click)="$any(stateOptions).isOpen = !$any(stateOptions).isOpen"
-          class="flex items-center justify-between w-full px-5 py-4 bg-slate-700 border border-slate-600 rounded-2xl font-bold text-white hover:bg-slate-600 transition-all focus:outline-none shadow-lg"
-        >
-          <span>{{ selectedState() === 'all' ? 'Estados' : selectedState() }}</span>
+      <div class="relative inline-block text-left w-64" (clickOutside)="isTypeComboOpen = false">
+        <div class="relative">
+          <input
+            type="text"
+            #typeInput
+            [value]="getTypeLabel(selectedType())"
+            (click)="toggleTypeMenu()"
+            (input)="isTypeComboOpen = true"
+            (blur)="onTypeBlur()"
+            placeholder="Buscar tipo..."
+            class="w-full px-5 py-4 bg-slate-700 border border-slate-600 rounded-2xl font-bold text-white placeholder:text-slate-500 hover:bg-slate-600 transition-all focus:outline-none shadow-lg outline-none focus:ring-2 focus:ring-blue-500/50"
+          />
           <i
-            class="fas fa-chevron-down text-slate-400 text-xs transition-transform"
-            [class.rotate-180]="$any(stateOptions).isOpen"
+            (click)="toggleTypeMenu()"
+            class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 text-xs transition-transform cursor-pointer"
+            [class.rotate-180]="isTypeComboOpen"
           ></i>
-        </button>
+        </div>
 
         <div
-          *ngIf="$any(stateOptions).isOpen"
-          (mouseleave)="$any(stateOptions).isOpen = false"
+          *ngIf="isTypeComboOpen"
           class="absolute z-50 mt-2 w-full bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
         >
-          <div
-            class="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent"
-          >
+          <div class="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 py-1">
             <button
-              (click)="selectedState.set('all'); $any(stateOptions).isOpen = false"
+              *ngIf="!typeInput.value || 'todos'.includes(typeInput.value.toLowerCase())"
+              (mousedown)="
+                selectedType.set('');
+                currentPage.set(1);
+                isTypeComboOpen = false;
+                typeInput.value = ''
+              "
+              class="w-full text-left px-5 py-3 text-sm font-semibold text-slate-400 hover:bg-slate-700 hover:text-white border-b border-slate-700/50"
+            >
+              Todos los Tipos
+            </button>
+
+            <ng-container *ngFor="let opt of typeOptions.slice(1)">
+              <button
+                *ngIf="opt.label.toLowerCase().includes(typeInput.value.toLowerCase())"
+                (mousedown)="
+                  selectedType.set(opt.value);
+                  currentPage.set(1);
+                  isTypeComboOpen = false;
+                  typeInput.value = opt.label
+                "
+                class="w-full text-left px-5 py-3 text-sm font-semibold transition-colors"
+                [ngClass]="
+                  selectedType() === opt.value
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                "
+              >
+                {{ opt.label }}
+              </button>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative inline-block text-left w-64" (clickOutside)="isStateComboOpen = false">
+        <div class="relative">
+          <input
+            type="text"
+            #stateInput
+            [value]="selectedState() === 'all' ? '' : selectedState()"
+            (click)="toggleMenu()"
+            (input)="isStateComboOpen = true"
+            (blur)="onBlur()"
+            placeholder="Buscar estado..."
+            class="w-full px-5 py-4 bg-slate-700 border border-slate-600 rounded-2xl font-bold text-white placeholder:text-slate-500 hover:bg-slate-600 transition-all focus:outline-none shadow-lg outline-none focus:ring-2 focus:ring-blue-500/50"
+          />
+          <i
+            (click)="toggleMenu()"
+            class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 text-xs transition-transform cursor-pointer"
+            [class.rotate-180]="isStateComboOpen"
+          ></i>
+        </div>
+
+        <div
+          *ngIf="isStateComboOpen"
+          class="absolute z-50 mt-2 w-full bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
+        >
+          <div class="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 py-1">
+            <button
+              *ngIf="!stateInput.value"
+              (mousedown)="selectState('all', '')"
               class="w-full text-left px-5 py-3 text-sm font-semibold text-slate-400 hover:bg-slate-700 hover:text-white border-b border-slate-700/50"
             >
               Todos los estados
             </button>
 
-            <button
-              *ngFor="let state of stateOptions.slice(1)"
-              (click)="selectedState.set(state); $any(stateOptions).isOpen = false"
-              class="w-full text-left px-5 py-3 text-sm font-semibold text-slate-300 hover:bg-blue-600 hover:text-white transition-colors"
-            >
-              {{ state }}
-            </button>
+            <ng-container *ngFor="let state of stateOptions.slice(1)">
+              <button
+                *ngIf="state.toLowerCase().includes(stateInput.value.toLowerCase())"
+                (mousedown)="selectState(state, state)"
+                class="w-full text-left px-5 py-3 text-sm font-semibold transition-colors"
+                [ngClass]="
+                  selectedState() === state
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                "
+              >
+                {{ state }}
+              </button>
+            </ng-container>
           </div>
         </div>
       </div>
