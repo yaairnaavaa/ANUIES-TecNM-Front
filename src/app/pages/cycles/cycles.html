@@ -1,0 +1,168 @@
+<div class="p-8 bg-[#f8fafc] min-h-screen font-sans text-[#1e293b]">
+  <div class="flex justify-between items-center mb-10">
+    <div>
+      <h1 class="text-3xl font-black text-slate-900 tracking-tight italic">Gestión de Ciclos</h1>
+      <p class="text-slate-500 font-medium italic">Historial y periodos académicos</p>
+    </div>
+    <button
+      (click)="openModal()"
+      class="bg-[#2563eb] hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95"
+    >
+      <i class="fas fa-plus text-sm"></i>
+      Nuevo Ciclo
+    </button>
+  </div>
+
+  <div
+    *ngIf="activeCycle() as active"
+    class="bg-[#0f172a] rounded-[2rem] p-8 mb-10 text-white relative overflow-hidden shadow-xl"
+  >
+    <div class="relative z-10">
+      <span
+        class="bg-[#10b981]/20 text-[#10b981] text-[10px] font-black px-3 py-1 rounded-full border border-[#10b981]/30 uppercase tracking-widest"
+      >
+        Ciclo Actual Activo
+      </span>
+      <h2 class="text-4xl font-black mt-4 tracking-tighter uppercase italic">{{ active.name }}</h2>
+
+      <div class="flex flex-wrap items-center gap-y-4 gap-x-8 mt-6">
+        <div class="flex flex-col">
+          <span class="text-[10px] uppercase tracking-tighter text-slate-500 font-black"
+            >Fecha de Inicio</span
+          >
+          <div class="flex items-center gap-2 text-white font-bold">
+            <i class="far fa-calendar text-blue-400"></i>
+            <span>{{ active.startDate | date: "d 'de' MMMM 'de' y" : '' : 'es' }}</span>
+          </div>
+        </div>
+
+        <div class="hidden md:block h-8 w-[1px] bg-slate-700 self-end mb-1"></div>
+
+        <div class="flex flex-col">
+          <span class="text-[10px] uppercase tracking-tighter text-slate-500 font-black"
+            >Fecha de Fin</span
+          >
+          <div class="flex items-center gap-2 text-white font-bold">
+            <i class="far fa-calendar-check text-emerald-400"></i>
+            <span>{{ active.endDate | date: "d 'de' MMMM 'de' y" : '' : 'es' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <i
+      class="fas fa-sync-alt text-[10rem] text-white/[0.03] absolute -right-8 -bottom-8 -rotate-12"
+    ></i>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-4 mb-6">
+    <div class="relative flex-1 max-w-md">
+      <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+      <input
+        [(ngModel)]="searchTerm"
+        type="text"
+        placeholder="Buscar por nombre del ciclo..."
+        class="w-full pl-12 pr-5 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all font-medium text-sm shadow-sm"
+      />
+    </div>
+    <button
+      (click)="clearSearch()"
+      class="text-xs font-black text-slate-400 hover:text-slate-600 uppercase tracking-widest flex items-center gap-2 transition-colors"
+    >
+      <i class="fas fa-redo-alt"></i> Limpiar
+    </button>
+  </div>
+
+  <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 overflow-hidden">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr
+          class="border-b border-slate-50 text-[10px] uppercase tracking-[0.15em] text-slate-400 font-black"
+        >
+          <th class="px-8 py-5">Nombre del Ciclo</th>
+          <th class="px-8 py-5">Inicio</th>
+          <th class="px-8 py-5">Fin</th>
+          <th class="px-8 py-5">Estado</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-50">
+        <tr
+          *ngFor="let cycle of filteredCycles()"
+          class="hover:bg-slate-50/50 transition-colors group"
+        >
+          <td class="px-8 py-5 font-black text-[#1e293b] text-sm uppercase">{{ cycle.name }}</td>
+          <td class="px-8 py-5 text-sm text-slate-500 font-bold">
+            {{ cycle.startDate | date: 'dd MMM, yyyy' : '' : 'es' }}
+          </td>
+          <td class="px-8 py-5 text-sm text-slate-500 font-bold">
+            {{ cycle.endDate | date: 'dd MMM, yyyy' : '' : 'es' }}
+          </td>
+          <td class="px-8 py-5">
+            <span
+              class="px-3 py-1 bg-slate-100 text-slate-500 text-[9px] font-black uppercase rounded-lg"
+            >
+              {{ cycle.status === 'finished' ? 'Finalizado' : 'Programado' }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div
+      class="p-6 border-t border-slate-50 flex justify-between items-center text-sm font-bold text-slate-500"
+    >
+      <div class="flex items-center gap-3">
+        Mostrar
+        <select
+          class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500"
+        >
+          <option>10</option>
+          <option>25</option>
+        </select>
+        por página
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 hover:bg-slate-50 disabled:opacity-30"
+        >
+          <i class="fas fa-chevron-left text-xs"></i>
+        </button>
+        <button
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-[#0f172a] text-white"
+        >
+          1
+        </button>
+        <button
+          class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 hover:bg-slate-50"
+        >
+          <i class="fas fa-chevron-right text-xs"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="isModalOpen()" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+  <div
+    class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+    (click)="closeModal()"
+  ></div>
+  <div
+    class="relative w-full max-w-lg bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300"
+  >
+    <div class="p-8">
+      <h2 class="text-xl font-black text-slate-900 mb-6 uppercase tracking-tight">
+        Registrar Nuevo Ciclo
+      </h2>
+      <div class="flex gap-4 mt-10">
+        <button (click)="closeModal()" class="flex-1 px-6 py-3 font-bold text-slate-400">
+          Cancelar
+        </button>
+        <button
+          class="flex-[1.5] px-6 py-3 bg-[#0f172a] text-white font-bold rounded-xl shadow-lg hover:bg-slate-800 transition-all"
+        >
+          Guardar Ciclo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

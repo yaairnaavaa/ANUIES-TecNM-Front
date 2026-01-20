@@ -10,6 +10,7 @@ import { authGuard } from './guards/auth.guard';
 import { loginGuard } from './guards/login.guard';
 import { Aspirant } from './pages/aspirant/aspirant';
 import { Home } from './pages/home/home';
+import { Cycles } from './pages/cycles/cycles';
 
 export const routes: Routes = [
   {
@@ -33,6 +34,7 @@ export const routes: Routes = [
       { path: 'campaigns', component: IesCampaignManagementComponent },
       { path: 'iems', component: IemsGestion },
       { path: 'aspirant', component: Aspirant },
+      { path: 'ciclos', component: Cycles},
       { path: '', redirectTo: 'ies-gestion', pathMatch: 'full' },
     ],
   },
