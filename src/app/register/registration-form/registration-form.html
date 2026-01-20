@@ -58,9 +58,7 @@
 
           <!-- CURP -->
           <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">
-              CURP (opcional)
-            </label>
+            <label class="block text-sm font-bold text-gray-700 mb-2"> CURP (opcional) </label>
             <div class="relative group">
               <i
                 class="fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"
@@ -70,7 +68,9 @@
                 formControlName="curp"
                 maxlength="18"
                 class="w-full pl-12 pr-12 py-4 uppercase bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                [class.border-red-300]="registrationForm.get('curp')?.invalid && registrationForm.get('curp')?.touched"
+                [class.border-red-300]="
+                  registrationForm.get('curp')?.invalid && registrationForm.get('curp')?.touched
+                "
                 placeholder="ABCD001122HDFXYZ09"
               />
               <i
@@ -78,8 +78,11 @@
                 class="fas fa-check-circle absolute right-4 top-1/2 -translate-y-1/2 text-green-500"
               ></i>
             </div>
-            <p 
-              *ngIf="registrationForm.get('curp')?.hasError('curpInvalid') && registrationForm.get('curp')?.touched"
+            <p
+              *ngIf="
+                registrationForm.get('curp')?.hasError('curpInvalid') &&
+                registrationForm.get('curp')?.touched
+              "
               class="text-red-500 text-xs mt-1 font-medium"
             >
               <i class="fas fa-exclamation-circle"></i>
@@ -139,10 +142,10 @@
               >
                 <li
                   *ngFor="let school of filteredIems"
-                  (click)="selectSchool(school)"
+                  (click)="selectSchool(school.name)"
                   class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-medium text-gray-700"
                 >
-                  {{ school }}
+                  {{ school.state }} - {{ school.name }}
                 </li>
               </ul>
             </div>
@@ -191,7 +194,7 @@
           <select
             [ngModel]="selectedIES()"
             (ngModelChange)="selectedIES.set($event)"
-            [ngModelOptions]="{standalone: true}"
+            [ngModelOptions]="{ standalone: true }"
             class="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 appearance-none font-medium text-gray-600"
           >
             <option [ngValue]="null">Seleccionar Tecnológico...</option>
@@ -218,39 +221,39 @@
 
         <div class="grid grid-cols-1 gap-3">
           @for (major of majorsList(); track major.id) {
-          <div
-            (click)="toggleMajor(major.id)"
-            [ngClass]="{
-              'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500': selectedMajors.includes(
-                major.id
-              )
-            }"
-            class="flex items-center gap-4 p-5 border border-gray-100 rounded-3xl cursor-pointer hover:border-blue-200 transition-all group"
-          >
             <div
-              class="w-6 h-6 border-2 rounded-lg flex items-center justify-center transition-all"
-              [ngClass]="
-                selectedMajors.includes(major.id)
-                  ? 'bg-blue-600 border-blue-600 text-white'
-                  : 'border-gray-200 group-hover:border-blue-300'
-              "
+              (click)="toggleMajor(major.id)"
+              [ngClass]="{
+                'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500': selectedMajors.includes(
+                  major.id
+                ),
+              }"
+              class="flex items-center gap-4 p-5 border border-gray-100 rounded-3xl cursor-pointer hover:border-blue-200 transition-all group"
             >
-              <i class="fas fa-check text-[10px]"></i>
-            </div>
+              <div
+                class="w-6 h-6 border-2 rounded-lg flex items-center justify-center transition-all"
+                [ngClass]="
+                  selectedMajors.includes(major.id)
+                    ? 'bg-blue-600 border-blue-600 text-white'
+                    : 'border-gray-200 group-hover:border-blue-300'
+                "
+              >
+                <i class="fas fa-check text-[10px]"></i>
+              </div>
 
-            <div class="flex-1">
-              <div class="font-bold text-gray-800 text-base">{{ major.name }}</div>
-              <div class="text-xs text-gray-400 font-medium">{{ major.meta }}</div>
-            </div>
+              <div class="flex-1">
+                <div class="font-bold text-gray-800 text-base">{{ major.name }}</div>
+                <div class="text-xs text-gray-400 font-medium">{{ major.meta }}</div>
+              </div>
 
-            @if (selectedMajors.includes(major.id)) {
-            <div
-              class="bg-blue-900 text-white w-9 h-9 rounded-full flex items-center justify-center font-black text-sm shadow-lg shadow-blue-900/20"
-            >
-              {{ getPriority(major.id) }}
+              @if (selectedMajors.includes(major.id)) {
+                <div
+                  class="bg-blue-900 text-white w-9 h-9 rounded-full flex items-center justify-center font-black text-sm shadow-lg shadow-blue-900/20"
+                >
+                  {{ getPriority(major.id) }}
+                </div>
+              }
             </div>
-            }
-          </div>
           }
         </div>
       </section>
@@ -274,15 +277,17 @@
 
       <!-- Mensaje de error -->
       @if (errorMessage()) {
-      <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-4 flex items-start gap-3 animate-shake">
-        <i class="fas fa-exclamation-circle text-red-500 text-xl mt-0.5"></i>
-        <div class="flex-1">
-          <p class="text-sm font-bold text-red-800">{{ errorMessage() }}</p>
+        <div
+          class="bg-red-50 border-2 border-red-200 rounded-2xl p-4 flex items-start gap-3 animate-shake"
+        >
+          <i class="fas fa-exclamation-circle text-red-500 text-xl mt-0.5"></i>
+          <div class="flex-1">
+            <p class="text-sm font-bold text-red-800">{{ errorMessage() }}</p>
+          </div>
+          <button (click)="errorMessage.set(null)" class="text-red-400 hover:text-red-600">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
-        <button (click)="errorMessage.set(null)" class="text-red-400 hover:text-red-600">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
       }
 
       <footer
@@ -297,7 +302,9 @@
 
         <button
           type="submit"
-          [disabled]="!registrationForm.valid || selectedMajors.length === 0 || !selectedIES() || isLoading()"
+          [disabled]="
+            !registrationForm.valid || selectedMajors.length === 0 || !selectedIES() || isLoading()
+          "
           class="w-full sm:w-auto min-w-[200px] px-8 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 hover:bg-blue-700 disabled:opacity-30 disabled:shadow-none transition-all flex items-center justify-center gap-3 uppercase text-[10px] tracking-widest"
         >
           <i *ngIf="isLoading()" class="fas fa-circle-notch animate-spin text-base"></i>
@@ -310,59 +317,59 @@
 </div>
 
 @if (showSuccess()) {
-<div class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-[#1a2e4c]/80 backdrop-blur-md animate-fade-in"></div>
+  <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-[#1a2e4c]/80 backdrop-blur-md animate-fade-in"></div>
 
-  <div
-    class="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-zoom-in"
-  >
-    <div class="p-8 text-center">
-      <div
-        class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-200"
-      >
-        <i class="fas fa-check text-4xl"></i>
-      </div>
-
-      <h2 class="text-2xl font-black text-gray-800 mb-2">¡Registro Exitoso!</h2>
-      <p class="text-sm text-gray-500 font-medium mb-8 leading-relaxed">
-        El aspirante ha sido registrado correctamente. Recibirá un correo de bienvenida en breve.
-      </p>
-
-      <div class="bg-gray-50 rounded-[2rem] p-6 mb-8 space-y-3 border border-gray-100">
-        <div class="flex justify-between items-center text-xs">
-          <span class="font-bold text-gray-400 uppercase tracking-wider">Nombre</span>
-          <span class="font-black text-gray-700 text-right">{{ successData?.fullName }}</span>
-        </div>
-        <div class="flex justify-between items-center text-xs border-t border-gray-200/50 pt-3">
-          <span class="font-bold text-gray-400 uppercase tracking-wider">IEMS</span>
-          <span class="font-black text-gray-700 text-right">{{ successData?.school }}</span>
-        </div>
-        <div class="flex justify-between items-center text-xs border-t border-gray-200/50 pt-3">
-          <span class="font-bold text-gray-400 uppercase tracking-wider">1ª Opción</span>
-          <span class="font-black text-blue-600 text-right">{{ successData?.firstChoice }}</span>
-        </div>
-        <div class="flex justify-between items-center text-xs border-t border-gray-200/50 pt-3">
-          <span class="font-bold text-gray-400 uppercase tracking-wider">Folio</span>
-          <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg font-black">{{
-            successData?.folio
-          }}</span>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <button
-          (click)="resetForm()"
-          class="flex items-center justify-center gap-2 px-6 py-4 bg-gray-100 text-gray-600 font-black rounded-2xl hover:bg-gray-200 transition-all text-[10px] uppercase tracking-widest"
+    <div
+      class="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-zoom-in"
+    >
+      <div class="p-8 text-center">
+        <div
+          class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-200"
         >
-          <i class="fas fa-plus"></i> Nuevo
-        </button>
-        <button
-          class="flex items-center justify-center gap-2 px-6 py-4 bg-green-500 text-white font-black rounded-2xl shadow-lg shadow-green-200 hover:bg-green-600 transition-all text-[10px] uppercase tracking-widest"
-        >
-          <i class="fab fa-whatsapp"></i> WhatsApp
-        </button>
+          <i class="fas fa-check text-4xl"></i>
+        </div>
+
+        <h2 class="text-2xl font-black text-gray-800 mb-2">¡Registro Exitoso!</h2>
+        <p class="text-sm text-gray-500 font-medium mb-8 leading-relaxed">
+          El aspirante ha sido registrado correctamente. Recibirá un correo de bienvenida en breve.
+        </p>
+
+        <div class="bg-gray-50 rounded-[2rem] p-6 mb-8 space-y-3 border border-gray-100">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-gray-400 uppercase tracking-wider">Nombre</span>
+            <span class="font-black text-gray-700 text-right">{{ successData?.fullName }}</span>
+          </div>
+          <div class="flex justify-between items-center text-xs border-t border-gray-200/50 pt-3">
+            <span class="font-bold text-gray-400 uppercase tracking-wider">IEMS</span>
+            <span class="font-black text-gray-700 text-right">{{ successData?.school }}</span>
+          </div>
+          <div class="flex justify-between items-center text-xs border-t border-gray-200/50 pt-3">
+            <span class="font-bold text-gray-400 uppercase tracking-wider">1ª Opción</span>
+            <span class="font-black text-blue-600 text-right">{{ successData?.firstChoice }}</span>
+          </div>
+          <div class="flex justify-between items-center text-xs border-t border-gray-200/50 pt-3">
+            <span class="font-bold text-gray-400 uppercase tracking-wider">Folio</span>
+            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg font-black">{{
+              successData?.folio
+            }}</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            (click)="resetForm()"
+            class="flex items-center justify-center gap-2 px-6 py-4 bg-gray-100 text-gray-600 font-black rounded-2xl hover:bg-gray-200 transition-all text-[10px] uppercase tracking-widest"
+          >
+            <i class="fas fa-plus"></i> Nuevo
+          </button>
+          <button
+            class="flex items-center justify-center gap-2 px-6 py-4 bg-green-500 text-white font-black rounded-2xl shadow-lg shadow-green-200 hover:bg-green-600 transition-all text-[10px] uppercase tracking-widest"
+          >
+            <i class="fab fa-whatsapp"></i> WhatsApp
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 }

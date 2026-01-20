@@ -1,6 +1,12 @@
 import { Component, inject, Output, EventEmitter, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormsModule,
+  FormGroup,
+  FormControl,
+  Validators,
+} from '@angular/forms';
 import { finalize } from 'rxjs/operators';
 import { curpValidator } from '../../validators/curp.validator';
 
@@ -10,6 +16,11 @@ import { IesService } from '../../services/ies.service';
 import { CampaignService } from '../../services/campaign.service';
 import { Prospect } from '../../models/api.models';
 import { IES, Campaign } from '../../models/api.models';
+
+interface IemsBasicInfo {
+  name: string;
+  state: string;
+}
 
 @Component({
   selector: 'app-registration-form',
@@ -34,8 +45,8 @@ export class RegistrationForm implements OnInit {
   successData: any = null;
 
   // IEMS autocomplete
-  iemsNames: string[] = [];
-  filteredIems: string[] = [];
+  iemsData: IemsBasicInfo[] = []; // Nueva lista de objetos completa
+  filteredIems: IemsBasicInfo[] = []; // Ahora filtrará objetos
 
   // Backend data
   iesList = signal<IES[]>([]);
@@ -81,8 +92,12 @@ export class RegistrationForm implements OnInit {
     this.iemsService.getAllIEMS({ active: true }).subscribe({
       next: (res) => {
         const data = res.data ?? [];
-        this.iemsNames = data.map((i) => i.name);
-        this.filteredIems = this.iemsNames;
+        // Extraemos nombre y estado de la estructura anidada
+        this.iemsData = data.map((i: any) => ({
+          name: i.name,
+          state: i.address?.state || 'N/A',
+        }));
+        this.filteredIems = this.iemsData;
       },
     });
   }
@@ -94,18 +109,20 @@ export class RegistrationForm implements OnInit {
           this.iesList.set(res.data);
         }
       },
-      error: (err) => console.error('Error cargando IES:', err)
+      error: (err) => console.error('Error cargando IES:', err),
     });
   }
 
   listenSchoolInput(): void {
     this.registrationForm.get('previousSchool')?.valueChanges.subscribe((value) => {
-      if (!value) {
-        this.filteredIems = this.iemsNames;
+      if (!value || typeof value !== 'string') {
+        this.filteredIems = this.iemsData;
         return;
       }
       const search = value.toLowerCase();
-      this.filteredIems = this.iemsNames.filter((n) => n.toLowerCase().includes(search));
+      this.filteredIems = this.iemsData.filter((school) =>
+        school.name.toLowerCase().includes(search) || school.state.toLowerCase().includes(search)
+      );
     });
   }
 
@@ -130,7 +147,9 @@ export class RegistrationForm implements OnInit {
 
   onSubmit(): void {
     if (this.registrationForm.invalid || this.selectedMajors.length === 0) {
-      this.errorMessage.set('Por favor completa todos los campos requeridos y selecciona al menos una carrera.');
+      this.errorMessage.set(
+        'Por favor completa todos los campos requeridos y selecciona al menos una carrera.',
+      );
       return;
     }
 
@@ -148,7 +167,7 @@ export class RegistrationForm implements OnInit {
     const prospectData: any = {
       // El backend espera fullName, no firstName/lastName por separado
       fullName: formValue.fullName!,
-      
+
       email: formValue.email!,
       phone: {
         mobile: formValue.phoneNumber!,
@@ -176,28 +195,29 @@ export class RegistrationForm implements OnInit {
       originCampaign: formValue.campaign || undefined,
     };
 
-    this.prospectService.createProspect(prospectData)
+    this.prospectService
+      .createProspect(prospectData)
       .pipe(
         finalize(() => {
           // Asegurar que isLoading siempre se restablezca, incluso si hay errores
           this.isLoading.set(false);
-        })
+        }),
       )
       .subscribe({
         next: (res) => {
           console.log('Respuesta del registro:', res);
-          
+
           if (res.success && res.data) {
             const data = res.data as any;
             const prospectId = data.id || data._id;
-            
+
             this.successData = {
               fullName: data.fullName,
               school: prospectData.originIEMSName,
               firstChoice: firstCareer?.name || 'N/A',
               folio: prospectId?.toString().substring(0, 8).toUpperCase() || 'N/A',
             };
-            
+
             console.log('Mostrando mensaje de éxito con datos:', this.successData);
             this.showSuccess.set(true);
             this.onRegistrationSuccess.emit();
@@ -209,7 +229,7 @@ export class RegistrationForm implements OnInit {
         error: (err) => {
           console.error('Error en el registro:', err);
           this.errorMessage.set(err.error?.message || 'Error al registrar el aspirante');
-        }
+        },
       });
   }
 
