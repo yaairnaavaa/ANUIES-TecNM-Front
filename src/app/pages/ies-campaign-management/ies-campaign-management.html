@@ -5,11 +5,10 @@
       <h1 class="text-3xl font-black text-slate-900 tracking-tight italic">Campañas e Impacto</h1>
       <p class="text-slate-500 font-medium italic">Análisis de rendimiento y retorno de inversión institucional</p>
     </div>
-    <button (click)="isAdding.set(!isAdding())"
-      [class]="isAdding() ? 'bg-slate-800' : 'bg-blue-600 shadow-blue-200'"
-      class="flex items-center gap-2 px-6 py-3 text-white font-bold rounded-2xl transition-all shadow-lg active:scale-95">
-      <i class="fas" [class.fa-plus]="!isAdding()" [class.fa-times]="isAdding()"></i>
-      {{ isAdding() ? 'Cancelar Registro' : 'Nueva Campaña' }}
+    <button (click)="openModal()"
+      class="flex items-center gap-2 px-6 py-3 bg-blue-600 shadow-blue-200 text-white font-bold rounded-2xl transition-all shadow-lg active:scale-95 hover:bg-blue-700">
+      <i class="fas fa-plus"></i>
+      Nueva Campaña
     </button>
   </header>
 
@@ -165,4 +164,697 @@
       </div>
     </div>
   </div>
+
+  <!-- MODAL DE CAMPAÑA -->
+  @if (showModal()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="closeModal()"></div>
+
+    <!-- Modal Container -->
+    <div class="relative w-full max-w-6xl max-h-[90vh] bg-white rounded-[3rem] shadow-2xl animate-slide-up flex flex-col overflow-hidden border border-white/20">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between p-8 bg-white border-b-2 border-slate-100 shrink-0">
+        <div class="flex items-center gap-5">
+          <div class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-2xl text-white shadow-lg shadow-blue-200">
+            <i class="fas fa-bullhorn"></i>
+          </div>
+          <div>
+            <h2 class="text-2xl font-black uppercase tracking-tight text-slate-900">
+              {{ isEditMode() ? 'Editar Campaña' : 'Nueva Campaña' }}
+            </h2>
+            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">
+              Gestión de Campañas Institucionales
+            </p>
+          </div>
+        </div>
+
+        <button
+          (click)="closeModal()"
+          class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-500 transition-all active:scale-90"
+        >
+          <i class="fas fa-times text-2xl"></i>
+        </button>
+      </div>
+
+      <!-- Messages -->
+      @if (errorMessage()) {
+        <div class="mx-8 mt-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-xl">
+          <div class="flex items-center gap-3">
+            <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+            <p class="text-sm font-bold text-red-700">{{ errorMessage() }}</p>
+          </div>
+        </div>
+      }
+
+      @if (successMessage()) {
+        <div class="mx-8 mt-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-xl">
+          <div class="flex items-center gap-3">
+            <i class="fas fa-check-circle text-emerald-500 text-xl"></i>
+            <p class="text-sm font-bold text-emerald-700">{{ successMessage() }}</p>
+          </div>
+        </div>
+      }
+
+      <!-- Form Content -->
+      <div class="flex-1 overflow-y-auto p-8">
+        <form [formGroup]="campaignForm" class="space-y-8">
+          
+          <!-- SECCIÓN 1: ASIGNACIÓN Y ESTADO -->
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+              <div class="w-10 h-10 bg-pink-50 rounded-xl flex items-center justify-center">
+                <i class="fas fa-user-tie text-pink-600"></i>
+              </div>
+              <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Asignación y Estado</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <!-- IES de la Campaña - Solo para usuarios sin IES asignada -->
+              @if (!userHasIES()) {
+                <div class="space-y-2 md:col-span-2">
+                  <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    Institución de Educación Superior *
+                  </label>
+                  <div class="relative group">
+                    <i class="fas fa-university absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
+                    <input
+                      type="text"
+                      [value]="iesSearchQuery()"
+                      (input)="filterIESForCampaign($any($event.target).value)"
+                      (focus)="showIESDropdown.set(true)"
+                      (blur)="onIESBlur()"
+                      placeholder="Seleccionar tecnológico responsable..."
+                      autocomplete="off"
+                      class="w-full pl-12 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                      [class.border-blue-500]="selectedIESForCampaign()"
+                      [class.border-red-300]="campaignForm.get('campaignIES')?.invalid && campaignForm.get('campaignIES')?.touched"
+                    />
+
+                    <!-- Botón limpiar -->
+                    @if (selectedIESForCampaign()) {
+                      <button
+                        type="button"
+                        (click)="clearIESSelection()"
+                        class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-100 transition-colors z-10"
+                      >
+                        <i class="fas fa-times text-xs text-red-500"></i>
+                      </button>
+                    }
+
+                    <!-- Dropdown IES -->
+                    @if (filteredIESForCampaign().length > 0 && showIESDropdown()) {
+                      <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-60 overflow-y-auto">
+                        @for (ies of filteredIESForCampaign(); track ies._id) {
+                          <li
+                            (mousedown)="selectIESForCampaign(ies)"
+                            class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-medium text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                            [class.bg-blue-50]="selectedIESForCampaign() === ies._id"
+                          >
+                            <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                                 [class.border-blue-600]="selectedIESForCampaign() === ies._id"
+                                 [class.bg-blue-600]="selectedIESForCampaign() === ies._id"
+                                 [class.border-slate-300]="selectedIESForCampaign() !== ies._id">
+                              @if (selectedIESForCampaign() === ies._id) {
+                                <i class="fas fa-check text-white text-xs"></i>
+                              }
+                            </div>
+                            <div class="flex-1">
+                              <div class="font-bold text-slate-800">{{ ies.name }}</div>
+                              <div class="text-xs text-slate-500">{{ ies.code }}</div>
+                            </div>
+                          </li>
+                        }
+                      </ul>
+                    }
+
+                    @if (iesList().length === 0 && showIESDropdown()) {
+                      <div class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl p-4">
+                        <p class="text-sm text-slate-500 text-center">
+                          <i class="fas fa-info-circle mr-2"></i>
+                          No hay IES disponibles.
+                        </p>
+                      </div>
+                    }
+                  </div>
+
+                  <p class="text-[11px] text-slate-400 mt-2 italic font-medium ml-1">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Selecciona el tecnológico al que pertenecerá esta campaña ({{ iesList().length }} disponibles)
+                  </p>
+                </div>
+              }
+              <!-- Usuario Responsable -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Usuario Responsable
+                </label>
+                <div class="relative">
+                  <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
+                  <input
+                    type="text"
+                    formControlName="responsible"
+                    (input)="filterUsers($any($event.target).value)"
+                    placeholder="Buscar usuario..."
+                    class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                  />
+                  
+                  <!-- Dropdown Usuarios -->
+                  @if (filteredUsers().length > 0 && userSearchQuery()) {
+                    <div class="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-60 overflow-y-auto z-50">
+                      @for (user of filteredUsers(); track user.id) {
+                        <button
+                          type="button"
+                          (click)="selectUser(user)"
+                          class="w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors flex items-center gap-3 border-b border-slate-100 last:border-0"
+                        >
+                          <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600 text-sm">
+                            {{ user.name.split(' ')[0][0] }}{{ user.name.split(' ')[1]?.[0] || '' }}
+                          </div>
+                          <div class="flex-1">
+                            <div class="font-bold text-sm text-slate-800">{{ user.name }}</div>
+                            <div class="text-xs text-slate-500">{{ user.role }} - {{ user.email }}</div>
+                          </div>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Estado Activo -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Estado de la Campaña
+                </label>
+                <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      formControlName="active"
+                      class="sr-only peer"
+                    />
+                    <div class="w-14 h-7 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+                  <div>
+                    <p class="text-sm font-bold text-slate-800">
+                      {{ campaignForm.get('active')?.value ? 'Activa' : 'Inactiva' }}
+                    </p>
+                    <p class="text-xs text-slate-500">
+                      {{ campaignForm.get('active')?.value ? 'La campaña está habilitada' : 'La campaña está deshabilitada' }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 2: TIPO Y MODALIDAD -->
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+              <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+                <i class="fas fa-layer-group text-purple-600"></i>
+              </div>
+              <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Tipo y Modalidad</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Tipo de Campaña -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Tipo de Campaña *
+                </label>
+                <div class="relative group">
+                  <i class="fas fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
+                  <input
+                    type="text"
+                    [value]="campaignTypeSearch()"
+                    (input)="filterCampaignType($any($event.target).value)"
+                    (focus)="showCampaignTypeDropdown.set(true)"
+                    (blur)="onCampaignTypeBlur()"
+                    placeholder="Seleccionar tipo de campaña..."
+                    autocomplete="off"
+                    class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                    [class.border-red-300]="campaignForm.get('type')?.invalid && campaignForm.get('type')?.touched"
+                    [class.border-blue-500]="campaignForm.get('type')?.value"
+                  />
+
+                  <!-- Dropdown Tipos -->
+                  @if (filteredCampaignTypes().length > 0 && showCampaignTypeDropdown()) {
+                    <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+                      @for (type of filteredCampaignTypes(); track type) {
+                        <li
+                          (mousedown)="selectCampaignType(type)"
+                          class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-bold text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                          [class.bg-blue-50]="campaignForm.get('type')?.value === type"
+                        >
+                          <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                               [class.border-blue-600]="campaignForm.get('type')?.value === type"
+                               [class.bg-blue-600]="campaignForm.get('type')?.value === type"
+                               [class.border-slate-300]="campaignForm.get('type')?.value !== type">
+                            @if (campaignForm.get('type')?.value === type) {
+                              <i class="fas fa-check text-white text-xs"></i>
+                            }
+                          </div>
+                          <span>{{ type }}</span>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+              </div>
+
+              <!-- Modalidad Específica -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Modalidad Específica *
+                </label>
+                <div class="relative group">
+                  <i class="fas fa-tags absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
+                  <input
+                    type="text"
+                    [value]="specificModalitySearch()"
+                    (input)="filterSpecificModality($any($event.target).value)"
+                    (focus)="showSpecificModalityDropdown.set(true)"
+                    (blur)="onSpecificModalityBlur()"
+                    [disabled]="!campaignForm.get('type')?.value"
+                    placeholder="Seleccionar modalidad..."
+                    autocomplete="off"
+                    class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    [class.border-red-300]="campaignForm.get('specificModality')?.invalid && campaignForm.get('specificModality')?.touched"
+                    [class.border-blue-500]="campaignForm.get('specificModality')?.value"
+                  />
+
+                  <!-- Dropdown Modalidades -->
+                  @if (filteredSpecificModalities().length > 0 && showSpecificModalityDropdown() && campaignForm.get('type')?.value) {
+                    <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-60 overflow-y-auto">
+                      @for (modality of filteredSpecificModalities(); track modality) {
+                        <li
+                          (mousedown)="selectSpecificModality(modality)"
+                          class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-medium text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                          [class.bg-blue-50]="campaignForm.get('specificModality')?.value === modality"
+                        >
+                          <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                               [class.border-blue-600]="campaignForm.get('specificModality')?.value === modality"
+                               [class.bg-blue-600]="campaignForm.get('specificModality')?.value === modality"
+                               [class.border-slate-300]="campaignForm.get('specificModality')?.value !== modality">
+                            @if (campaignForm.get('specificModality')?.value === modality) {
+                              <i class="fas fa-check text-white text-xs"></i>
+                            }
+                          </div>
+                          <span>{{ modality }}</span>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+              </div>
+
+              <!-- IEMS Objetivo - Solo para Presencial -->
+              @if (campaignForm.get('type')?.value === 'Presencial') {
+                <div class="space-y-2 md:col-span-2">
+                  <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    IEMS Objetivo (Preparatoria/Bachillerato)
+                  </label>
+                  <div class="relative group">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
+                    <input
+                      #iemsInput
+                      type="text"
+                      [value]="iemsSearchQuery()"
+                      (input)="filterIEMS($any($event.target).value)"
+                      (focus)="showIEMSDropdown.set(true)"
+                      (blur)="onIEMSBlur()"
+                      placeholder="Seleccionar preparatoria/bachillerato..."
+                      autocomplete="off"
+                      class="w-full pl-12 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                      [class.border-blue-500]="selectedIEMS()"
+                    />
+
+                    <!-- Botón limpiar -->
+                    @if (selectedIEMS()) {
+                      <button
+                        type="button"
+                        (click)="clearIEMSSelection()"
+                        class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-100 transition-colors z-10"
+                      >
+                        <i class="fas fa-times text-xs text-red-500"></i>
+                      </button>
+                    }
+
+                    <!-- Dropdown IEMS -->
+                    @if (filteredIEMS().length > 0 && showIEMSDropdown()) {
+                      <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-60 overflow-y-auto">
+                        @for (iems of filteredIEMS(); track iems._id) {
+                          <li
+                            (mousedown)="selectIEMS(iems._id!, iems.address.state + ' - ' + iems.name)"
+                            class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-medium text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                            [class.bg-blue-50]="isIEMSSelected(iems._id!)"
+                          >
+                            <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                                 [class.border-blue-600]="isIEMSSelected(iems._id!)"
+                                 [class.bg-blue-600]="isIEMSSelected(iems._id!)"
+                                 [class.border-slate-300]="!isIEMSSelected(iems._id!)">
+                              @if (isIEMSSelected(iems._id!)) {
+                                <i class="fas fa-check text-white text-xs"></i>
+                              }
+                            </div>
+                            <div class="flex-1">
+                              <div class="font-bold text-slate-800">{{ iems.address.state }} - {{ iems.name }}</div>
+                              <div class="text-xs text-slate-500">{{ iems.type }} - {{ iems.address.municipality }}</div>
+                            </div>
+                          </li>
+                        }
+                      </ul>
+                    }
+                    
+                    @if (iemsList().length === 0 && showIEMSDropdown()) {
+                      <div class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl p-4">
+                        <p class="text-sm text-slate-500 text-center">
+                          <i class="fas fa-info-circle mr-2"></i>
+                          No hay IEMS disponibles. Asegúrate de que el backend esté funcionando.
+                        </p>
+                      </div>
+                    }
+                  </div>
+
+                  <p class="text-[11px] text-slate-400 mt-2 italic font-medium ml-1">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Selecciona la institución de nivel medio superior donde se aplicará la campaña ({{ iemsList().length }} disponibles)
+                  </p>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- SECCIÓN 3: INFORMACIÓN BÁSICA -->
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+              <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                <i class="fas fa-info-circle text-blue-600"></i>
+              </div>
+              <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Información Básica</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Nombre de la Campaña -->
+              <div class="space-y-2 md:col-span-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Nombre de la Campaña *
+                </label>
+                <div class="relative">
+                  <i class="fas fa-tag absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                  <input
+                    type="text"
+                    formControlName="name"
+                    placeholder="Ej. Campaña de Promoción Verano 2024"
+                    class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                    [class.border-red-300]="campaignForm.get('name')?.invalid && campaignForm.get('name')?.touched"
+                  />
+                </div>
+              </div>
+
+              <!-- Descripción -->
+              <div class="space-y-2 md:col-span-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Descripción
+                </label>
+                <textarea
+                  formControlName="description"
+                  rows="3"
+                  placeholder="Describe los objetivos y características de la campaña..."
+                  class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium resize-none"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 4: PERIODO -->
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+              <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                <i class="fas fa-calendar-alt text-emerald-600"></i>
+              </div>
+              <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Periodo de Ejecución</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Fecha de Inicio -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Fecha de Inicio *
+                </label>
+                <div class="relative">
+                  <i class="fas fa-calendar-day absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                  <input
+                    type="date"
+                    formControlName="startDate"
+                    class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                    [class.border-red-300]="campaignForm.get('startDate')?.invalid && campaignForm.get('startDate')?.touched"
+                  />
+                </div>
+              </div>
+
+              <!-- Fecha de Finalización -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Fecha de Finalización *
+                </label>
+                <div class="relative">
+                  <i class="fas fa-calendar-check absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                  <input
+                    type="date"
+                    formControlName="endDate"
+                    class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                    [class.border-red-300]="campaignForm.get('endDate')?.invalid && campaignForm.get('endDate')?.touched"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 5: ALCANCE -->
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+              <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                <i class="fas fa-bullseye text-blue-600"></i>
+              </div>
+              <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Alcance y Objetivos</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <!-- Alcance Estimado -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Alcance Estimado *
+                </label>
+                <div class="relative">
+                  <i class="fas fa-chart-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                  <input
+                    type="number"
+                    formControlName="estimatedReach"
+                    min="0"
+                    placeholder="0"
+                    class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                    [class.border-red-300]="campaignForm.get('estimatedReach')?.invalid && campaignForm.get('estimatedReach')?.touched"
+                  />
+                </div>
+              </div>
+
+              <!-- Alcance Real -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Alcance Real
+                </label>
+                <div class="relative">
+                  <i class="fas fa-users absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                  <input
+                    type="number"
+                    formControlName="actualReach"
+                    min="0"
+                    placeholder="0"
+                    class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                  />
+                </div>
+              </div>
+
+              <!-- Unidad de Medida -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Unidad *
+                </label>
+                <select
+                  formControlName="reachUnit"
+                  class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium cursor-pointer"
+                >
+                  @for (unit of reachUnits; track unit) {
+                    <option [value]="unit">{{ unit }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 6: COSTOS -->
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+              <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                <i class="fas fa-dollar-sign text-emerald-600"></i>
+              </div>
+              <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Inversión y Costos</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Costo Total -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Inversión Total (MXN) *
+                </label>
+                <div class="relative">
+                  <i class="fas fa-money-bill-wave absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                  <input
+                    type="number"
+                    formControlName="totalCost"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-mono font-medium"
+                    [class.border-red-300]="campaignForm.get('totalCost')?.invalid && campaignForm.get('totalCost')?.touched"
+                  />
+                </div>
+              </div>
+
+              <!-- Costo por Impacto -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Costo por Impacto (calculado)
+                </label>
+                <div class="relative">
+                  <i class="fas fa-calculator absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                  <input
+                    type="number"
+                    formControlName="costPerImpact"
+                    readonly
+                    placeholder="0.00"
+                    class="w-full pl-12 pr-4 py-3.5 bg-slate-100 border border-slate-200 rounded-2xl outline-none font-mono font-medium cursor-not-allowed"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 7: CARRERAS PROMOCIONADAS -->
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+              <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                <i class="fas fa-graduation-cap text-amber-600"></i>
+              </div>
+              <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Carreras Promocionadas</h3>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              @for (career of careersList(); track career.id) {
+                <button
+                  type="button"
+                  (click)="toggleCareer(career.id)"
+                  class="p-4 border-2 rounded-2xl transition-all text-left"
+                  [class.border-blue-500]="isCareerSelected(career.id)"
+                  [class.bg-blue-50]="isCareerSelected(career.id)"
+                  [class.border-slate-200]="!isCareerSelected(career.id)"
+                  [class.hover:border-slate-300]="!isCareerSelected(career.id)"
+                >
+                  <div class="flex items-start gap-2">
+                    <div class="w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all"
+                         [class.border-blue-600]="isCareerSelected(career.id)"
+                         [class.bg-blue-600]="isCareerSelected(career.id)"
+                         [class.border-slate-300]="!isCareerSelected(career.id)">
+                      @if (isCareerSelected(career.id)) {
+                        <i class="fas fa-check text-white text-xs"></i>
+                      }
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-xs font-black text-slate-800 leading-tight">
+                        {{ career.name }}
+                      </div>
+                      <div class="text-[10px] text-slate-500 font-bold mt-0.5">
+                        {{ career.code }}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              }
+            </div>
+
+            @if (selectedCareers().length > 0) {
+              <div class="p-3 bg-amber-50 rounded-2xl border border-amber-100">
+                <p class="text-xs font-bold text-amber-700">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  {{ selectedCareers().length }} carrera(s) seleccionada(s)
+                </p>
+              </div>
+            }
+          </div>
+
+          <!-- SECCIÓN 8: EVALUACIÓN -->
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+              <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+                <i class="fas fa-clipboard-list text-purple-600"></i>
+              </div>
+              <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Evaluación de la Campaña</h3>
+            </div>
+
+            <div class="space-y-4">
+              <!-- Notas de Evaluación -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Notas de Evaluación
+                </label>
+                <textarea
+                  formControlName="evaluationNotes"
+                  rows="4"
+                  placeholder="Observaciones sobre el desempeño, resultados y recomendaciones para la campaña..."
+                  class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium resize-none"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Footer con botones -->
+      <div class="p-8 border-t border-slate-100 bg-slate-50/50 shrink-0">
+        <div class="flex items-center justify-end gap-4">
+          <button
+            type="button"
+            (click)="closeModal()"
+            [disabled]="isLoading()"
+            class="px-8 py-3.5 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-2xl hover:bg-slate-50 transition-all active:scale-95 disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            (click)="saveCampaign()"
+            [disabled]="isLoading() || campaignForm.invalid"
+            class="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 hover:shadow-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            @if (isLoading()) {
+              <i class="fas fa-circle-notch animate-spin"></i>
+              <span>Procesando...</span>
+            } @else {
+              <i class="fas fa-save"></i>
+              <span>{{ isEditMode() ? 'Actualizar Campaña' : 'Crear Campaña' }}</span>
+            }
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  }
+
 </div>
