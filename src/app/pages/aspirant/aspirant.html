@@ -53,8 +53,10 @@
         </div>
         <div class="flex-1 min-w-0">
           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Preferencia 1</p>
-          <h3 class="text-sm font-black text-slate-900 truncate uppercase">
-            {{ (selectedAspirant()?.careerInterests?.[0])?.career || 'Carrera no definida' }}
+          <h3 
+            class="text-sm font-black text-slate-900 truncate uppercase cursor-help"
+            [title]="(selectedAspirant()?.careerInterests?.[0])?.career || 'Carrera no definida'">
+            {{ getCareerAbbr((selectedAspirant()?.careerInterests?.[0])?.career || 'Carrera no definida') }}
           </h3>
         </div>
       </div>
@@ -115,14 +117,16 @@
               </td>
 
               <td class="px-8 py-5">
-                <div class="flex flex-wrap gap-1">
-                  @for(interest of a.careerInterests?.slice(0, 2); track $index) {
-                    <span class="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-[10px] font-black uppercase">
-                      {{ interest.career }}
+                <div class="flex flex-wrap gap-1.5">
+                  @for(interest of a.careerInterests?.slice(0, 3); track $index) {
+                    <span 
+                      class="px-3 py-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xs font-black uppercase tracking-wide shadow-sm hover:shadow-md transition-all cursor-help"
+                      [title]="interest.career">
+                      {{ getCareerAbbr(interest.career) }}
                     </span>
                   }
-                  @if(a.careerInterests && a.careerInterests.length > 2) {
-                    <span class="text-[10px] text-slate-400 font-bold">+{{ a.careerInterests.length - 2 }}</span>
+                  @if(a.careerInterests && a.careerInterests.length > 3) {
+                    <span class="px-2 py-1 text-xs text-slate-500 font-bold italic">+{{ a.careerInterests.length - 3 }} más</span>
                   }
                 </div>
               </td>

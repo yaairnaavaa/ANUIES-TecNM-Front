@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProspectService } from '../../services/prospect.service'; // Ajusta la ruta
 import { Prospect } from '../../models/api.models'; // Ajusta la ruta
+import { getCareerAbbreviation } from '../../utils/career-abbreviations';
 
 @Component({
   selector: 'app-aspirant',
@@ -109,5 +110,10 @@ export class Aspirant implements OnInit {
     if (status.profileValidated) return 'Validado';
     if (status.registrationComplete) return 'Completo';
     return 'Pendiente';
+  }
+
+  // Función para obtener la abreviación de una carrera
+  getCareerAbbr(careerName: string): string {
+    return getCareerAbbreviation(careerName);
   }
 }
