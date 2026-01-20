@@ -13,6 +13,10 @@ export class AuthService {
   // Estado de autenticación
   currentUser = signal<UserAuth | null>(null);
   isAuthenticated = signal<boolean>(false);
+  
+  // Control de inicialización de sesión con Promise
+  private sessionInitPromise: Promise<boolean>;
+  private sessionInitResolve?: (value: boolean) => void;
 
   private readonly MENU_KEY = 'anuies_menu';
   private readonly ROLE_KEY = 'anuies_role';
@@ -20,6 +24,10 @@ export class AuthService {
   menu = computed(() => this.currentUser()?.menu ?? []);
 
   constructor() {
+    // Crear nueva promesa en cada construcción
+    this.sessionInitPromise = new Promise<boolean>((resolve) => {
+      this.sessionInitResolve = resolve;
+    });
     this.restoreSession();
   }
 
@@ -88,7 +96,11 @@ export class AuthService {
     const roleStr = localStorage.getItem(this.ROLE_KEY);
     const userInfoStr = localStorage.getItem(this.USER_INFO_KEY);
 
-    if (!roleStr || !userInfoStr) return;
+    if (!roleStr || !userInfoStr) {
+      // No hay datos de sesión guardados
+      this.sessionInitResolve?.(false);
+      return;
+    }
 
     try {
       const role = JSON.parse(roleStr);
@@ -114,27 +126,45 @@ export class AuthService {
               this.currentUser.set(response.data);
               // Actualizar localStorage con datos frescos
               localStorage.setItem(this.ROLE_KEY, JSON.stringify(response.data.role));
-              localStorage.setItem(
-                this.USER_INFO_KEY,
-                JSON.stringify({
-                  id: response.data.id,
-                  firstName: response.data.firstName,
-                  lastName: response.data.lastName,
-                  secondLastName: response.data.secondLastName,
-                  email: response.data.email,
-                }),
-              );
+              localStorage.setItem(this.USER_INFO_KEY, JSON.stringify({
+                id: response.data.id,
+                firstName: response.data.firstName,
+                lastName: response.data.lastName,
+                secondLastName: response.data.secondLastName,
+                email: response.data.email
+              }));
+              this.isAuthenticated.set(true);
+              this.sessionInitResolve?.(true);
             } else {
-              this.clearSession();
+              this.clearSessionSilently();
+              this.sessionInitResolve?.(false);
             }
           },
           error: () => {
-            this.clearSession();
-          },
+            this.clearSessionSilently();
+            this.sessionInitResolve?.(false);
+          }
         });
     } catch {
-      this.clearSession();
+      this.clearSessionSilently();
+      this.sessionInitResolve?.(false);
     }
+  }
+
+  private clearSessionSilently(): void {
+    localStorage.removeItem(this.MENU_KEY);
+    localStorage.removeItem(this.ROLE_KEY);
+    localStorage.removeItem(this.USER_INFO_KEY);
+    this.currentUser.set(null);
+    this.isAuthenticated.set(false);
+  }
+
+  /**
+   * Espera a que la sesión se inicialice (útil para guards)
+   */
+  async waitForSessionInit(): Promise<boolean> {
+    await this.sessionInitPromise;
+    return this.isAuthenticated();
   }
 
   /* ============================

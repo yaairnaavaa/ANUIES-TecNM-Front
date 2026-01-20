@@ -19,55 +19,67 @@
   <div class="space-y-4">
     <div class="flex items-center gap-2 px-2">
       <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-      <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Resumen de Selección</span>
+      <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Estadísticas Generales</span>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Total de Aspirantes -->
       <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5">
         <div class="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl shadow-lg shadow-blue-100">
-          <i class="fas fa-school"></i>
+          <i class="fas fa-users"></i>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Procedencia</p>
-          <h3 class="text-sm font-black text-slate-900 leading-tight uppercase truncate">
-            {{ selectedAspirant()?.originIEMSName || selectedAspirant()?.originIEMS || 'Sin Selección' }}
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Aspirantes</p>
+          <h3 class="text-3xl font-black text-slate-900 leading-tight">
+            {{ totalAspirants() }}
           </h3>
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5">
-        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl">
-          <i class="fas fa-graduation-cap"></i>
-        </div>
-        <div>
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Semestre</p>
-          <h3 class="text-2xl font-black text-slate-900">
-            {{ selectedAspirant()?.currentSemester || '0' }}°
-          </h3>
-        </div>
-      </div>
-
+      <!-- Registros Completos -->
       <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5">
         <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl">
-          <i class="fas fa-star"></i>
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div>
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Completos</p>
+          <h3 class="text-3xl font-black text-slate-900">
+            {{ completedAspirants() }}
+          </h3>
+          <p class="text-[9px] text-slate-400 font-bold mt-0.5">
+            {{ totalAspirants() > 0 ? ((completedAspirants() / totalAspirants() * 100) | number:'1.0-0') : 0 }}% del total
+          </p>
+        </div>
+      </div>
+
+      <!-- Carrera Más Solicitada -->
+      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5">
+        <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl">
+          <i class="fas fa-fire"></i>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Preferencia 1</p>
-          <h3 class="text-sm font-black text-slate-900 truncate uppercase">
-            {{ (selectedAspirant()?.careerInterests?.[0])?.career || 'Carrera no definida' }}
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Más Solicitada</p>
+          <h3 
+            class="text-sm font-black text-slate-900 truncate uppercase cursor-help"
+            [title]="topCareer()">
+            {{ getCareerAbbr(topCareer()) }}
           </h3>
         </div>
       </div>
 
+      <!-- Promedio General -->
       <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5">
-        <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl">
-          <i class="fas fa-tasks"></i>
+        <div class="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-xl">
+          <i class="fas fa-star"></i>
         </div>
         <div>
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Progreso</p>
-          <h3 class="text-2xl font-black text-slate-900">
-            {{ selectedAspirant()?.processStatus?.registrationComplete ? '100%' : '45%' }}
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Promedio Gral.</p>
+          <h3 class="text-3xl font-black text-slate-900">
+            {{ averageGrade() }}
           </h3>
+          <p class="text-[9px] text-slate-400 font-bold mt-0.5">
+            De 10.0
+          </p>
         </div>
       </div>
     </div>
@@ -115,14 +127,16 @@
               </td>
 
               <td class="px-8 py-5">
-                <div class="flex flex-wrap gap-1">
-                  @for(interest of a.careerInterests?.slice(0, 2); track $index) {
-                    <span class="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-[10px] font-black uppercase">
-                      {{ interest.career }}
+                <div class="flex flex-wrap gap-1.5">
+                  @for(interest of a.careerInterests?.slice(0, 3); track $index) {
+                    <span 
+                      class="px-3 py-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xs font-black uppercase tracking-wide shadow-sm hover:shadow-md transition-all cursor-help"
+                      [title]="interest.career">
+                      {{ getCareerAbbr(interest.career) }}
                     </span>
                   }
-                  @if(a.careerInterests && a.careerInterests.length > 2) {
-                    <span class="text-[10px] text-slate-400 font-bold">+{{ a.careerInterests.length - 2 }}</span>
+                  @if(a.careerInterests && a.careerInterests.length > 3) {
+                    <span class="px-2 py-1 text-xs text-slate-500 font-bold italic">+{{ a.careerInterests.length - 3 }} más</span>
                   }
                 </div>
               </td>
