@@ -184,10 +184,10 @@
           <tr
             class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-widest font-black"
           >
-            <th class="px-8 py-5 ">Institución</th>
-            <th class="px-8 py-5 ">Clave Oficial</th>
-            <th class="px-8 py-5 ">Contacto Principal</th>
-            <th class="px-8 py-5 ">Estatus</th>
+            <th class="px-8 py-5">Institución</th>
+            <th class="px-8 py-5">Clave Oficial</th>
+            <th class="px-8 py-5">Contacto Principal</th>
+            <th class="px-8 py-5">Estatus</th>
             <th class="px-8 py-5 text-center">Acciones</th>
           </tr>
         </thead>
@@ -233,6 +233,7 @@
               <td class="px-8 py-5 text-center">
                 <div class="relative inline-block text-left">
                   <button
+                    #anchor
                     type="button"
                     (click)="$any(ies).showMenu = !$any(ies).showMenu"
                     class="flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all focus:outline-none"
@@ -243,7 +244,9 @@
                   <div
                     *ngIf="$any(ies).showMenu"
                     (mouseleave)="$any(ies).showMenu = false"
-                    class="absolute right-0 z-50 mt-2 w-64 origin-top-right rounded-2xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden border border-slate-100"
+                    class="fixed z-[100] w-64 mt-2 origin-top-right rounded-2xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden border border-slate-100"
+                    [style.left.px]="anchor.getBoundingClientRect().left - 200"
+                    [style.top.px]="anchor.getBoundingClientRect().bottom"
                   >
                     <div class="p-2 space-y-1">
                       <button
