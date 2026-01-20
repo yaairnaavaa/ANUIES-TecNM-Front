@@ -29,88 +29,92 @@
     </div>
 
     <div class="p-8 bg-slate-50/50">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-
-      <div class="space-y-2">
-        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-          >Nombre de la IES</label
-        >
-        <div class="relative">
-          <i class="fas fa-school absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
-          <input
-            [(ngModel)]="ies!.name"
-            type="text"
-            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium"
-          />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-2">
+          <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
+            >Nombre de la IES</label
+          >
+          <div class="relative">
+            <i class="fas fa-school absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+            <input
+              [(ngModel)]="ies!.name"
+              type="text"
+              class="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium"
+            />
+          </div>
         </div>
-      </div>
 
-      <div class="space-y-2">
-        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-          >Responsable</label
-        >
-        <div class="relative">
-          <i class="fas fa-user-tie absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
-          <input
-            [(ngModel)]="ies!.contact.responsable"
-            type="text"
-            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium"
-          />
+        <div class="space-y-2">
+          <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
+            >Responsable</label
+          >
+          <div class="relative">
+            <i class="fas fa-user-tie absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+            <input
+              [(ngModel)]="ies!.contact.responsable"
+              type="text"
+              class="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium"
+            />
+          </div>
         </div>
-      </div>
 
-      <div class="space-y-2">
-        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-          >Nombre del Director</label
-        >
-        <div class="relative">
-          <i
-            class="fas fa-user-graduate absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
-          ></i>
-          <input
-            [(ngModel)]="ies!.contact.nombreDirector"
-            type="text"
-            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium"
-          />
+        <div class="space-y-2">
+          <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
+            >Nombre del Director</label
+          >
+          <div class="relative">
+            <i
+              class="fas fa-user-graduate absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
+            ></i>
+            <input
+              [(ngModel)]="ies!.contact.nombreDirector"
+              type="text"
+              class="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium"
+            />
+          </div>
         </div>
-      </div>
 
-      <div class="space-y-2">
-        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-          >Email</label
-        >
-        <div class="relative">
-          <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
-          <input
-            [(ngModel)]="ies!.contact.email"
-            type="email"
-            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium"
-          />
+        <div class="space-y-2">
+          <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
+            >Email</label
+          >
+          <div class="relative">
+            <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+            <input
+              [(ngModel)]="ies!.contact.email"
+              type="email"
+              class="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium"
+            />
+          </div>
         </div>
-      </div>
 
-      <div class="space-y-2">
-        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-          >Teléfono</label
-        >
-        <div class="relative">
-          <i class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
-          <input
-            [(ngModel)]="ies!.contact.generalPhone"
-            type="tel"
-            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium"
-          />
+        <div class="space-y-2">
+          <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
+            >Teléfono</label
+          >
+          <div class="relative">
+            <i class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+            <input
+              [(ngModel)]="ies!.contact.generalPhone"
+              type="tel"
+              class="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium"
+            />
+          </div>
         </div>
-      </div>
 
-      <div class="space-y-2">
-        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-          >Estado de la Institución</label
-        >
-        <div class="flex items-center gap-4 p-3.5 bg-slate-50 border border-slate-100 rounded-2xl">
-          <i class="fas fa-toggle-on text-indigo-600"></i>
-          <span class="text-sm font-bold text-slate-600">Institución Activa</span>
-          <input type="checkbox" [(ngModel)]="ies!.active" class="w-5 h-5 accent-indigo-600" />
+        <div class="space-y-2">
+          <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
+            >Estado de la Institución</label
+          >
+          <div class="flex items-center gap-4 p-3.5 bg-white border border-slate-100 rounded-2xl">
+            <i class="fas fa-toggle-on text-indigo-600"></i>
+            <span class="text-sm font-bold text-slate-600">Institución Activa</span>
+            <input
+              type="checkbox"
+              [(ngModel)]="ies!.active"
+              class="w-5 h-5 accent-indigo-600 ml-auto"
+            />
+          </div>
         </div>
       </div>
       <div class="flex justify-end gap-4 mt-10">
@@ -124,7 +128,7 @@
           (click)="onSave.emit(ies!)"
           class="px-10 py-3.5 bg-indigo-600 text-white font-black rounded-2xl shadow-lg hover:bg-indigo-700 transition-all"
         >
-          Guardar Cambios
+          Guardar
         </button>
       </div>
     </div>

@@ -9,11 +9,10 @@ import { computed } from '@angular/core';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-
   // Estado de autenticación
   currentUser = signal<UserAuth | null>(null);
   isAuthenticated = signal<boolean>(false);
-  
+
   // Control de inicialización de sesión con Promise
   private sessionInitPromise: Promise<boolean>;
   private sessionInitResolve?: (value: boolean) => void;
@@ -118,7 +117,9 @@ export class AuthService {
 
       // Verificar la sesión con el backend y obtener datos completos
       this.http
-        .get<{ success: boolean; data: UserAuth }>(`${environment.apiUrl}/auth/me`)
+        .get<{ success: boolean; data: UserAuth }>(`${environment.apiUrl}/auth/me`, {
+          withCredentials: true,
+        })
         .subscribe({
           next: (response) => {
             if (response.success && response.data) {
@@ -126,13 +127,16 @@ export class AuthService {
               this.currentUser.set(response.data);
               // Actualizar localStorage con datos frescos
               localStorage.setItem(this.ROLE_KEY, JSON.stringify(response.data.role));
-              localStorage.setItem(this.USER_INFO_KEY, JSON.stringify({
-                id: response.data.id,
-                firstName: response.data.firstName,
-                lastName: response.data.lastName,
-                secondLastName: response.data.secondLastName,
-                email: response.data.email
-              }));
+              localStorage.setItem(
+                this.USER_INFO_KEY,
+                JSON.stringify({
+                  id: response.data.id,
+                  firstName: response.data.firstName,
+                  lastName: response.data.lastName,
+                  secondLastName: response.data.secondLastName,
+                  email: response.data.email,
+                }),
+              );
               this.isAuthenticated.set(true);
               this.sessionInitResolve?.(true);
             } else {
@@ -143,7 +147,7 @@ export class AuthService {
           error: () => {
             this.clearSessionSilently();
             this.sessionInitResolve?.(false);
-          }
+          },
         });
     } catch {
       this.clearSessionSilently();
