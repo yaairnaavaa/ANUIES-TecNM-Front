@@ -1,9 +1,18 @@
-import { Component, signal, computed, Input, Output, EventEmitter, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserService } from '../../services/user.service';
-import { AuthService } from '../../services/auth.service';
-import { User } from '../../models/api.models';
+import { UserService } from '../../../services/user.service';
+import { AuthService } from '../../../services/auth.service';
+import { User } from '../../../models/api.models';
 
 interface UserDisplay {
   id: string;
@@ -54,7 +63,7 @@ export class IesUserManagement implements OnInit {
     this.errorMessage.set(null);
 
     const currentUser = this.authService.currentUser();
-    const iesIdToUse = this.iesId || currentUser?.ies as string;
+    const iesIdToUse = this.iesId || (currentUser?.ies as string);
 
     if (!iesIdToUse) {
       this.errorMessage.set('No se ha especificado una IES');
@@ -74,7 +83,7 @@ export class IesUserManagement implements OnInit {
         console.error('Error cargando usuarios:', error);
         this.errorMessage.set('Error al cargar usuarios');
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -82,20 +91,20 @@ export class IesUserManagement implements OnInit {
    * Mapear usuarios del backend al formato de visualización
    */
   private mapUsersToDisplay(users: User[]): UserDisplay[] {
-    return users.map(u => ({
+    return users.map((u) => ({
       id: u._id || '',
       fullName: `${u.firstName} ${u.lastName} ${u.secondLastName || ''}`.trim(),
       jobTitle: u.role,
       email: u.email,
       lastAccess: u.updatedAt ? new Date(u.updatedAt).toISOString().split('T')[0] : 'N/A',
-      status: u.active ? 'Active' : 'Inactive'
+      status: u.active ? 'Active' : 'Inactive',
     }));
   }
 
   filteredUsers = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     return this.users().filter(
-      (u) => u.fullName.toLowerCase().includes(query) || u.email.toLowerCase().includes(query)
+      (u) => u.fullName.toLowerCase().includes(query) || u.email.toLowerCase().includes(query),
     );
   });
 
@@ -142,7 +151,7 @@ export class IesUserManagement implements OnInit {
       error: (error) => {
         console.error('Error eliminando usuario:', error);
         alert('Error al eliminar el usuario');
-      }
+      },
     });
   }
 
@@ -151,7 +160,7 @@ export class IesUserManagement implements OnInit {
    */
   toggleUserStatus(userId: string, currentStatus: 'Active' | 'Inactive'): void {
     const newStatus = currentStatus === 'Active';
-    
+
     this.userService.toggleUserStatus(userId, !newStatus).subscribe({
       next: () => {
         this.loadUsers();
@@ -159,7 +168,7 @@ export class IesUserManagement implements OnInit {
       error: (error) => {
         console.error('Error cambiando estado:', error);
         alert('Error al cambiar el estado del usuario');
-      }
+      },
     });
   }
 }

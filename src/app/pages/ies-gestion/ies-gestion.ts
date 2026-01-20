@@ -4,19 +4,23 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IES } from '../../models/api.models';
 import { IesService } from '../../services/ies.service';
 import { AuthService } from '../../services/auth.service';
-import { IesUserManagement } from '../ies-user-management/ies-user-management';
+import { IesUserManagement } from '../ies-gestion-modals/ies-user-management/ies-user-management';
+import { IesEditComponent } from '../ies-gestion-modals/ies-edit-component/ies-edit-component';
+type ViewState = 'list' | 'add' | 'edit' | 'users';
+
 @Component({
   selector: 'app-ies-gestion',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IesUserManagement],
+  imports: [IesEditComponent, CommonModule, FormsModule, ReactiveFormsModule, IesUserManagement],
   templateUrl: './ies-gestion.html',
 })
 export class IesGestion implements OnInit {
   private iesService = inject(IesService);
+
   private authService = inject(AuthService);
   // Estado para controlar qué vista mostrar
   // 'list' para la tabla, 'users' para la gestión de operativos
-  currentView = signal<'list' | 'users'>('list');
+  currentView = signal<ViewState>('list');
   selectedIes = signal<IES | null>(null);
 
   isAdding = signal(false);
@@ -57,6 +61,11 @@ export class IesGestion implements OnInit {
   }
 
   // Métodos para cambiar de vista
+  openEdit(ies: IES) {
+    this.selectedIes.set(ies);
+    this.currentView.set('edit');
+  }
+
   manageUsers(ies: IES) {
     this.selectedIes.set(ies);
     this.currentView.set('users');
@@ -166,10 +175,11 @@ export class IesGestion implements OnInit {
     });
   }
 
-  openEdit(ies: any): void {
-    console.log('Editando institución:', ies);
-    // Aquí va tu lógica para abrir el modal de edición
-    // Ejemplo: this.selectedIes = ies; this.showEditModal = true;
+  onSave(updatedIes: any) {
+    console.log('Datos recibidos del hijo:', updatedIes);
+    // Aquí iría tu lógica para llamar al servicio y actualizar en la BD
+    // Al terminar, puedes cerrar la modal:
+    this.backToList();
   }
 
   /**
