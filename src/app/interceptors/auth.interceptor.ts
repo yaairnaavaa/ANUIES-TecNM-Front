@@ -14,10 +14,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(clonedRequest).pipe(
       catchError((error: HttpErrorResponse) => {
-        // Si es 401 y no es la ruta de login o register, redirigir al login
+        // Si es 401 y no es la ruta de login, register o verificación de sesión
         if (error.status === 401 && 
             !req.url.includes('/auth/login') && 
-            !req.url.includes('/prospects/register')) {
+            !req.url.includes('/prospects/register') &&
+            !req.url.includes('/auth/me')) {
           console.warn('Sesión expirada o no autenticado. Redirigiendo al login...');
           localStorage.clear();
           router.navigate(['/login']);

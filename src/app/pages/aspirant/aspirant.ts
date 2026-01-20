@@ -55,6 +55,60 @@ export class Aspirant implements OnInit {
     return Math.ceil(this.filteredAspirants().length / this.itemsPerPage) || 1;
   });
 
+  // ========================================
+  // ESTADÍSTICAS GENERALES DEL MÓDULO
+  // ========================================
+  
+  // Total de aspirantes
+  totalAspirants = computed(() => this.aspirants().length);
+
+  // Aspirantes con registro completo
+  completedAspirants = computed(() => {
+    return this.aspirants().filter(a => 
+      a.processStatus?.registrationComplete === true
+    ).length;
+  });
+
+  // Carrera más solicitada
+  topCareer = computed(() => {
+    const aspirants = this.aspirants();
+    if (aspirants.length === 0) return 'N/A';
+
+    // Contar todas las carreras de interés
+    const careerCount: { [key: string]: number } = {};
+    
+    aspirants.forEach(a => {
+      a.careerInterests?.forEach(interest => {
+        const career = interest.career;
+        careerCount[career] = (careerCount[career] || 0) + 1;
+      });
+    });
+
+    // Encontrar la más solicitada
+    let maxCount = 0;
+    let topCareer = 'N/A';
+    
+    Object.entries(careerCount).forEach(([career, count]) => {
+      if (count > maxCount) {
+        maxCount = count;
+        topCareer = career;
+      }
+    });
+
+    return topCareer;
+  });
+
+  // Promedio general de calificaciones
+  averageGrade = computed(() => {
+    const aspirants = this.aspirants();
+    const withGrades = aspirants.filter(a => a.averageGrade && a.averageGrade > 0);
+    
+    if (withGrades.length === 0) return 0;
+    
+    const sum = withGrades.reduce((acc, a) => acc + (a.averageGrade || 0), 0);
+    return (sum / withGrades.length).toFixed(1);
+  });
+
   ngOnInit(): void {
     this.loadProspects();
   }

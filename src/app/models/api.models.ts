@@ -113,9 +113,13 @@ export interface Prospect {
   _id?: string;
 
   // Datos personales
+  fullName?: string;
   firstName: string;
   lastName: string;
   secondLastName?: string;
+  birthDate?: Date | string;
+  gender?: 'Masculino' | 'Femenino' | 'Otro' | 'Prefiero no decir';
+  curp?: string;
 
   // Datos de contacto
   email: string;
@@ -138,9 +142,11 @@ export interface Prospect {
   // Procedencia académica
   originIEMS?: string;
   originIEMSName?: string;
+  technicalMajor?: string;
   iemsCareer?: string;
   iemsAverage?: number;
-  currentSemester?: number;
+  averageGrade?: number;
+  currentSemester?: number | string;
   estimatedGraduationDate?: Date | string;
 
   // Interés en TecNM
@@ -197,9 +203,6 @@ export interface Prospect {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-
-  // Virtual
-  fullName?: string;
 }
 
 export interface Role {
