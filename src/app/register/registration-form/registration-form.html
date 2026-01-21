@@ -120,22 +120,23 @@
           <i class="fas fa-school text-sm"></i> Escuela de procedencia
         </div>
 
-        <div class="md:col-span-2">
+        <div class="md:col-span-2" #iemsContainer>
           <label class="block text-sm font-bold text-gray-700 mb-2">
             IEMS (Preparatoria/Bachillerato) <span class="text-red-500">*</span>
           </label>
 
           <div class="relative group">
-            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <i
+              class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+            ></i>
             <input
               type="text"
               formControlName="previousSchool"
-              (click)="showIemsList = true"
-              (input)="showIemsList = true"
-              class="w-full pl-12 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              (focus)="showIemsList = true"
+              (blur)="onBlurIems()"
               placeholder="Buscar tu escuela..."
-              (blur)="onBlur()"
               autocomplete="off"
+              class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-gray-600"
             />
 
             <ul
@@ -146,29 +147,29 @@
               <ng-container *ngIf="filteredIems.length > 0">
                 <li
                   *ngFor="let school of filteredIems"
-                  (click)="selectSchool(school.name)"
-                  class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-medium text-slate-700 border-b border-slate-50 last:border-none transition-colors"
+                  (mousedown)="selectSchool(school.name)"
+                  class="px-5 py-3.5 cursor-pointer hover:bg-blue-50 transition-colors border-b border-gray-50 last:border-none"
                 >
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-3">
                     <span
-                      class="font-bold text-slate-600 text-[10px] uppercase tracking-wider shrink-0"
+                      class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded-md uppercase shrink-0"
                     >
                       {{ school.state }}
                     </span>
-                    <span class="text-slate-400">|</span>
-                    <span class="truncate">{{ school.name }}</span>
+                    <span class="text-sm font-semibold text-gray-700 truncate">{{
+                      school.name
+                    }}</span>
                   </div>
                 </li>
               </ng-container>
-
               <li *ngIf="filteredIems.length === 0" class="px-4 py-10 text-center text-slate-400">
                 <i class="fas fa-search-minus mb-2 text-2xl block opacity-20"></i>
-                <span class="text-xs font-bold uppercase italic">Sin coincidencias</span>
+                <span class="text-xs font-bold uppercase italic tracking-wider"
+                  >Sin coincidencias</span
+                >
               </li>
             </ul>
           </div>
-
-          <div *ngIf="showIemsList" class="fixed inset-0 z-10" (click)="showIemsList = false"></div>
         </div>
       </section>
 
@@ -188,11 +189,10 @@
             <i
               class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
             ></i>
-
             <input
               type="text"
               [placeholder]="selectedIES() ? selectedIES()?.name : 'Buscar Tecnológico...'"
-              (focus)="showIesList = true"
+              (focus)="onFocusIes()"
               (input)="filterIes($event)"
               (blur)="onBlurIes()"
               class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-gray-600"
@@ -208,23 +208,26 @@
                 <li
                   *ngFor="let ies of filteredIes()"
                   (mousedown)="selectIes(ies)"
-                  class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-medium text-slate-700 border-b border-slate-50 last:border-none transition-colors"
+                  class="px-5 py-3.5 cursor-pointer hover:bg-blue-50 transition-colors border-b border-gray-50 last:border-none"
                 >
-                  <div class="flex items-center gap-2">
-                    <i class="fas fa-university text-blue-600 text-[10px]"></i>
-                    <span class="truncate">{{ ies.name }}</span>
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="bg-slate-100 text-slate-600 text-[9px] font-black px-2 py-0.5 rounded-md uppercase shrink-0"
+                    >
+                      {{ ies.address.state || 'N/A' }}
+                    </span>
+                    <span class="text-sm font-semibold text-gray-700 truncate">{{ ies.name }}</span>
                   </div>
                 </li>
               </ng-container>
-
               <li *ngIf="filteredIes().length === 0" class="px-4 py-10 text-center text-slate-400">
                 <i class="fas fa-search-minus mb-2 text-2xl block opacity-20"></i>
-                <span class="text-xs font-bold uppercase italic">Sin coincidencias</span>
+                <span class="text-xs font-bold uppercase italic tracking-wider"
+                  >Sin coincidencias</span
+                >
               </li>
             </ul>
           </div>
-
-          <div *ngIf="showIesList" class="fixed inset-0 z-10" (click)="showIesList = false"></div>
         </div>
       </section>
 

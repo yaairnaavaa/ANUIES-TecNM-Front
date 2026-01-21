@@ -1,4 +1,15 @@
-import { Component, inject, Output, EventEmitter, OnInit, signal, computed } from '@angular/core';
+import {
+  Component,
+  inject,
+  Output,
+  EventEmitter,
+  OnInit,
+  signal,
+  computed,
+  HostListener,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -9,13 +20,11 @@ import {
 } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
 import { curpValidator } from '../../validators/curp.validator';
-
 import { ProspectService } from '../../services/prospect.service';
 import { IemsService } from '../../services/iems.service';
 import { IesService } from '../../services/ies.service';
 import { CampaignService } from '../../services/campaign.service';
-import { Prospect } from '../../models/api.models';
-import { IES, Campaign } from '../../models/api.models';
+import { IES, Campaign, Prospect } from '../../models/api.models';
 
 interface IemsBasicInfo {
   name: string;
@@ -34,39 +43,62 @@ export class RegistrationForm implements OnInit {
   private iemsService = inject(IemsService);
   private iesService = inject(IesService);
   private campaignService = inject(CampaignService);
-  showIemsList = false;
-  isSelecting = false;
+
   @Output() onRegistrationSuccess = new EventEmitter<void>();
 
-  // UI state
+  // --- UI State (IEMS / Escuelas) ---
+  showIemsList = false;
+  isSelectingIems = false;
+  iemsData: IemsBasicInfo[] = [];
+  filteredIems: IemsBasicInfo[] = [];
+
+  // --- UI State (IES / Tecnológicos) ---
+  showIesList = false;
+  filteredIes = signal<IES[]>([]);
+  selectedIES = signal<IES | null>(null);
+
+  // --- Form State ---
   selectedMajors: string[] = [];
   isLoading = signal(false);
   showSuccess = signal(false);
   errorMessage = signal<string | null>(null);
   successData: any = null;
-  showIesList = false;
-  filteredIes = signal<any[]>([]);
 
-  // IEMS autocomplete
-  iemsData: IemsBasicInfo[] = []; // Nueva lista de objetos completa
-  filteredIems: IemsBasicInfo[] = []; // Ahora filtrará objetos
-
-  // Backend data
+  // --- Data Lists ---
   iesList = signal<IES[]>([]);
   campaignsList = signal<Campaign[]>([]);
-  selectedIES = signal<IES | null>(null);
 
+  @ViewChild('iemsContainer') iemsContainer!: ElementRef;
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    if (
+      this.showIemsList &&
+      this.iemsContainer &&
+      !this.iemsContainer.nativeElement.contains(event.target)
+    ) {
+      this.showIemsList = false;
+    }
+  }
+
+  // --- Computed Properties ---
+  // Cambia tu propiedad computada por esta:
   majorsList = computed(() => {
     const ies = this.selectedIES();
-    if (ies?.careers?.length) {
+
+    // Si hay una IES seleccionada Y tiene carreras activas, las mostramos
+    if (ies?.careers && ies.careers.filter((c) => c.active).length > 0) {
       return ies.careers
         .filter((c) => c.active)
         .map((c) => ({
           id: c.code || c.name,
           name: c.name,
-          meta: `${c.modality} · ${c.duration || 9} semestres`,
+          meta: `${c.modality || 'Presencial'} · ${c.duration || 9} semestres`,
         }));
     }
+
+    // Si no hay IES o la IES no tiene carreras registradas aún,
+    // mostramos la lista por defecto para que el formulario no se vea vacío
     return this.defaultMajorsList;
   });
 
@@ -75,13 +107,10 @@ export class RegistrationForm implements OnInit {
     email: new FormControl('', [Validators.required, Validators.email]),
     phoneNumber: new FormControl('', [Validators.required, Validators.pattern('^[0-9]{10}$')]),
     curp: new FormControl('', [curpValidator()]),
-
     previousSchool: new FormControl('', Validators.required),
     currentSemester: new FormControl(''),
     technicalMajor: new FormControl(''),
-
     campaign: new FormControl(''),
-
     privacyPolicy: new FormControl(false, Validators.requiredTrue),
   });
 
@@ -89,14 +118,13 @@ export class RegistrationForm implements OnInit {
     this.loadIEMS();
     this.loadIES();
     this.listenSchoolInput();
-    this.filteredIes.set(this.iesList());
   }
 
+  // --- Lógica IEMS (Preparatoria) ---
   loadIEMS(): void {
     this.iemsService.getAllIEMS({ active: true }).subscribe({
       next: (res) => {
         const data = res.data ?? [];
-        // Extraemos nombre y estado de la estructura anidada
         this.iemsData = data.map((i: any) => ({
           name: i.name,
           state: i.address?.state || 'N/A',
@@ -106,25 +134,13 @@ export class RegistrationForm implements OnInit {
     });
   }
 
-  loadIES(): void {
-    this.iesService.getAllIES({ active: true }).subscribe({
-      next: (res) => {
-        if (res.success && res.data) {
-          this.iesList.set(res.data);
-        }
-      },
-      error: (err) => console.error('Error cargando IES:', err),
-    });
-  }
-
   listenSchoolInput(): void {
     this.registrationForm.get('previousSchool')?.valueChanges.subscribe((value) => {
-      if (this.isSelecting) {
-        this.isSelecting = false;
+      if (this.isSelectingIems) {
+        this.isSelectingIems = false;
         return;
       }
 
-      // Si el input está vacío, mostramos toda la lista original
       if (!value) {
         this.filteredIems = this.iemsData;
         return;
@@ -135,17 +151,65 @@ export class RegistrationForm implements OnInit {
         (school) =>
           school.name.toLowerCase().includes(search) || school.state.toLowerCase().includes(search),
       );
-
-      // Abrimos la lista automáticamente al escribir
       this.showIemsList = true;
     });
   }
 
   selectSchool(schoolName: string): void {
-    this.isSelecting = true;
+    this.isSelectingIems = true;
     this.registrationForm.get('previousSchool')?.setValue(schoolName);
-    this.showIemsList = false; // Cerramos al seleccionar
+    this.showIemsList = false;
   }
+
+
+  // --- Lógica IES (Tecnológicos) ---
+  loadIES(): void {
+    this.iesService.getAllIES({ active: true }).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.iesList.set(res.data);
+          this.filteredIes.set(res.data); // Inicializa la lista filtrada para el primer clic
+        }
+      },
+      error: (err) => console.error('Error cargando IES:', err),
+    });
+  }
+
+  onFocusIes(): void {
+    this.showIesList = true;
+    // Si la lista de búsqueda está vacía, mostramos todos los Tecnológicos
+    if (this.filteredIes().length === 0) {
+      this.filteredIes.set(this.iesList());
+    }
+  }
+
+  filterIes(event: any): void {
+    const query = event.target.value.toLowerCase().trim();
+    this.showIesList = true;
+
+    if (!query) {
+      this.filteredIes.set(this.iesList());
+      return;
+    }
+
+    const results = this.iesList().filter((ies) => ies.name.toLowerCase().includes(query));
+    this.filteredIes.set(results);
+  }
+
+  selectIes(ies: IES): void {
+    this.selectedIES.set(ies);
+    this.showIesList = false;
+    // Reseteamos el filtro para la próxima vez que abra
+    this.filteredIes.set(this.iesList());
+  }
+
+  onBlurIes(): void {
+    setTimeout(() => {
+      this.showIesList = false;
+    }, 0);
+  }
+
+  // --- Lógica de Carreras ---
   toggleMajor(id: string): void {
     const index = this.selectedMajors.indexOf(id);
     if (index > -1) {
@@ -160,45 +224,33 @@ export class RegistrationForm implements OnInit {
     return index !== -1 ? `${index + 1}ª` : '';
   }
 
+  // --- Envío del Formulario ---
   onSubmit(): void {
     if (this.registrationForm.invalid || this.selectedMajors.length === 0) {
-      this.errorMessage.set(
-        'Por favor completa todos los campos requeridos y selecciona al menos una carrera.',
-      );
+      this.errorMessage.set('Completa los campos y selecciona al menos una carrera.');
       return;
     }
 
-    // Validar que se haya seleccionado una IES
     if (!this.selectedIES()?._id) {
-      this.errorMessage.set('Por favor selecciona un Tecnológico (IES) de interés.');
+      this.errorMessage.set('Selecciona un Tecnológico de interés.');
       return;
     }
 
     this.isLoading.set(true);
     this.errorMessage.set(null);
+
     const formValue = this.registrationForm.value;
     const firstCareer = this.majorsList().find((c) => c.id === this.selectedMajors[0]);
 
     const prospectData: any = {
-      // El backend espera fullName, no firstName/lastName por separado
       fullName: formValue.fullName!,
-
       email: formValue.email!,
-      phone: {
-        mobile: formValue.phoneNumber!,
-      },
-
-      // Normalizar CURP a mayúsculas y trim
+      phone: { mobile: formValue.phoneNumber! },
       curp: formValue.curp?.trim().toUpperCase() || undefined,
-
-      // El backend espera originIEMSName (string), no originIEMS (ObjectId)
       originIEMSName: formValue.previousSchool!,
       currentSemester: formValue.currentSemester || undefined,
       technicalMajor: formValue.technicalMajor || undefined,
-
-      // firstChoiceIES es requerido en el backend
       firstChoiceIES: this.selectedIES()!._id,
-
       careerInterests: this.selectedMajors.map((id, index) => {
         const career = this.majorsList().find((c) => c.id === id);
         return {
@@ -206,90 +258,58 @@ export class RegistrationForm implements OnInit {
           priority: index + 1,
         };
       }),
-
       originCampaign: formValue.campaign || undefined,
     };
 
     this.prospectService
       .createProspect(prospectData)
-      .pipe(
-        finalize(() => {
-          // Asegurar que isLoading siempre se restablezca, incluso si hay errores
-          this.isLoading.set(false);
-        }),
-      )
+      .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: (res) => {
-          console.log('Respuesta del registro:', res);
-
           if (res.success && res.data) {
             const data = res.data as any;
-            const prospectId = data.id || data._id;
-
             this.successData = {
               fullName: data.fullName,
               school: prospectData.originIEMSName,
               firstChoice: firstCareer?.name || 'N/A',
-              folio: prospectId?.toString().substring(0, 8).toUpperCase() || 'N/A',
+              folio: (data.id || data._id).toString().substring(0, 8).toUpperCase(),
             };
-
-            console.log('Mostrando mensaje de éxito con datos:', this.successData);
             this.showSuccess.set(true);
             this.onRegistrationSuccess.emit();
           } else {
-            console.error('Registro sin éxito:', res);
             this.errorMessage.set(res.message || 'Error al registrar');
           }
         },
-        error: (err) => {
-          console.error('Error en el registro:', err);
-          this.errorMessage.set(err.error?.message || 'Error al registrar el aspirante');
-        },
+        error: (err) => this.errorMessage.set(err.error?.message || 'Error en el servidor'),
       });
   }
 
-  // 3. Función de filtrado
-  filterIes(event: any) {
-    const query = event.target.value.toLowerCase();
-    this.showIesList = true;
-
-    if (!query) {
-      this.filteredIes.set(this.iesList());
-      return;
-    }
-
-    const results = this.iesList().filter((ies) => ies.name.toLowerCase().includes(query));
-    this.filteredIes.set(results);
+  onFocusIems() {
+    this.showIemsList = true;
   }
 
-  // 4. Selección del Tecnológico
-  selectIes(ies: any) {
-    this.selectedIES.set(ies);
-    this.showIesList = false;
-    // Opcional: limpiar el input después de seleccionar o emitir evento
+  filterIems(event: Event) {
+    const value = (event.target as HTMLInputElement).value.toLowerCase();
+
+    this.filteredIems = this.iemsData.filter((i) => i.name.toLowerCase().includes(value));
+
+    this.showIemsList = true;
   }
 
-  // 5. Cierre al perder foco
-  onBlurIes() {
-    setTimeout(() => {
-      this.showIemsList = false;
-    }, 200);
-  }
-
-  onBlur(): void {
-    // Damos un margen de 200ms para que el clic en la lista funcione
-    setTimeout(() => {
-      this.showIemsList = false;
-    }, 200);
-  }
   resetForm(): void {
     this.showSuccess.set(false);
-    this.registrationForm.reset({
-      privacyPolicy: false,
-    });
+    this.registrationForm.reset({ privacyPolicy: false });
     this.selectedMajors = [];
     this.successData = null;
     this.errorMessage.set(null);
+    this.selectedIES.set(null);
+  }
+
+  onBlurIems() {
+    // pequeño delay para permitir el mousedown del <li>
+    setTimeout(() => {
+      this.showIemsList = false;
+    }, 150);
   }
 
   defaultMajorsList = [
