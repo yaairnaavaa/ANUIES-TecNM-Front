@@ -12,7 +12,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../../../services/user.service';
 import { AuthService } from '../../../services/auth.service';
-import { User } from '../../../models/api.models';
+import { RoleService } from '../../../services/role.service';
+import { User, Role } from '../../../models/api.models';
 
 interface UserDisplay {
   id: string;
@@ -43,6 +44,7 @@ interface NewUserForm {
 export class IesUserManagement implements OnInit {
   private userService = inject(UserService);
   private authService = inject(AuthService);
+  private roleService = inject(RoleService);
 
   // Recibimos los datos del padre
   @Input() iesName: string = '';
@@ -61,6 +63,7 @@ export class IesUserManagement implements OnInit {
 
   users = signal<UserDisplay[]>([]);
   rawUsers = signal<User[]>([]);
+  availableRoles = signal<Role[]>([]);
 
   // Formulario para nuevo usuario
   newUser = signal<NewUserForm>({
@@ -70,11 +73,31 @@ export class IesUserManagement implements OnInit {
     email: '',
     password: '',
     phone: '',
-    role: 'Operativo IES'
+    role: ''
   });
 
   ngOnInit() {
     this.loadUsers();
+    this.loadRoles();
+  }
+
+  /**
+   * Cargar roles disponibles
+   */
+  loadRoles() {
+    this.roleService.getAllRoles().subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          // Filtrar solo roles relacionados con IES
+          this.availableRoles.set(response.data.filter(r => 
+            r.name === 'Admin IES' || r.name === 'Operativo IES'
+          ));
+        }
+      },
+      error: (error) => {
+        console.error('Error cargando roles:', error);
+      },
+    });
   }
 
   /**
@@ -116,7 +139,7 @@ export class IesUserManagement implements OnInit {
     return users.map((u) => ({
       id: u._id || '',
       fullName: `${u.firstName} ${u.lastName} ${u.secondLastName || ''}`.trim(),
-      jobTitle: u.role,
+      jobTitle: typeof u.role === 'object' ? (u.role as Role).displayName || (u.role as Role).name : u.role as string,
       email: u.email,
       lastAccess: u.updatedAt ? new Date(u.updatedAt).toISOString().split('T')[0] : 'N/A',
       status: u.active ? 'Active' : 'Inactive',
@@ -170,7 +193,7 @@ export class IesUserManagement implements OnInit {
     const form = this.newUser();
     
     // Validaciones básicas
-    if (!form.firstName || !form.lastName || !form.email || !form.password) {
+    if (!form.firstName || !form.lastName || !form.email || !form.password || !form.role) {
       alert('Por favor complete todos los campos obligatorios');
       return;
     }
@@ -188,7 +211,7 @@ export class IesUserManagement implements OnInit {
       email: form.email,
       password: form.password,
       phone: form.phone || undefined,
-      role: form.role as any,
+      role: form.role, // Aquí ya está el _id del rol
       ies: iesIdToUse,
       active: true
     };
@@ -221,7 +244,7 @@ export class IesUserManagement implements OnInit {
       email: '',
       password: '',
       phone: '',
-      role: 'Operativo IES'
+      role: ''
     });
   }
 
@@ -237,80 +260,6 @@ export class IesUserManagement implements OnInit {
       next: () => {
         this.loadUsers();
         alert('Usuario eliminado correctamente');
-      },
-      error: (error) => {
-        console.error('Error eliminando usuario:', error);
-        alert('Error al eliminar el usuario');
-      },
-    });
-  }
-
-  /**
-   * Cambiar estado activo/inactivo
-   */
-  toggleUserStatus(userId: string, currentStatus: 'Active' | 'Inactive'): void {
-    const newStatus = currentStatus === 'Active';
-
-    this.userService.toggleUserStatus(userId, !newStatus).subscribe({
-      next: () => {
-        this.loadUsers();
-      },
-      error: (error) => {
-        console.error('Error cambiando estado:', error);
-        alert('Error al cambiar el estado del usuario');
-      },
-    });
-  }
-}
-    }));
-  }
-
-  filteredUsers = computed(() => {
-    const query = this.searchQuery().toLowerCase().trim();
-    return this.users().filter(
-      (u) => u.fullName.toLowerCase().includes(query) || u.email.toLowerCase().includes(query),
-    );
-  });
-
-  totalUsers = computed(() => this.users().length);
-
-  // Propiedad computada para saber si ya no caben más usuarios
-  isLimitReached = computed(() => this.users().length >= this.maxUsers());
-
-  // Esta es la función que te marcaba el error en el HTML
-  toggleAddUser(): void {
-    if (this.isLimitReached() && !this.isAddingUser()) {
-      alert('Se ha alcanzado el límite máximo de usuarios permitidos.');
-      return;
-    }
-    this.isAddingUser.update((val) => !val);
-  }
-
-  // Reemplazamos el método problemático por uno que emite el evento
-  backToList(): void {
-    this.close.emit();
-  }
-
-  getInitials(name: string): string {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
-  }
-
-  /**
-   * Eliminar usuario
-   */
-  deleteUser(userId: string): void {
-    if (!confirm('¿Desea eliminar este usuario?')) {
-      return;
-    }
-
-    this.userService.deleteUser(userId).subscribe({
-      next: () => {
-        this.loadUsers();
       },
       error: (error) => {
         console.error('Error eliminando usuario:', error);

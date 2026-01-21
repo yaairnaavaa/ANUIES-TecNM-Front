@@ -5,7 +5,7 @@ export interface User {
   secondLastName?: string;
   email: string;
   password?: string;
-  role: 'Admin Nacional' | 'Admin IES' | 'Operativo IES' | 'Interesado';
+  role: string | Role | 'Admin Nacional' | 'Admin IES' | 'Operativo IES' | 'Interesado';
   phone?: string;
   ies?: string | IES;
   iems?: string;
