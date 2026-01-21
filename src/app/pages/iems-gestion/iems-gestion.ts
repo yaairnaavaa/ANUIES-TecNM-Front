@@ -56,16 +56,32 @@ export class IemsGestion implements OnInit {
   // Opciones
   typeOptions = [
     { value: 'all', label: 'Tipo de IEMS' },
-    { value: 'CBTis', label: 'CBTis' },
-    { value: 'CETis', label: 'CETis' },
+
+    { value: 'BACHEST', label: 'Bachillerato Estatal' },
+    { value: 'COBACH', label: 'COBACH' },
+    { value: 'DGB', label: 'DGB' },
+    { value: 'DGB (CAED)', label: 'DGB (CAED)' },
+    { value: 'UEMSTIS', label: 'UEMSTIS' },
+    { value: 'UEMSTAYCM', label: 'UEMSTAYCM' },
+    { value: 'AUTÓNOMA', label: 'Autónoma' },
+    { value: 'LCAE CMYOTENTAÑA', label: 'LCAE CMYOTENTAÑA' },
+    { value: 'LCOESCYTE', label: 'LCOESCYTE' },
+    { value: 'CECYTE', label: 'CECYTE' },
+    { value: 'GCAEMCYETZE', label: 'GCAEMCYETZE' },
+    { value: 'RCAESC YIITE', label: 'RCAESC YIITE' },
+    { value: 'EMSAD', label: 'EMSAD' },
     { value: 'CONALEP', label: 'CONALEP' },
-    { value: 'Bachillerato General', label: 'Bachillerato General' },
-    { value: 'Bachillerato Tecnológico', label: 'Bachillerato Tecnológico' },
-    { value: 'Telebachillerato', label: 'Telebachillerato' },
-    { value: 'Preparatoria', label: 'Preparatoria' },
-    { value: 'Otro', label: 'Otro' },
-    { value: 'TELEBACHCOMUNITARIOS', label: 'Telebachcomunitarios' },
-    { value: 'TELEBACH', label: 'Telebach' },
+    { value: 'PREPAABIERTA', label: 'Preparatoria Abierta' },
+    { value: 'TELEBACH', label: 'Telebachillerato' },
+    { value: 'TELEBACHCOMUNITARIOS', label: 'Telebachillerato Comunitario' },
+    { value: 'CCAELCVYILTLEITO)', label: 'CCAELCVYILTLEITO' },
+    { value: 'PREFECO', label: 'PREFECO' },
+    { value: 'RCOECMYOTE', label: 'RCOECMYOTE' },
+    { value: 'TCOOBACH', label: 'TCOOBACH' },
+    { value: 'BTED', label: 'BTED' },
+    { value: 'BACHPART', label: 'Bachillerato Particular' },
+    { value: 'OCECYTE', label: 'OCECYTE' },
+    { value: 'CBTis', label: 'CBTis' },
   ];
 
   stateOptions = [
@@ -133,15 +149,30 @@ export class IemsGestion implements OnInit {
    */
   filteredIEMS = computed(() => {
     let filtered = this.iemsList();
-    // ... (filtro de búsqueda igual)
+    const query = this.searchQuery().toLowerCase().trim();
 
-    // Filtro por tipo: si es vacío o 'all', no filtrar
-    const typeFilter = this.selectedType().toLowerCase();
-    if (typeFilter && typeFilter !== 'all') {
-      filtered = filtered.filter((iems) => iems.type?.toLowerCase() === typeFilter);
+    // 1. Filtro de búsqueda por texto (Nombre, Clave o Municipio)
+    if (query) {
+      filtered = filtered.filter(
+        (iems) =>
+          iems.name?.toLowerCase().includes(query) ||
+          iems.code?.toLowerCase().includes(query) ||
+          iems.address?.municipality?.toLowerCase().includes(query),
+      );
     }
 
-    // ... (filtro de estado igual)
+    // 2. Filtro por tipo: si es vacío o 'all', no filtrar
+    const typeFilter = this.selectedType();
+    if (typeFilter && typeFilter !== 'all') {
+      filtered = filtered.filter((iems) => iems.type === typeFilter);
+    }
+
+    // 3. Filtro por estado (CORRECCIÓN AQUÍ)
+    const stateFilter = this.selectedState();
+    if (stateFilter && stateFilter !== 'all') {
+      filtered = filtered.filter((iems) => iems.address?.state === stateFilter);
+    }
+
     return filtered;
   });
 

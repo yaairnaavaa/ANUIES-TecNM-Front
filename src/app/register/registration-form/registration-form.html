@@ -1,9 +1,7 @@
 <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-3xl mx-auto overflow-hidden">
   <div class="text-center p-8 border-b border-gray-100">
     <h2 class="text-3xl font-extrabold text-gray-800 tracking-tight">Registro de Aspirante</h2>
-    <p class="text-gray-500 mt-2 font-medium">
-      Completa tus datos para recibir información
-    </p>
+    <p class="text-gray-500 mt-2 font-medium">Completa tus datos para recibir información</p>
   </div>
 
   <div class="p-6 md:p-10">
@@ -152,7 +150,7 @@
                 >
                   <div class="flex items-center gap-3">
                     <span
-                      class="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded-md uppercase shrink-0"
+                      class="bg-slate-100 text-slate-600 text-[9px] font-black px-2 py-0.5 rounded-md uppercase shrink-0"
                     >
                       {{ school.state }}
                     </span>
@@ -162,7 +160,7 @@
                   </div>
                 </li>
               </ng-container>
-              <li *ngIf="filteredIems.length === 0" class="px-4 py-10 text-center text-slate-400">
+              <li *ngIf="filteredIems.length === 0" class="px-4 py-10 text-center text-slate-700">
                 <i class="fas fa-search-minus mb-2 text-2xl block opacity-20"></i>
                 <span class="text-xs font-bold uppercase italic tracking-wider"
                   >Sin coincidencias</span
@@ -191,7 +189,8 @@
             ></i>
             <input
               type="text"
-              [placeholder]="selectedIES() ? selectedIES()?.name : 'Buscar Tecnológico...'"
+              placeholder="Buscar Tecnológico..."
+              [value]="selectedIES() ? selectedIES()?.name : ''"
               (focus)="onFocusIes()"
               (input)="filterIes($event)"
               (blur)="onBlurIes()"
@@ -220,7 +219,7 @@
                   </div>
                 </li>
               </ng-container>
-              <li *ngIf="filteredIes().length === 0" class="px-4 py-10 text-center text-slate-400">
+              <li *ngIf="filteredIes().length === 0" class="px-4 py-10 text-center text-slate-700">
                 <i class="fas fa-search-minus mb-2 text-2xl block opacity-20"></i>
                 <span class="text-xs font-bold uppercase italic tracking-wider"
                   >Sin coincidencias</span

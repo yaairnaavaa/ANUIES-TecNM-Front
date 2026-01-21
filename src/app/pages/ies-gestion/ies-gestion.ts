@@ -34,7 +34,9 @@ export class IesGestion implements OnInit {
 
   // Datos desde backend
   iesList = signal<IES[]>([]);
-  errorMessage = signal<string>('');
+  // Agrega | null para que TypeScript permita resetearlas con null
+  errorMessage = signal<string | null>(null);
+  successMessage = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadIES();
@@ -58,6 +60,10 @@ export class IesGestion implements OnInit {
         this.isLoading.set(false);
       },
     });
+  }
+
+  closeModal() {
+    this.isAdding.set(false);
   }
 
   // Métodos para cambiar de vista
@@ -159,18 +165,34 @@ export class IesGestion implements OnInit {
 
   saveIES() {
     this.isLoading.set(true);
-    this.errorMessage.set('');
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
 
     this.iesService.createIES(this.newIes()).subscribe({
       next: (response) => {
-        this.loadIES(); // Recargar lista
+        // 1. Establecemos el mensaje (se verá en el toast externo)
+        this.successMessage.set('Institución registrada correctamente');
+
+        // 2. CERRAMOS EL MODAL INMEDIATAMENTE
+        this.isAdding.set(false); // O llama a this.closeModal() si limpia más datos
+
+        this.loadIES();
         this.isLoading.set(false);
-        this.toggleAdd();
+
+        // Limpiar el toast después de unos segundos
+        setTimeout(() => this.successMessage.set(null), 3500);
       },
       error: (error) => {
         console.error('Error creando IES:', error);
-        this.errorMessage.set('Error al crear la IES');
+        this.errorMessage.set('Error al guardar: Verifique los datos');
+
+        // 3. OPCIONAL: Cerrar también en error
+        // Si quieres que el usuario corrija, no lo cierres aquí.
+        // Pero si quieres que se cierre como pediste:
+        this.isAdding.set(false);
+
         this.isLoading.set(false);
+        setTimeout(() => this.errorMessage.set(null), 5000);
       },
     });
   }
