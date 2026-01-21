@@ -19,6 +19,10 @@ export const routes: Routes = [
     canActivate: [loginGuard],
   },
   {
+    path: 'register/:campaignId',
+    component: Register,
+  },
+  {
     path: 'register',
     component: Register,
   },

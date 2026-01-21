@@ -1,6 +1,7 @@
 import {
   Component,
   inject,
+  Input,
   Output,
   EventEmitter,
   OnInit,
@@ -44,6 +45,7 @@ export class RegistrationForm implements OnInit {
   private iesService = inject(IesService);
   private campaignService = inject(CampaignService);
 
+  @Input() campaignId: string | null = null;
   @Output() onRegistrationSuccess = new EventEmitter<void>();
 
   // --- UI State (IEMS / Escuelas) ---
@@ -67,6 +69,7 @@ export class RegistrationForm implements OnInit {
   // --- Data Lists ---
   iesList = signal<IES[]>([]);
   campaignsList = signal<Campaign[]>([]);
+  currentCampaign = signal<Campaign | null>(null);
 
   @ViewChild('iemsContainer') iemsContainer!: ElementRef;
 
@@ -118,6 +121,55 @@ export class RegistrationForm implements OnInit {
     this.loadIEMS();
     this.loadIES();
     this.listenSchoolInput();
+    
+    // Cargar campaña si se proporciona un ID
+    if (this.campaignId) {
+      this.loadCampaign(this.campaignId);
+    }
+  }
+
+  /**
+   * Cargar información de la campaña específica
+   */
+  loadCampaign(campaignId: string): void {
+    console.log('🔍 Cargando información de la campaña:', campaignId);
+    
+    this.campaignService.getCampaignById(campaignId).subscribe({
+      next: (response: any) => {
+        console.log('✅ Respuesta de la campaña:', response);
+        
+        // Manejar diferentes estructuras de respuesta
+        const isSuccess = response.success === true || response.status === 'success';
+        const campaignData = response.data;
+        
+        if (isSuccess && campaignData) {
+          this.currentCampaign.set(campaignData);
+          console.log('📋 Campaña cargada:', campaignData);
+          
+          // Pre-llenar el campo de campaña en el formulario
+          this.registrationForm.patchValue({
+            campaign: campaignData.name || campaignId
+          });
+        } else {
+          console.warn('⚠️ No se pudo cargar la campaña');
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error al cargar la campaña:', error);
+        this.errorMessage.set('No se pudo cargar la información de la campaña');
+      }
+    });
+  }
+
+  /**
+   * Obtener nombre de la IES de forma segura (maneja tanto iesName como name)
+   */
+  getIESName(): string | null {
+    const campaign = this.currentCampaign();
+    if (!campaign?.ies) return null;
+    
+    const ies: any = campaign.ies;
+    return ies.iesName || ies.name || null;
   }
 
   // --- Lógica IEMS (Preparatoria) ---

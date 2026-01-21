@@ -16,6 +16,7 @@ export class Navbar {
   @Input() subtitulo: string = 'Instituto Tecnológico de Aguascalientes';
   @Input() evento: string = 'Feria Universitaria 2024';
   @Input() registrosHoy: number = 47;
+  @Input() campaign: any = null; // Información de la campaña
 
   // Estado del Modal
   isModalOpen: boolean = false;
@@ -35,5 +36,20 @@ export class Navbar {
   copyLink() {
     navigator.clipboard.writeText(this.qrUrl);
     alert('¡Enlace copiado al portapapeles!');
+  }
+
+  /**
+   * Obtener nombre de la IES de la campaña
+   */
+  getCampaignIESName(): string {
+    if (!this.campaign?.ies) return this.subtitulo;
+    return this.campaign.ies.iesName || this.campaign.ies.name || this.subtitulo;
+  }
+
+  /**
+   * Obtener nombre del evento/campaña
+   */
+  getCampaignName(): string {
+    return this.campaign?.name || this.evento;
   }
 }
