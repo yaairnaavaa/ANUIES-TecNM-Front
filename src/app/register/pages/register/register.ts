@@ -27,6 +27,11 @@ export class Register implements OnInit {
         this.campaignId.set(id);
         console.log('📋 ID de campaña capturado:', id);
         this.loadCampaign(id);
+      } else {
+        // Si no hay identificador en la ruta, mostrar error
+        this.campaignError.set('Campaña no encontrada. El enlace de registro debe incluir un identificador de campaña válido.');
+        this.isLoadingCampaign.set(false);
+        console.warn('⚠️ No se proporcionó un identificador de campaña en la ruta');
       }
     });
   }

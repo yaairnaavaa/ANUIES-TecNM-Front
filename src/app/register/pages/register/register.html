@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-[#1a2e4c] flex flex-col">
   <!-- Navbar solo se muestra si no hay error de campaña -->
   @if (!campaignError()) {
-    <app-navbar [campaign]="currentCampaign()"></app-navbar>
+    <app-navbar [campaign]="currentCampaign()" [campaignId]="campaignId()"></app-navbar>
   }
 
   <!-- Spinner de carga -->
@@ -32,13 +32,6 @@
             Verifica que el enlace sea correcto o contacta al responsable de la campaña.
           </p>
         </div>
-        <a 
-          href="/register" 
-          class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl text-center transition-colors"
-        >
-          <i class="fas fa-arrow-left mr-2"></i>
-          Ir al registro general
-        </a>
       </div>
     </div>
   }
