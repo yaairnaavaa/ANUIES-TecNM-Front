@@ -6,7 +6,7 @@ import { Campaign, ApiResponse } from '../models/api.models';
 
 export interface CampaignFilters {
   ies?: string;
-  type?: 'Presencial' | 'Tradicional' | 'Digital';
+  type?: 'Presencial' | 'Virtual';
   status?: 'Planificada' | 'En Curso' | 'Finalizada' | 'Cancelada' | 'Pausada';
 }
 
@@ -14,7 +14,7 @@ export interface CreateCampaignDto {
   ies: string;
   name: string;
   description?: string;
-  type: 'Presencial' | 'Tradicional' | 'Digital';
+  type: 'Presencial' | 'Virtual';
   specificModality: string;
   period: {
     startDate: string | Date;
@@ -104,40 +104,17 @@ export class CampaignService {
   /**
    * Obtener modalidades específicas por tipo de campaña
    */
-  getModalitiesByType(type: 'Presencial' | 'Tradicional' | 'Digital'): string[] {
+  getModalitiesByType(type: 'Presencial' | 'Virtual'): string[] {
     const modalities = {
       'Presencial': [
-        'Conferencias',
-        'Proyectos de innovación',
-        'Visitas a IEMS',
-        'Visitas guiadas a campus',
-        'Volanteo',
-        'Open house',
-        'Ferias universitarias',
-        'Participación en eventos académicos y deportivos',
-        'Transporte institucional a actividades del campus',
-        'Difusión en talleres y laboratorios',
-        'Actividades culturales y demostraciones'
+        'Feria/Evento',
+        'Visita a escuela'
       ],
-      'Tradicional': [
-        'Radio institucional y comercial',
-        'Televisión local o estatal',
-        'Publicidad impresa en periódico',
-        'Espectaculares digitales y analógicos',
-        'Revistas especializadas en educación',
-        'Perifoneo'
-      ],
-      'Digital': [
+      'Virtual': [
         'Facebook',
         'Instagram',
         'TikTok',
-        'YouTube y videoblogs',
-        'Telegram',
-        'WhatsApp',
-        'Mensajería SMS',
-        'Reels y Trends',
-        'Publicaciones fotográficas especializadas',
-        'Videoconferencias en plataformas educativas'
+        'YouTube'
       ]
     };
 

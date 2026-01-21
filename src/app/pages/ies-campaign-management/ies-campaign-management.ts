@@ -7,6 +7,7 @@ import { Campaign, IES, IEMS } from '../../models/api.models';
 import { IesService } from '../../services/ies.service';
 import { IemsService } from '../../services/iems.service';
 import { UserService } from '../../services/user.service';
+import { CycleService } from '../../services/cycle.service';
 
 interface CampaignDisplay {
   id: string;
@@ -47,6 +48,7 @@ export class IesCampaignManagementComponent implements OnInit {
   private iesService = inject(IesService); // Necesario para cargar carreras de la IES
   private iemsService = inject(IemsService);
   private userService = inject(UserService);
+  private cycleService = inject(CycleService);
   private fb = inject(FormBuilder);
 
   // Data
@@ -98,6 +100,9 @@ export class IesCampaignManagementComponent implements OnInit {
   careersList = signal<MockCareer[]>([]);
   selectedCareers = signal<string[]>([]);
 
+  // Ciclo Activo
+  activeCycle = signal<any>(null);
+
   // Combos dinámicos
   campaignTypes = ['Presencial', 'Digital'];
   filteredCampaignTypes = signal<string[]>(['Presencial', 'Digital']);
@@ -138,6 +143,7 @@ export class IesCampaignManagementComponent implements OnInit {
     this.loadCampaigns();
     this.loadIEMS(); // Cargar IEMS para campañas presenciales
     this.loadIES(); // Cargar IES para selección de campaña
+    this.loadActiveCycle(); // Cargar ciclo activo
     this.loadMockData();
     this.loadCareersFromIES();
   }
@@ -146,22 +152,31 @@ export class IesCampaignManagementComponent implements OnInit {
    * Cargar IES desde backend
    */
   loadIES() {
-    console.log('🏫 Cargando IES...');
-    
     this.iesService.getAllIES({ active: true }).subscribe({
       next: (response) => {
-        console.log('✅ Respuesta IES recibida:', response);
-        
         if (response.success && response.data) {
-          console.log(`📋 IES cargadas: ${response.data.length} registros`);
           this.iesList.set(response.data);
           this.filteredIESForCampaign.set(response.data);
-        } else {
-          console.warn('⚠️ Respuesta sin datos IES:', response);
         }
       },
       error: (error) => {
         console.error('❌ Error cargando IES:', error);
+      }
+    });
+  }
+
+  /**
+   * Cargar ciclo activo actual
+   */
+  loadActiveCycle() {
+    this.cycleService.getCurrentActiveCycle().subscribe({
+      next: (response) => {
+        if (response.data && response.data.currentActive) {
+          this.activeCycle.set(response.data.currentActive);
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error cargando ciclo activo:', error);
       }
     });
   }
@@ -205,7 +220,7 @@ export class IesCampaignManagementComponent implements OnInit {
       // Evaluación
       evaluationNotes: [''],
       
-      // Responsable
+      // Responsable (se bloqueará después de establecer el valor)
       responsible: [''],
       responsibleId: [''],
       
@@ -239,19 +254,14 @@ export class IesCampaignManagementComponent implements OnInit {
    * Cargar IEMS desde backend
    */
   loadIEMS() {
-    console.log('🔄 Iniciando carga de IEMS...');
     this.isLoading.set(true);
     
     this.iemsService.getAllIEMS({ active: true }).subscribe({
       next: (response) => {
-        console.log('✅ Respuesta IEMS recibida:', response);
-        
         if (response.success && response.data) {
-          console.log(`📋 IEMS cargadas: ${response.data.length} registros`);
           this.iemsList.set(response.data);
           this.filteredIEMS.set(response.data);
         } else {
-          console.warn('⚠️ Respuesta sin datos:', response);
           this.errorMessage.set('No se encontraron IEMS activas');
         }
         
@@ -259,12 +269,6 @@ export class IesCampaignManagementComponent implements OnInit {
       },
       error: (error) => {
         console.error('❌ Error cargando IEMS:', error);
-        console.error('Detalles del error:', {
-          status: error.status,
-          statusText: error.statusText,
-          message: error.error?.message || error.message,
-          url: error.url
-        });
         
         this.errorMessage.set(
           `Error al cargar IEMS: ${error.error?.message || error.message || 'Error desconocido'}`
@@ -287,13 +291,8 @@ export class IesCampaignManagementComponent implements OnInit {
    * Cargar carreras de la IES del usuario autenticado o todas si no tiene IES
    */
   loadCareersFromIES() {
-    console.log('🎓 Cargando carreras...');
-    
     const user = this.authService.currentUser();
-    console.log('👤 Usuario actual:', user);
-    
     const userIES = user?.ies;
-    console.log('🏫 IES del usuario:', userIES);
     
     if (userIES && typeof userIES === 'object') {
       // Si userIES es un objeto completo con carreras
@@ -305,14 +304,11 @@ export class IesCampaignManagementComponent implements OnInit {
             name: c.name,
             code: c.code || ''
           }));
-        console.log(`✅ Carreras cargadas desde objeto IES: ${careers.length}`);
         this.careersList.set(careers);
       } else {
-        console.warn('⚠️ IES no tiene carreras definidas, cargando todas');
         this.loadAllCareers();
       }
     } else if (userIES && typeof userIES === 'string') {
-      console.log('📝 IES es un ID, cargando datos completos');
       // Si userIES es solo un ID, cargar datos completos de la IES
       this.iesService.getIESById(userIES).subscribe({
         next: (response) => {
@@ -324,21 +320,17 @@ export class IesCampaignManagementComponent implements OnInit {
                 name: c.name,
                 code: c.code || ''
               }));
-            console.log(`✅ Carreras cargadas desde API: ${careers.length}`);
             this.careersList.set(careers);
           } else {
-            console.warn('⚠️ No se encontraron carreras en la IES, cargando todas');
             this.loadAllCareers();
           }
         },
         error: (error) => {
           console.error('❌ Error cargando carreras de la IES:', error);
-          console.log('🔄 Cargando todas las carreras como fallback');
           this.loadAllCareers();
         }
       });
     } else {
-      console.log('🌐 Usuario sin IES asignada, cargando todas las carreras');
       // Si no hay IES, consultar todas
       this.loadAllCareers();
     }
@@ -348,13 +340,9 @@ export class IesCampaignManagementComponent implements OnInit {
    * Cargar todas las carreras de todas las IES activas
    */
   private loadAllCareers() {
-    console.log('🔄 Consultando todas las IES para obtener carreras...');
-    
     this.iesService.getAllIES({ active: true }).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          console.log(`📚 IES recibidas: ${response.data.length}`);
-          
           // Crear un Set para evitar duplicados
           const careersMap = new Map<string, MockCareer>();
           
@@ -379,20 +367,16 @@ export class IesCampaignManagementComponent implements OnInit {
           const allCareers = Array.from(careersMap.values());
           
           if (allCareers.length > 0) {
-            console.log(`✅ Total de carreras únicas cargadas: ${allCareers.length}`);
             this.careersList.set(allCareers);
           } else {
-            console.warn('⚠️ No se encontraron carreras en ninguna IES, usando mock');
             this.careersList.set(this.mockCareers);
           }
         } else {
-          console.warn('⚠️ No se recibieron IES, usando carreras mock');
           this.careersList.set(this.mockCareers);
         }
       },
       error: (error) => {
         console.error('❌ Error cargando todas las IES:', error);
-        console.warn('🔧 Usando carreras mock como último recurso');
         this.careersList.set(this.mockCareers);
       }
     });
@@ -419,10 +403,16 @@ export class IesCampaignManagementComponent implements OnInit {
     this.errorMessage.set(null);
 
     this.campaignService.getCampaigns().subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.rawCampaigns.set(response.data);
-          this.allCampaigns.set(this.mapCampaignsToDisplay(response.data));
+      next: (response: any) => {
+        console.log('📋 Respuesta de campañas:', response);
+        
+        // Manejar diferentes estructuras de respuesta del API
+        const isSuccess = response.success === true || response.status === 'success';
+        const campaignsData = response.data || [];
+        
+        if (isSuccess && campaignsData.length >= 0) {
+          this.rawCampaigns.set(campaignsData);
+          this.allCampaigns.set(this.mapCampaignsToDisplay(campaignsData));
         }
         this.isLoading.set(false);
       },
@@ -437,14 +427,15 @@ export class IesCampaignManagementComponent implements OnInit {
   /**
    * Mapear campañas del backend al formato del componente
    */
-  private mapCampaignsToDisplay(campaigns: Campaign[]): CampaignDisplay[] {
+  private mapCampaignsToDisplay(campaigns: any[]): CampaignDisplay[] {
     return campaigns.map(c => {
+      // Manejar el objeto ies que puede tener diferentes estructuras
       const ies = typeof c.ies === 'object' ? c.ies : null;
-      const institutionName = ies ? (ies.name || 'Sin IES') : 'Sin IES';
+      const institutionName = ies ? (ies.iesName || ies.name || 'Sin IES') : 'Sin IES';
       
       // Mapear estado
       let status: 'Active' | 'Finished' | 'Draft' | 'Cancelled' | 'Paused' = 'Draft';
-      if (c.status === 'En curso') status = 'Active';
+      if (c.status === 'En curso' || c.status === 'En Curso') status = 'Active';
       else if (c.status === 'Finalizada') status = 'Finished';
       else if (c.status === 'Cancelada') status = 'Cancelled';
       else if (c.status === 'Pausada') status = 'Paused';
@@ -589,8 +580,16 @@ export class IesCampaignManagementComponent implements OnInit {
    * Abrir modal para nueva campaña
    */
   openModal() {
+    const currentUser = this.authService.currentUser();
+
     this.isEditMode.set(false);
     this.editingCampaignId.set(null);
+    
+    // Construir nombre completo del usuario
+    const fullName = currentUser?.firstName 
+      ? `${currentUser.firstName} ${currentUser.lastName || ''}`.trim()
+      :  '';
+    
     this.campaignForm.reset({
       active: true,
       reachUnit: 'Personas',
@@ -598,8 +597,18 @@ export class IesCampaignManagementComponent implements OnInit {
       actualReach: 0,
       totalCost: 0,
       costPerImpact: 0,
-      type: 'Presencial' // Por defecto Presencial
+      type: 'Presencial', // Por defecto Presencial
+      responsibleId: currentUser?.id || ''
     });
+    
+    // Establecer el nombre del usuario responsable y luego deshabilitar el campo
+    this.campaignForm.patchValue({
+      responsible: fullName
+    });
+    
+    // Deshabilitar el campo después de establecer el valor
+    this.campaignForm.get('responsible')?.disable();
+    
     this.selectedCareers.set([]);
     this.selectedIEMS.set(null);
     this.selectedIEMSName.set('');
@@ -666,65 +675,132 @@ export class IesCampaignManagementComponent implements OnInit {
     
     if (!iesId) {
       this.errorMessage.set('Debe seleccionar una IES para la campaña');
+      this.isLoading.set(false);
+      return;
+    }
+
+    // Validar que haya un ciclo activo
+    if (!this.activeCycle()) {
+      this.errorMessage.set('No hay un ciclo activo disponible');
+      this.isLoading.set(false);
       return;
     }
     
+    // Construir el objeto de campaña con la estructura correcta del API
     const campaignData = {
-      ies: iesId, // IES del usuario o seleccionada
+      ies: {
+        iesId: iesId
+      },
       name: formValue.name,
-      description: formValue.description,
+      description: formValue.description || '',
       type: formValue.type,
       specificModality: formValue.specificModality,
       period: {
-        startDate: formValue.startDate,
-        endDate: formValue.endDate
+        startDate: new Date(formValue.startDate).toISOString(),
+        endDate: new Date(formValue.endDate).toISOString()
       },
       reach: {
-        estimated: formValue.estimatedReach,
-        actual: formValue.actualReach || undefined,
+        estimated: Number(formValue.estimatedReach) || 0,
+        actual: formValue.actualReach ? Number(formValue.actualReach) : 0,
         unit: formValue.reachUnit
       },
       costs: {
-        total: formValue.totalCost,
-        costPerImpact: formValue.costPerImpact || undefined
+        total: Number(formValue.totalCost) || 0
       },
-      targetedIEMS: this.selectedIEMS() ? [this.selectedIEMS()!] : undefined,
-      targetedCareers: this.selectedCareers().length > 0 ? this.selectedCareers() : undefined,
-      responsible: formValue.responsibleId || undefined,
-      active: formValue.active,
-      // Notas de evaluación (los resultados numéricos se calcularán automáticamente)
-      evaluationNotes: formValue.evaluationNotes || undefined
+      // targetedIEMS solo si es tipo Presencial y hay IEMS seleccionada
+      ...(formValue.type === 'Presencial' && this.selectedIEMS() ? {
+        targetedIEMS: [{
+          iemsId: this.selectedIEMS()!
+        }]
+      } : {}),
+      // Carreras promocionadas
+      promotedCareers: this.selectedCareers().length > 0 ? this.selectedCareers() : [],
+      // Evidence (valores por defecto vacíos)
+      evidence: {
+        photos: [],
+        videos: [],
+        documents: [],
+        digitalLinks: []
+      },
+      // Responsible
+      responsible: {
+        id: formValue.responsibleId || user?.id || '',
+        name: user?.firstName 
+          ? `${user.firstName} ${user.lastName || ''}`.trim()
+          : ''
+      },
+      // Ciclo activo
+      cycle: {
+        cycleId: this.activeCycle()._id,
+        cycleName: this.activeCycle().name
+      }
     };
+
+    console.log('📤 Datos de la campaña a enviar:', JSON.stringify(campaignData, null, 2));
 
     if (this.isEditMode() && this.editingCampaignId()) {
       // Actualizar campaña existente
       this.campaignService.updateCampaign(this.editingCampaignId()!, campaignData as any).subscribe({
-        next: (response) => {
+        next: (response: any) => {
           this.isLoading.set(false);
-          if (response.success) {
-            this.successMessage.set('Campaña actualizada exitosamente');
+          console.log('✅ Respuesta del servidor (actualización):', response);
+          
+          // Verificar si la respuesta es exitosa (manejar diferentes estructuras de API)
+          const isSuccess = response.success === true || 
+                           response.status === 'success' || 
+                           response.data !== undefined;
+          
+          if (isSuccess) {
+            // Cerrar modal inmediatamente
+            this.showModal.set(false);
+            // Mostrar mensaje de éxito
+            this.successMessage.set('✅ Campaña actualizada exitosamente');
+            // Recargar lista de campañas
             this.loadCampaigns();
-            setTimeout(() => this.closeModal(), 1500);
+            // Limpiar mensaje después de 5 segundos
+            setTimeout(() => {
+              this.successMessage.set(null);
+            }, 5000);
+          } else {
+            this.errorMessage.set('No se pudo actualizar la campaña');
           }
         },
         error: (error) => {
           this.isLoading.set(false);
+          console.error('❌ Error al actualizar campaña:', error);
           this.errorMessage.set(error.error?.message || 'Error al actualizar la campaña');
         }
       });
     } else {
       // Crear nueva campaña
       this.campaignService.createCampaign(campaignData as any).subscribe({
-        next: (response) => {
+        next: (response: any) => {
           this.isLoading.set(false);
-          if (response.success) {
-            this.successMessage.set('Campaña creada exitosamente');
+          console.log('✅ Respuesta del servidor (creación):', response);
+          
+          // Verificar si la respuesta es exitosa (manejar diferentes estructuras de API)
+          const isSuccess = response.success === true || 
+                           response.status === 'success' || 
+                           response.data !== undefined;
+          
+          if (isSuccess) {
+            // Cerrar modal inmediatamente
+            this.showModal.set(false);
+            // Mostrar mensaje de éxito
+            this.successMessage.set('✅ Campaña creada exitosamente');
+            // Recargar lista de campañas
             this.loadCampaigns();
-            setTimeout(() => this.closeModal(), 1500);
+            // Limpiar mensaje después de 5 segundos
+            setTimeout(() => {
+              this.successMessage.set(null);
+            }, 5000);
+          } else {
+            this.errorMessage.set('No se pudo crear la campaña');
           }
         },
         error: (error) => {
           this.isLoading.set(false);
+          console.error('❌ Error al crear campaña:', error);
           this.errorMessage.set(error.error?.message || 'Error al crear la campaña');
         }
       });
