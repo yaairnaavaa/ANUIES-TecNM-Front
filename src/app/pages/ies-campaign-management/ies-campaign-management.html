@@ -105,9 +105,11 @@
           <tr class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-widest font-black">
             <th class="px-8 py-5">Campaña / Institución</th>
             <th class="px-8 py-5">Estado</th>
+            <th class="px-8 py-5">Ciclo</th>
             <th class="px-8 py-5">Costo</th>
             <th class="px-8 py-5">Impacto</th>
             <th class="px-8 py-5 text-center">Ver Detalle</th>
+            <th class="px-8 py-5 text-center">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
@@ -124,12 +126,19 @@
               </td>
               <td class="px-8 py-5">
                 <span [ngClass]="{
-                  'bg-emerald-100 text-emerald-700': c.status === 'Active',
-                  'bg-slate-100 text-slate-500': c.status === 'Finished',
-                  'bg-amber-100 text-amber-700': c.status === 'Draft'
+                  'bg-blue-100 text-blue-700': c.status === 'Planificada',
+                  'bg-emerald-100 text-emerald-700': c.status === 'En curso',
+                  'bg-slate-100 text-slate-500': c.status === 'Finalizada',
+                  'bg-red-100 text-red-700': c.status === 'Cancelada'
                 }" class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">
-                  {{ statusMap[c.status] }}
+                  {{ c.status }}
                 </span>
+              </td>
+              <td class="px-8 py-5">
+                <div class="flex items-center gap-2">
+                  <i class="far fa-calendar text-slate-400 text-xs"></i>
+                  <span class="text-xs font-bold text-slate-700">{{ c.cycleName }}</span>
+                </div>
               </td>
               <td class="px-8 py-5 font-mono text-xs font-bold text-slate-600">
                 {{ c.cost | currency:'MXN' }}
@@ -149,10 +158,19 @@
                   @if(selectedCampaign()?.id === c.id){ <i class="fas fa-check text-white text-[10px]"></i> }
                 </div>
               </td>
+              <td class="px-8 py-5 text-center">
+                <button
+                  (click)="editCampaign(c.id); $event.stopPropagation()"
+                  class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all active:scale-95"
+                  title="Editar campaña"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+              </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="5" class="px-8 py-20 text-center opacity-40">
+              <td colspan="7" class="px-8 py-20 text-center opacity-40">
                 <i class="fas fa-search text-4xl mb-4"></i>
                 <p class="font-bold uppercase tracking-widest">No se encontraron campañas registradas</p>
               </td>
@@ -213,12 +231,35 @@
           </div>
         </div>
 
-        <button
-          (click)="closeModal()"
-          class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-500 transition-all active:scale-90"
-        >
-          <i class="fas fa-times text-2xl"></i>
-        </button>
+        <div class="flex items-center gap-4">
+          <!-- Estado Activo -->
+          <div class="flex items-center gap-3 px-4 py-2 bg-slate-50 rounded-xl border border-slate-200">
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              Estado de Campaña:
+            </span>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                [checked]="campaignForm.get('active')?.value"
+                (change)="campaignForm.get('active')?.setValue($any($event.target).checked)"
+                class="sr-only peer"
+              />
+              <div class="w-12 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+            </label>
+            <div>
+              <p class="text-xs font-bold text-slate-800">
+                {{ campaignForm.get('active')?.value ? 'Activa' : 'Inactiva' }}
+              </p>
+            </div>
+          </div>
+
+          <button
+            (click)="closeModal()"
+            class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-500 transition-all active:scale-90"
+          >
+            <i class="fas fa-times text-2xl"></i>
+          </button>
+        </div>
       </div>
 
       <!-- Messages -->
@@ -350,29 +391,53 @@
                 </p>
               </div>
 
-              <!-- Estado Activo -->
+              <!-- Estado de la Campaña -->
               <div class="space-y-2">
                 <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                  Estado de la Campaña
+                  Estado de la Campaña *
                 </label>
-                <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      formControlName="active"
-                      class="sr-only peer"
-                    />
-                    <div class="w-14 h-7 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
-                  </label>
-                  <div>
-                    <p class="text-sm font-bold text-slate-800">
-                      {{ campaignForm.get('active')?.value ? 'Activa' : 'Inactiva' }}
-                    </p>
-                    <p class="text-xs text-slate-500">
-                      {{ campaignForm.get('active')?.value ? 'La campaña está habilitada' : 'La campaña está deshabilitada' }}
-                    </p>
-                  </div>
+                <div class="relative group">
+                  <i class="fas fa-flag absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
+                  <input
+                    type="text"
+                    [value]="campaignStatusSearch()"
+                    (input)="filterCampaignStatus($any($event.target).value)"
+                    (focus)="showCampaignStatusDropdown.set(true)"
+                    (blur)="onCampaignStatusBlur()"
+                    placeholder="Seleccionar estado de la campaña..."
+                    autocomplete="off"
+                    class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                    [class.border-red-300]="campaignForm.get('status')?.invalid && campaignForm.get('status')?.touched"
+                    [class.border-blue-500]="campaignForm.get('status')?.value"
+                  />
+
+                  <!-- Dropdown Estados -->
+                  @if (filteredCampaignStatuses().length > 0 && showCampaignStatusDropdown()) {
+                    <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+                      @for (status of filteredCampaignStatuses(); track status) {
+                        <li
+                          (mousedown)="selectCampaignStatus(status)"
+                          class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-bold text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                          [class.bg-blue-50]="campaignForm.get('status')?.value === status"
+                        >
+                          <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                               [class.border-blue-600]="campaignForm.get('status')?.value === status"
+                               [class.bg-blue-600]="campaignForm.get('status')?.value === status"
+                               [class.border-slate-300]="campaignForm.get('status')?.value !== status">
+                            @if (campaignForm.get('status')?.value === status) {
+                              <i class="fas fa-check text-white text-xs"></i>
+                            }
+                          </div>
+                          <span>{{ status }}</span>
+                        </li>
+                      }
+                    </ul>
+                  }
                 </div>
+                <p class="text-[11px] text-slate-400 italic font-medium ml-1">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  Selecciona el estado actual de la campaña
+                </p>
               </div>
             </div>
           </div>

@@ -16,10 +16,11 @@ interface CampaignDisplay {
   reach: number;
   cost: number;
   impact: number;
-  status: 'Active' | 'Finished' | 'Draft' | 'Cancelled' | 'Paused';
+  status: 'Planificada' | 'En curso' | 'Finalizada' | 'Cancelada';
   institution: string;
   type: string;
   specificModality: string;
+  cycleName: string;
 }
 
 // Interfaces para datos de prueba
@@ -115,6 +116,12 @@ export class IesCampaignManagementComponent implements OnInit {
   showSpecificModalityDropdown = signal(false);
   
   reachUnits = ['Personas', 'Impresiones', 'Clics', 'Vistas', 'Asistentes'];
+  
+  // Opciones de estado de campaña
+  campaignStatusOptions = ['Planificada', 'En curso', 'Finalizada', 'Cancelada'];
+  filteredCampaignStatuses = signal<string[]>(['Planificada', 'En curso', 'Finalizada', 'Cancelada']);
+  campaignStatusSearch = signal('');
+  showCampaignStatusDropdown = signal(false);
 
   // Datos MOCK para pruebas
   mockUsers: MockUser[] = [
@@ -224,7 +231,10 @@ export class IesCampaignManagementComponent implements OnInit {
       responsible: [''],
       responsibleId: [''],
       
-      // Estado
+      // Estado de la campaña (por defecto "Planificada")
+      status: ['Planificada', Validators.required],
+      
+      // Estado activo
       active: [true]
     });
 
@@ -244,10 +254,21 @@ export class IesCampaignManagementComponent implements OnInit {
     this.specificModalities.set(defaultModalities);
     this.filteredSpecificModalities.set(defaultModalities);
     this.campaignTypeSearch.set('Presencial');
+    
+    // Inicializar estado de campaña con "Planificada"
+    this.campaignStatusSearch.set('Planificada');
+    this.filteredCampaignStatuses.set(this.campaignStatusOptions);
 
     // Calcular costo por impacto automáticamente
     this.campaignForm.get('totalCost')?.valueChanges.subscribe(() => this.calculateCostPerImpact());
     this.campaignForm.get('actualReach')?.valueChanges.subscribe(() => this.calculateCostPerImpact());
+    
+    // Sincronizar el input de estado con el valor del formulario
+    this.campaignForm.get('status')?.valueChanges.subscribe(status => {
+      if (status) {
+        this.campaignStatusSearch.set(status);
+      }
+    });
   }
 
   /**
@@ -432,19 +453,15 @@ export class IesCampaignManagementComponent implements OnInit {
       // Manejar el objeto ies que puede tener diferentes estructuras
       const ies = typeof c.ies === 'object' ? c.ies : null;
       const institutionName = ies ? (ies.iesName || ies.name || 'Sin IES') : 'Sin IES';
-      
-      // Mapear estado
-      let status: 'Active' | 'Finished' | 'Draft' | 'Cancelled' | 'Paused' = 'Draft';
-      if (c.status === 'En curso' || c.status === 'En Curso') status = 'Active';
-      else if (c.status === 'Finalizada') status = 'Finished';
-      else if (c.status === 'Cancelada') status = 'Cancelled';
-      else if (c.status === 'Pausada') status = 'Paused';
-      else if (c.status === 'Planificada') status = 'Draft';
 
       // Calcular impacto (ROI simplificado)
       const reach = c.reach?.actual || c.reach?.estimated || 0;
       const cost = c.costs?.total || 0;
       const impact = cost > 0 ? (reach / cost) * 100 : 0;
+
+      // Manejar el objeto cycle
+      const cycle = typeof c.cycle === 'object' ? c.cycle : null;
+      const cycleName = cycle ? (cycle.cycleName || 'Sin ciclo') : 'Sin ciclo';
 
       return {
         id: c._id || '',
@@ -455,10 +472,11 @@ export class IesCampaignManagementComponent implements OnInit {
         reach: reach,
         cost: cost,
         impact: impact,
-        status: status,
+        status: c.status,
         institution: institutionName,
         type: c.type,
-        specificModality: c.specificModality
+        specificModality: c.specificModality,
+        cycleName: cycleName
       };
     });
   }
@@ -477,15 +495,6 @@ export class IesCampaignManagementComponent implements OnInit {
     return this.filteredCampaigns().slice(start, start + this.itemsPerPage());
   });
   
-  // Mapeo de estatus para visualización
-  statusMap: Record<string, string> = {
-    Active: 'Activa',
-    Finished: 'Finalizada',
-    Draft: 'Borrador',
-    Cancelled: 'Cancelada',
-    Paused: 'Pausada'
-  };
-
   // Ajustamos el label de displayMetrics para que sea en español
   displayMetrics = computed(() => {
     const selected = this.selectedCampaign();
@@ -598,7 +607,8 @@ export class IesCampaignManagementComponent implements OnInit {
       totalCost: 0,
       costPerImpact: 0,
       type: 'Presencial', // Por defecto Presencial
-      responsibleId: currentUser?.id || ''
+      responsibleId: currentUser?.id || '',
+      status: 'Planificada' // Estado por defecto
     });
     
     // Establecer el nombre del usuario responsable y luego deshabilitar el campo
@@ -632,8 +642,128 @@ export class IesCampaignManagementComponent implements OnInit {
     this.specificModalities.set(defaultModalities);
     this.filteredSpecificModalities.set(defaultModalities);
     
+    // Resetear estado de campaña
+    this.campaignStatusSearch.set('Planificada');
+    this.filteredCampaignStatuses.set(this.campaignStatusOptions);
+    this.showCampaignStatusDropdown.set(false);
+    
     this.showModal.set(true);
     this.isAdding.set(false);
+  }
+
+  /**
+   * Abrir modal para editar campaña existente
+   */
+  editCampaign(campaignId: string) {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
+
+    this.campaignService.getCampaignById(campaignId).subscribe({
+      next: (response: any) => {
+        const campaign = response.data || response;
+        
+        if (!campaign) {
+          this.errorMessage.set('No se pudo cargar la información de la campaña');
+          this.isLoading.set(false);
+          return;
+        }
+
+        this.isEditMode.set(true);
+        this.editingCampaignId.set(campaignId);
+        
+        const currentUser = this.authService.currentUser();
+        const fullName = currentUser?.firstName 
+          ? `${currentUser.firstName} ${currentUser.lastName || ''}`.trim()
+          : '';
+
+        // Formatear fechas para el input date (YYYY-MM-DD)
+        const formatDateForInput = (date: string | Date): string => {
+          if (!date) return '';
+          const d = new Date(date);
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+
+        // Cargar datos en el formulario
+        this.campaignForm.patchValue({
+          name: campaign.name || '',
+          description: campaign.description || '',
+          type: campaign.type || 'Presencial',
+          specificModality: campaign.specificModality || '',
+          startDate: formatDateForInput(campaign.period?.startDate),
+          endDate: formatDateForInput(campaign.period?.endDate),
+          estimatedReach: campaign.reach?.estimated || 0,
+          actualReach: campaign.reach?.actual || 0,
+          reachUnit: campaign.reach?.unit || 'Personas',
+          totalCost: campaign.costs?.total || 0,
+          status: campaign.status || 'Planificada',
+          responsible: fullName,
+          responsibleId: currentUser?.id || ''
+        });
+
+        // Habilitar campo responsable si estaba deshabilitado
+        this.campaignForm.get('responsible')?.disable();
+
+        // Configurar tipo de campaña y modalidad
+        if (campaign.type) {
+          this.campaignTypeSearch.set(campaign.type);
+          const modalities = this.campaignService.getModalitiesByType(campaign.type as any);
+          this.specificModalities.set(modalities);
+          this.filteredSpecificModalities.set(modalities);
+          this.specificModalitySearch.set(campaign.specificModality || '');
+        }
+
+        // Configurar estado de campaña
+        this.campaignStatusSearch.set(campaign.status || 'Planificada');
+        this.filteredCampaignStatuses.set(this.campaignStatusOptions);
+
+        // Configurar IEMS si existe
+        if (campaign.targetedIEMS && campaign.targetedIEMS.length > 0) {
+          const iems = campaign.targetedIEMS[0];
+          this.selectedIEMS.set(iems.iemsId);
+          this.selectedIEMSName.set(iems.iemsName || '');
+          this.iemsSearchQuery.set(iems.iemsName || '');
+        } else {
+          this.selectedIEMS.set(null);
+          this.selectedIEMSName.set('');
+          this.iemsSearchQuery.set('');
+        }
+        this.showIEMSDropdown.set(false);
+
+        // Configurar IES si el usuario no tiene una asignada
+        if (!this.userHasIES()) {
+          const iesId = campaign.ies?.iesId || campaign.ies?._id;
+          if (iesId) {
+            this.selectedIESForCampaign.set(iesId);
+            this.selectedIESName.set(campaign.ies?.iesName || campaign.ies?.name || '');
+            this.iesSearchQuery.set(campaign.ies?.iesName || campaign.ies?.name || '');
+          }
+        }
+
+        // Configurar carreras promocionadas
+        if (campaign.promotedCareers && campaign.promotedCareers.length > 0) {
+          this.selectedCareers.set([...campaign.promotedCareers]);
+        } else {
+          this.selectedCareers.set([]);
+        }
+
+        // Estado activo
+        this.campaignForm.patchValue({
+          active: campaign.active !== undefined ? campaign.active : true
+        });
+
+        this.isLoading.set(false);
+        this.showModal.set(true);
+      },
+      error: (error) => {
+        console.error('Error cargando campaña:', error);
+        this.errorMessage.set('Error al cargar la información de la campaña');
+        this.isLoading.set(false);
+      }
+    });
   }
 
   /**
@@ -695,6 +825,7 @@ export class IesCampaignManagementComponent implements OnInit {
       description: formValue.description || '',
       type: formValue.type,
       specificModality: formValue.specificModality,
+      status: formValue.status || 'Planificada', // Estado de la campaña
       period: {
         startDate: new Date(formValue.startDate).toISOString(),
         endDate: new Date(formValue.endDate).toISOString()
@@ -897,6 +1028,42 @@ export class IesCampaignManagementComponent implements OnInit {
   onSpecificModalityBlur() {
     setTimeout(() => {
       this.showSpecificModalityDropdown.set(false);
+    }, 200);
+  }
+
+  /**
+   * Filtrar estado de campaña
+   */
+  filterCampaignStatus(query: string) {
+    this.campaignStatusSearch.set(query);
+    this.showCampaignStatusDropdown.set(true);
+    
+    if (!query.trim()) {
+      this.filteredCampaignStatuses.set(this.campaignStatusOptions);
+      return;
+    }
+    
+    const filtered = this.campaignStatusOptions.filter(status => 
+      status.toLowerCase().includes(query.toLowerCase())
+    );
+    this.filteredCampaignStatuses.set(filtered);
+  }
+
+  /**
+   * Seleccionar estado de campaña
+   */
+  selectCampaignStatus(status: string) {
+    this.campaignStatusSearch.set(status);
+    this.campaignForm.patchValue({ status });
+    this.showCampaignStatusDropdown.set(false);
+  }
+
+  /**
+   * Manejar blur del estado de campaña
+   */
+  onCampaignStatusBlur() {
+    setTimeout(() => {
+      this.showCampaignStatusDropdown.set(false);
     }, 200);
   }
 
