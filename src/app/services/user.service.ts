@@ -13,10 +13,11 @@ export interface UserFilters {
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/auth`;
+  private readonly baseUrl = `${environment.apiUrl}/users`;
+  private readonly authUrl = `${environment.apiUrl}/auth`;
 
   /**
-   * Obtener todos los usuarios (solo Admin Nacional)
+   * Obtener todos los usuarios con filtros opcionales
    */
   getAllUsers(filters?: UserFilters): Observable<ApiResponse<User[]>> {
     let params = new HttpParams();
@@ -27,41 +28,41 @@ export class UserService {
       if (filters.active !== undefined) params = params.set('active', filters.active.toString());
     }
 
-    return this.http.get<ApiResponse<User[]>>(`${this.baseUrl}/users`, { params });
+    return this.http.get<ApiResponse<User[]>>(`${this.baseUrl}`, { params });
   }
 
   /**
    * Obtener usuario por ID
    */
   getUserById(id: string): Observable<ApiResponse<User>> {
-    return this.http.get<ApiResponse<User>>(`${this.baseUrl}/users/${id}`);
+    return this.http.get<ApiResponse<User>>(`${this.baseUrl}/${id}`);
   }
 
   /**
-   * Crear nuevo usuario
+   * Crear nuevo usuario (usando el endpoint de auth/register)
    */
   createUser(userData: Partial<User>): Observable<ApiResponse<User>> {
-    return this.http.post<ApiResponse<User>>(`${this.baseUrl}/register`, userData);
+    return this.http.post<ApiResponse<User>>(`${this.authUrl}/register`, userData);
   }
 
   /**
    * Actualizar usuario
    */
   updateUser(id: string, userData: Partial<User>): Observable<ApiResponse<User>> {
-    return this.http.put<ApiResponse<User>>(`${this.baseUrl}/users/${id}`, userData);
+    return this.http.patch<ApiResponse<User>>(`${this.baseUrl}/${id}`, userData);
   }
 
   /**
-   * Eliminar usuario
+   * Eliminar (desactivar) usuario
    */
   deleteUser(id: string): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.baseUrl}/users/${id}`);
+    return this.http.delete<ApiResponse<void>>(`${this.baseUrl}/${id}`);
   }
 
   /**
    * Activar/Desactivar usuario
    */
   toggleUserStatus(id: string, active: boolean): Observable<ApiResponse<User>> {
-    return this.http.patch<ApiResponse<User>>(`${this.baseUrl}/users/${id}/status`, { active });
+    return this.http.patch<ApiResponse<User>>(`${this.baseUrl}/${id}`, { active });
   }
 }

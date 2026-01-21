@@ -1,133 +1,256 @@
 <div class="h-full flex flex-col bg-white">
   <div class="px-8 py-6 border-b border-slate-100 bg-white/50 backdrop-blur-sm sticky top-0 z-20">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-      <div class="relative w-full md:w-96 group">
-        <i
-          class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors text-sm"
-        ></i>
-        <input
-          type="text"
-          [ngModel]="searchQuery()"
-          (ngModelChange)="searchQuery.set($event)"
-          placeholder="Buscar operativo..."
-          class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 focus:border-blue-400 focus:bg-white rounded-xl outline-none transition-all text-sm font-medium text-slate-600 placeholder:text-slate-400"
-        />
+      <div>
+        <h2 class="text-2xl font-black text-slate-900 tracking-tight italic">
+          Gestión de Usuarios - {{ iesName }}
+        </h2>
+        <p class="text-sm text-slate-500 font-medium italic">Clave: {{ iesClave }}</p>
       </div>
 
-      <div class="flex items-center gap-6">
+      <div class="flex items-center gap-4">
         <div class="flex items-center gap-3 pr-6 border-r border-slate-200">
           <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
           <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-            <span class="text-slate-900 text-lg mr-1">{{ totalUsers() }}</span> Operativos Activos
+            <span class="text-slate-900 text-lg mr-1">{{ totalUsers() }}</span> Usuarios
           </span>
         </div>
 
         <button
           (click)="toggleAddUser()"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all active:scale-95"
+          [class]="isAddingUser() ? 'bg-slate-800' : 'bg-blue-600'"
+          class="hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all active:scale-95"
         >
-          <i class="fas fa-plus text-[10px]"></i> NUEVO OPERATIVO
+          <i class="fas" [class.fa-plus]="!isAddingUser()" [class.fa-times]="isAddingUser()" class="text-[10px]"></i>
+          {{ isAddingUser() ? 'CANCELAR' : 'NUEVO USUARIO' }}
+        </button>
+
+        <button
+          (click)="backToList()"
+          class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all active:scale-95"
+        >
+          <i class="fas fa-arrow-left text-[10px]"></i>
+          VOLVER
         </button>
       </div>
     </div>
   </div>
 
-  <main class="flex-1 p-8 overflow-y-auto">
+  @if (isAddingUser()) {
+    <div class="px-8 py-6 bg-blue-50/30 border-b border-blue-100 animate-slide-down">
+      <div class="max-w-7xl mx-auto">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+          <h3 class="text-lg font-black text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-user-plus text-blue-600"></i>
+            Nuevo Usuario para {{ iesName }}
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="space-y-2">
+              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Nombre(s) *
+              </label>
+              <input
+                [(ngModel)]="newUser().firstName"
+                type="text"
+                placeholder="Ej. Juan Carlos"
+                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Apellido Paterno *
+              </label>
+              <input
+                [(ngModel)]="newUser().lastName"
+                type="text"
+                placeholder="Ej. López"
+                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Apellido Materno
+              </label>
+              <input
+                [(ngModel)]="newUser().secondLastName"
+                type="text"
+                placeholder="Ej. Martínez"
+                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Email *
+              </label>
+              <input
+                [(ngModel)]="newUser().email"
+                type="email"
+                placeholder="usuario@ies.edu.mx"
+                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Contraseña *
+              </label>
+              <input
+                [(ngModel)]="newUser().password"
+                type="password"
+                placeholder="Mínimo 6 caracteres"
+                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Teléfono
+              </label>
+              <input
+                [(ngModel)]="newUser().phone"
+                type="tel"
+                placeholder="10 dígitos"
+                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
+              />
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-slate-100">
+            <button
+              (click)="toggleAddUser()"
+              class="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-sm transition-all active:scale-95"
+            >
+              Cancelar
+            </button>
+            <button
+              (click)="saveNewUser()"
+              [disabled]="isSaving()"
+              class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              @if (isSaving()) {
+                <i class="fas fa-circle-notch animate-spin"></i>
+                <span>Guardando...</span>
+              } @else {
+                <i class="fas fa-save"></i>
+                <span>Guardar Usuario</span>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <main class="flex-1 px-8 py-6 overflow-y-auto">
     <div class="max-w-7xl mx-auto">
-      <div class="w-full overflow-hidden">
-        <table class="w-full border-separate border-spacing-y-3">
-          <thead>
-            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              <th class="px-6 py-4 font-black">Personal</th>
-              <th class="px-6 py-4 font-black">Cargo</th>
-              <th class="px-6 py-4 font-black text-center">Último Acceso</th>
-              <th class="px-6 py-4 font-black text-center">Estatus</th>
-              <th class="px-6 py-4 font-black text-right">Gestión</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for(user of filteredUsers(); track user.id) {
-            <tr class="group hover:bg-slate-50 transition-colors">
-              <td
-                class="px-6 py-4 bg-white first:rounded-l-2xl border-y border-l border-slate-100 group-hover:border-blue-100 transition-colors"
-              >
-                <div class="flex items-center gap-4">
-                  <div
-                    class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-500 text-xs transition-colors group-hover:bg-blue-100 group-hover:text-blue-600"
-                  >
-                    {{ getInitials(user.fullName) }}
-                  </div>
-                  <div>
-                    <div
-                      class="text-sm font-bold text-slate-700 uppercase group-hover:text-blue-600 transition-colors"
-                    >
-                      {{ user.fullName }}
-                    </div>
-                    <div class="text-[10px] text-slate-400 font-medium">
-                      enlace.operativo&#64;ies.edu.mx
-                    </div>
-                  </div>
-                </div>
-              </td>
+      <div class="mb-6">
+        <div class="relative w-full md:w-96 group">
+          <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors text-sm"></i>
+          <input
+            type="text"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            placeholder="Buscar usuario..."
+            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 focus:border-blue-400 focus:bg-white rounded-xl outline-none transition-all text-sm font-medium text-slate-600 placeholder:text-slate-400"
+          />
+        </div>
+      </div>
 
-              <td class="px-6 py-4 bg-white border-y border-slate-100 group-hover:border-blue-100">
-                <span
-                  class="text-[10px] font-black text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg uppercase tracking-tight group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors"
-                >
-                  {{ user.jobTitle }}
-                </span>
-              </td>
+      @if (errorMessage()) {
+        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <p class="text-sm font-bold text-red-600">{{ errorMessage() }}</p>
+        </div>
+      }
 
-              <td
-                class="px-6 py-4 bg-white border-y border-slate-100 group-hover:border-blue-100 text-center"
-              >
-                <span class="text-[11px] font-mono text-slate-400 font-medium">
-                  {{ user.lastAccess || '---' }}
-                </span>
-              </td>
-
-              <td
-                class="px-6 py-4 bg-white border-y border-slate-100 group-hover:border-blue-100 text-center"
-              >
-                <div
-                  class="inline-flex items-center gap-1.5 px-2 py-1 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-black uppercase tracking-tighter"
-                >
-                  {{ user.status }}
-                </div>
-              </td>
-
-              <td
-                class="px-6 py-4 bg-white last:rounded-r-2xl border-y border-r border-slate-100 group-hover:border-blue-100 text-right"
-              >
-                <div class="flex justify-end gap-2">
-                  <button
-                    title="Reenviar"
-                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-blue-600 hover:text-white transition-all"
-                  >
-                    <i class="fas fa-paper-plane text-[10px]"></i>
-                  </button>
-                  <button
-                    (click)="deleteUser(user.id)"
-                    title="Eliminar"
-                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-red-500 hover:text-white transition-all"
-                  >
-                    <i class="fas fa-trash-alt text-[10px]"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-            }
-          </tbody>
-        </table>
-
-        @if (filteredUsers().length === 0) {
+      @if (isLoading()) {
         <div class="py-20 text-center">
-          <p class="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">
-            No se encontraron registros
+          <div class="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin mb-4 mx-auto"></div>
+          <p class="font-black text-slate-400 uppercase tracking-tighter animate-pulse">
+            Cargando usuarios...
           </p>
         </div>
-        }
-      </div>
+      } @else {
+        <div class="w-full overflow-hidden">
+          <table class="w-full border-separate border-spacing-y-3">
+            <thead>
+              <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <th class="px-6 py-4 font-black text-left">Personal</th>
+                <th class="px-6 py-4 font-black text-left">Cargo</th>
+                <th class="px-6 py-4 font-black text-center">Último Acceso</th>
+                <th class="px-6 py-4 font-black text-center">Estatus</th>
+                <th class="px-6 py-4 font-black text-right">Gestión</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for(user of filteredUsers(); track user.id) {
+              <tr class="group hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-4 bg-white first:rounded-l-2xl border-y border-l border-slate-100 group-hover:border-blue-100 transition-colors">
+                  <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-500 text-xs transition-colors group-hover:bg-blue-100 group-hover:text-blue-600">
+                      {{ getInitials(user.fullName) }}
+                    </div>
+                    <div>
+                      <div class="text-sm font-bold text-slate-700 uppercase group-hover:text-blue-600 transition-colors">
+                        {{ user.fullName }}
+                      </div>
+                      <div class="text-[10px] text-slate-400 font-medium">
+                        {{ user.email }}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <td class="px-6 py-4 bg-white border-y border-slate-100 group-hover:border-blue-100">
+                  <span class="text-[10px] font-black text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg uppercase tracking-tight group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
+                    {{ user.jobTitle }}
+                  </span>
+                </td>
+
+                <td class="px-6 py-4 bg-white border-y border-slate-100 group-hover:border-blue-100 text-center">
+                  <span class="text-[11px] font-mono text-slate-400 font-medium">
+                    {{ user.lastAccess || '---' }}
+                  </span>
+                </td>
+
+                <td class="px-6 py-4 bg-white border-y border-slate-100 group-hover:border-blue-100 text-center">
+                  <div 
+                    class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-tighter"
+                    [ngClass]="user.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'"
+                  >
+                    {{ user.status }}
+                  </div>
+                </td>
+
+                <td class="px-6 py-4 bg-white last:rounded-r-2xl border-y border-r border-slate-100 group-hover:border-blue-100 text-right">
+                  <div class="flex justify-end gap-2">
+                    <button
+                      (click)="deleteUser(user.id)"
+                      title="Eliminar"
+                      class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-red-500 hover:text-white transition-all"
+                    >
+                      <i class="fas fa-trash-alt text-[10px]"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+
+          @if (filteredUsers().length === 0) {
+            <div class="py-20 text-center">
+              <i class="fas fa-users text-4xl text-slate-300 mb-4"></i>
+              <p class="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">
+                No se encontraron usuarios
+              </p>
+            </div>
+          }
+        </div>
+      }
     </div>
   </main>
 </div>
