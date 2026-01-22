@@ -261,6 +261,7 @@ export interface Period {
   };
   status: 'Planificado' | 'Activo' | 'En curso' | 'Finalizado' | 'Cerrado';
   isCurrent?: boolean;
+  active?: boolean;
 }
 
 export interface MenuItem {

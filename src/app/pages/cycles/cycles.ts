@@ -277,26 +277,45 @@ export class Cycles implements OnInit {
   toggleActions(id: string) {
     this.activeActionMenu.set(this.activeActionMenu() === id ? null : id);
   }
-  toggleStatus(cycle: any) {
-    // Cerramos el menú de acciones primero
+
+  toggleStatus(cycle: Cycle) {
+    // 1. Cerramos el menú de acciones y activamos el estado de carga
     this.activeActionMenu.set(null);
-
-    // Lógica para cambiar el estado (puedes adaptarlo a tu servicio)
-    const newStatus = cycle.active ? false : true;
-
-    // Aquí llamarías a tu servicio, por ahora actualizamos localmente
     this.isLoading.set(true);
+    this.errorMessage.set('');
 
-    // Ejemplo de llamada al servicio (ajusta según tu iesService)
-    // this.cycleService.updateCycleStatus(cycle._id, newStatus).subscribe(...)
+    // 2. Definimos el nuevo estado (el opuesto al actual)
+    const newStatus = !cycle.active;
 
-    console.log('Cambiando estado de:', cycle.name, 'a:', newStatus);
+    // 3. Llamamos al servicio usando el ID del ciclo
+    // Solo enviamos el campo 'active' ya que es un PATCH
+    this.cycleService;
+    this.cycleService
+      .updateCycle(cycle._id, { active: newStatus })
+      .pipe(
+        tap(() => {
+          // 4. Feedback visual de éxito
+          const action = newStatus ? 'activado' : 'desactivado';
+          this.successMessage.set(`El ciclo "${cycle.name}" ha sido ${action} con éxito.`);
 
-    // Simulación de éxito
-    setTimeout(() => {
-      cycle.active = newStatus;
-      this.isLoading.set(false);
-    }, 500);
+          // 5. Recargamos la lista para actualizar los signals y el computed del 'activeCycle'
+          this.loadCycles();
+
+          // Limpiamos el mensaje de éxito después de 3 segundos
+          setTimeout(() => this.successMessage.set(''), 3000);
+        }),
+        catchError((error) => {
+          console.error('Error al cambiar estado:', error);
+          this.errorMessage.set(
+            error.error?.message || 'No se pudo cambiar el estado del ciclo. Intenta de nuevo.',
+          );
+          return of(null);
+        }),
+        finalize(() => {
+          this.isLoading.set(false);
+        }),
+      )
+      .subscribe();
   }
 
   /**
