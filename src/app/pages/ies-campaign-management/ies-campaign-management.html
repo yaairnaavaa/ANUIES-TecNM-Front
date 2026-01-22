@@ -35,13 +35,13 @@
        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
        <span class="text-xs font-black text-slate-400 uppercase tracking-widest">{{ displayMetrics().label }}</span>
        @if(selectedCampaign()){
-         <button (click)="selectedCampaign.set(null)" class="text-[10px] bg-slate-200 px-2 py-0.5 rounded-md hover:bg-slate-300 transition-colors font-bold text-slate-600">LIMPIAR SELECCIÓN</button>
+         <button (click)="selectedCampaign.set(null); $event.stopPropagation()" class="text-[10px] bg-slate-200 px-2 py-0.5 rounded-md hover:bg-slate-300 transition-colors font-bold text-slate-600">LIMPIAR SELECCIÓN</button>
        }
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       
-      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all" [class.border-blue-500]="selectedCampaign()">
+      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:shadow-md" [class.border-blue-500]="selectedCampaign()">
         <div class="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl shadow-lg shadow-blue-100">
           <i class="fas" [class.fa-university]="!displayMetrics().isGlobal" [class.fa-network-wired]="displayMetrics().isGlobal"></i>
         </div>
@@ -49,29 +49,36 @@
           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
             {{ displayMetrics().isGlobal ? 'Cobertura' : 'Institución' }}
           </p>
-<h3 class="text-sm md:text-base font-black text-slate-900 leading-tight uppercase break-words">            {{ displayMetrics().isGlobal ? (displayMetrics().institutionCount + ' Escuelas') : displayMetrics().institutionName }}
+          <h3 class="text-sm md:text-base font-black text-slate-900 leading-tight uppercase break-words">
+            {{ displayMetrics().isGlobal ? (displayMetrics().institutionCount + ' Escuela' + (displayMetrics().institutionCount !== 1 ? 's' : '')) : displayMetrics().institutionName }}
           </h3>
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all" [class.border-blue-500]="selectedCampaign()">
-        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl"><i class="fas fa-bullseye"></i></div>
+      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:shadow-md" [class.border-blue-500]="selectedCampaign()">
+        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl">
+          <i class="fas fa-bullseye"></i>
+        </div>
         <div>
           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Alcance Total</p>
           <h3 class="text-2xl font-black text-slate-900">{{ displayMetrics().reach | number }}</h3>
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all" [class.border-blue-500]="selectedCampaign()">
-        <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl"><i class="fas fa-dollar-sign"></i></div>
+      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:shadow-md" [class.border-blue-500]="selectedCampaign()">
+        <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl">
+          <i class="fas fa-dollar-sign"></i>
+        </div>
         <div>
           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inversión</p>
           <h3 class="text-2xl font-black text-slate-900">{{ displayMetrics().cost | currency:'MXN':'symbol-narrow' }}</h3>
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all" [class.border-blue-500]="selectedCampaign()">
-        <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl"><i class="fas fa-chart-line"></i></div>
+      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:shadow-md" [class.border-blue-500]="selectedCampaign()">
+        <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl">
+          <i class="fas fa-chart-line"></i>
+        </div>
         <div>
           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Impacto Estimado</p>
           <h3 class="text-2xl font-black text-slate-900">{{ displayMetrics().impact | number:'1.1-2' }}%</h3>
@@ -91,10 +98,15 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-tighter">Mostrar:</span>
-        <select [ngModel]="itemsPerPage()" (ngModelChange)="itemsPerPage.set($event)"
-          class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none cursor-pointer">
-          @for(opt of pageSizeOptions; track opt){ <option [value]="opt">{{opt}} registros</option> }
+        <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Mostrar:</span>
+        <select
+          [ngModel]="itemsPerPage()"
+          (ngModelChange)="onItemsPerPageChange($event)"
+          class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-all"
+        >
+          @for (option of pageSizeOptions; track option) {
+            <option [value]="option">{{ option }} filas</option>
+          }
         </select>
       </div>
     </div>
@@ -108,15 +120,16 @@
             <th class="px-8 py-5">Ciclo</th>
             <th class="px-8 py-5">Costo</th>
             <th class="px-8 py-5">Impacto</th>
-            <th class="px-8 py-5 text-center">Ver Detalle</th>
             <th class="px-8 py-5 text-center">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
           @for(c of pagedCampaigns(); track c.id) {
-            <tr (click)="selectCampaign(c)" 
-                class="cursor-pointer transition-all group"
-                [class.bg-blue-50/50]="selectedCampaign()?.id === c.id">
+            <tr 
+              (click)="selectCampaign(c)"
+              class="transition-all hover:bg-blue-50/30 group cursor-pointer"
+              [class.bg-blue-50/50]="selectedCampaign()?.id === c.id"
+            >
               <td class="px-8 py-5">
                 <div class="font-bold text-slate-800 leading-tight uppercase">{{ c.name }}</div>
                 <div class="text-[10px] text-blue-600 font-black uppercase tracking-tighter mt-1 italic">
@@ -152,27 +165,59 @@
                 </div>
               </td>
               <td class="px-8 py-5 text-center">
-                <div class="w-6 h-6 rounded-full border-2 border-slate-200 mx-auto flex items-center justify-center transition-all"
-                     [class.bg-blue-600]="selectedCampaign()?.id === c.id"
-                     [class.border-blue-600]="selectedCampaign()?.id === c.id">
-                  @if(selectedCampaign()?.id === c.id){ <i class="fas fa-check text-white text-[10px]"></i> }
+                <div class="relative inline-block text-left">
+                  <button
+                    #anchor
+                    type="button"
+                    (click)="$any(c).showMenu = !$any(c).showMenu; $event.stopPropagation()"
+                    class="flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all focus:outline-none"
+                  >
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+
+                  <div
+                    *ngIf="$any(c).showMenu"
+                    (mouseleave)="$any(c).showMenu = false"
+                    class="fixed z-[100] w-64 mt-2 origin-top-right rounded-2xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden border border-slate-100"
+                    [style.left.px]="anchor.getBoundingClientRect().left - 200"
+                    [style.top.px]="anchor.getBoundingClientRect().bottom"
+                  >
+                    <div class="p-2 space-y-1">
+                      <button
+                        (click)="openDetailsModal(c); $any(c).showMenu = false"
+                        class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all"
+                      >
+                        <div
+                          class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 mr-3 group-hover:bg-blue-600 group-hover:text-white transition-all"
+                        >
+                          <i class="fas fa-eye"></i>
+                        </div>
+                        Ver Detalles
+                      </button>
+
+                      <button
+                        (click)="editCampaign(c.id); $any(c).showMenu = false"
+                        class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all"
+                      >
+                        <div
+                          class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 mr-3 group-hover:bg-blue-600 group-hover:text-white transition-all"
+                        >
+                          <i class="fas fa-edit"></i>
+                        </div>
+                        Editar Campaña
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </td>
-              <td class="px-8 py-5 text-center">
-                <button
-                  (click)="editCampaign(c.id); $event.stopPropagation()"
-                  class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all active:scale-95"
-                  title="Editar campaña"
-                >
-                  <i class="fas fa-edit"></i>
-                </button>
               </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="7" class="px-8 py-20 text-center opacity-40">
-                <i class="fas fa-search text-4xl mb-4"></i>
-                <p class="font-bold uppercase tracking-widest">No se encontraron campañas registradas</p>
+              <td colspan="6" class="px-8 py-20 text-center">
+                <div class="flex flex-col items-center gap-3">
+                  <i class="fas fa-search text-slate-200 text-4xl"></i>
+                  <p class="text-slate-400 font-medium italic">No se encontraron campañas registradas</p>
+                </div>
               </td>
             </tr>
           }
@@ -180,21 +225,31 @@
       </table>
     </div>
 
-    <div class="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="text-sm text-slate-500 font-medium">
-        Mostrando <span class="text-slate-900 font-bold">{{ pagedCampaigns().length }}</span> de <span class="text-slate-900 font-bold">{{ filteredCampaigns().length }}</span> resultados
+    <div
+      class="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4"
+    >
+      <div class="text-sm text-slate-500 font-bold order-2 md:order-1">
+        Mostrando <span class="text-blue-600 font-black">{{ showingRange() }}</span> de
+        <span class="text-slate-900 font-black">{{ filteredCampaigns().length }}</span> campañas
       </div>
-
-      <div class="flex items-center gap-2">
-        <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
-          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 disabled:opacity-20 transition-all hover:bg-slate-100">
+      <div class="flex items-center gap-2 order-1 md:order-2">
+        <button
+          (click)="goToPage(currentPage() - 1)"
+          [disabled]="currentPage() === 1"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
+        >
           <i class="fas fa-chevron-left"></i>
         </button>
-        <div class="bg-white border border-slate-200 rounded-xl px-4 h-10 flex items-center font-bold text-sm text-slate-700">
-          Página {{ currentPage() }} de {{ totalPages() || 1 }}
+        <div
+          class="flex items-center bg-white border border-slate-200 rounded-xl px-4 h-10 font-black text-xs text-slate-700 shadow-sm uppercase"
+        >
+          Pág. {{ currentPage() }} / {{ totalPages() || 1 }}
         </div>
-        <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() >= totalPages()"
-          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 disabled:opacity-20 transition-all hover:bg-slate-100">
+        <button
+          (click)="goToPage(currentPage() + 1)"
+          [disabled]="currentPage() >= totalPages()"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
+        >
           <i class="fas fa-chevron-right"></i>
         </button>
       </div>
@@ -232,27 +287,6 @@
         </div>
 
         <div class="flex items-center gap-4">
-          <!-- Estado Activo -->
-          <div class="flex items-center gap-3 px-4 py-2 bg-slate-50 rounded-xl border border-slate-200">
-            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              Estado de Campaña:
-            </span>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                [checked]="campaignForm.get('active')?.value"
-                (change)="campaignForm.get('active')?.setValue($any($event.target).checked)"
-                class="sr-only peer"
-              />
-              <div class="w-12 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-            </label>
-            <div>
-              <p class="text-xs font-bold text-slate-800">
-                {{ campaignForm.get('active')?.value ? 'Activa' : 'Inactiva' }}
-              </p>
-            </div>
-          </div>
-
           <button
             (click)="closeModal()"
             class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-500 transition-all active:scale-90"
@@ -739,14 +773,48 @@
                 <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
                   Unidad *
                 </label>
-                <select
-                  formControlName="reachUnit"
-                  class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium cursor-pointer"
-                >
-                  @for (unit of reachUnits; track unit) {
-                    <option [value]="unit">{{ unit }}</option>
+                <div class="relative group">
+                  <i class="fas fa-ruler-combined absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
+                  <input
+                    type="text"
+                    [value]="reachUnitSearch()"
+                    (input)="filterReachUnit($any($event.target).value)"
+                    (focus)="showReachUnitDropdown.set(true)"
+                    (blur)="onReachUnitBlur()"
+                    placeholder="Seleccionar unidad..."
+                    autocomplete="off"
+                    class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                    [class.border-red-300]="campaignForm.get('reachUnit')?.invalid && campaignForm.get('reachUnit')?.touched"
+                    [class.border-blue-500]="campaignForm.get('reachUnit')?.value"
+                  />
+
+                  <!-- Dropdown Unidades -->
+                  @if (filteredReachUnits().length > 0 && showReachUnitDropdown()) {
+                    <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+                      @for (unit of filteredReachUnits(); track unit) {
+                        <li
+                          (mousedown)="selectReachUnit(unit)"
+                          class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-bold text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                          [class.bg-blue-50]="campaignForm.get('reachUnit')?.value === unit"
+                        >
+                          <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                               [class.border-blue-600]="campaignForm.get('reachUnit')?.value === unit"
+                               [class.bg-blue-600]="campaignForm.get('reachUnit')?.value === unit"
+                               [class.border-slate-300]="campaignForm.get('reachUnit')?.value !== unit">
+                            @if (campaignForm.get('reachUnit')?.value === unit) {
+                              <i class="fas fa-check text-white text-xs"></i>
+                            }
+                          </div>
+                          <span>{{ unit }}</span>
+                        </li>
+                      }
+                    </ul>
                   }
-                </select>
+                </div>
+                <p class="text-[11px] text-slate-400 italic font-medium ml-1">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  Selecciona la unidad de medida del alcance
+                </p>
               </div>
             </div>
           </div>
@@ -869,6 +937,354 @@
   </div>
   }
 
+  <!-- MODAL DE DETALLES DE CAMPAÑA -->
+  @if (showDetailsModal() && viewingCampaign()) {
+    <div class="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-fade-in">
+      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="closeDetailsModal()"></div>
+
+      <div
+        class="relative bg-white w-full max-w-4xl max-h-[90vh] rounded-[3rem] shadow-2xl animate-slide-up border border-white/20 flex flex-col overflow-hidden"
+      >
+        <!-- Header -->
+        <div
+          class="px-10 py-8 border-b-2 border-slate-100 bg-white flex justify-between items-center shrink-0"
+        >
+          <div class="flex items-center gap-4">
+            <div
+              class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200"
+            >
+              <i class="fas fa-bullhorn text-xl"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight">
+                Detalles de la Campaña
+              </h3>
+              <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">
+                Información Completa
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="closeDetailsModal()"
+            class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-500 transition-all active:scale-90"
+          >
+            <i class="fas fa-times text-2xl"></i>
+          </button>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 overflow-y-auto p-10 space-y-8">
+          @if (viewingCampaign(); as campaign) {
+            @if (getFullCampaign(campaign.id); as fullCampaign) {
+              <!-- INFORMACIÓN BÁSICA -->
+              <div class="space-y-4">
+                <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+                  <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-info-circle text-blue-600"></i>
+                  </div>
+                  <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+                    Información Básica
+                  </h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Nombre de la Campaña
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ campaign.name }}
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Institución
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ campaign.institution }}
+                    </div>
+                  </div>
+
+                  @if (fullCampaign.description) {
+                    <div class="space-y-2 md:col-span-2">
+                      <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                        Descripción
+                      </label>
+                      <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-medium text-slate-700">
+                        {{ fullCampaign.description }}
+                      </div>
+                    </div>
+                  }
+
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Tipo
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ campaign.type }}
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Modalidad Específica
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ campaign.specificModality }}
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Estado
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
+                      <span [ngClass]="{
+                        'bg-blue-100 text-blue-700': campaign.status === 'Planificada',
+                        'bg-emerald-100 text-emerald-700': campaign.status === 'En curso',
+                        'bg-slate-100 text-slate-500': campaign.status === 'Finalizada',
+                        'bg-red-100 text-red-700': campaign.status === 'Cancelada'
+                      }" class="px-3 py-1 rounded-full text-[10px] font-black uppercase">
+                        {{ campaign.status }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Ciclo
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ campaign.cycleName }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PERIODO -->
+              <div class="space-y-4">
+                <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+                  <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-emerald-600"></i>
+                  </div>
+                  <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+                    Periodo de Ejecución
+                  </h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Fecha de Inicio
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ fullCampaign.period?.startDate | date:'dd/MM/yyyy' }}
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Fecha de Finalización
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ fullCampaign.period?.endDate | date:'dd/MM/yyyy' }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ALCANCE Y COSTOS -->
+              <div class="space-y-4">
+                <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+                  <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-bullseye text-purple-600"></i>
+                  </div>
+                  <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+                    Alcance y Costos
+                  </h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Alcance Estimado
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ campaign.reach | number }}
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Unidad
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ fullCampaign.reach?.unit || 'Personas' }}
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Inversión Total
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-mono font-bold text-slate-700">
+                      {{ campaign.cost | currency:'MXN' }}
+                    </div>
+                  </div>
+
+                  <div class="space-y-2 md:col-span-3">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Impacto Estimado
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
+                      <div class="flex items-center gap-3">
+                        <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div [style.width.%]="campaign.impact" class="h-full bg-blue-500"></div>
+                        </div>
+                        <span class="text-sm font-bold text-slate-700">{{ campaign.impact }}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- IEMS OBJETIVO -->
+              @if (fullCampaign.targetedIEMS && fullCampaign.targetedIEMS.length > 0) {
+                <div class="space-y-4">
+                  <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+                    <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                      <i class="fas fa-school text-amber-600"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+                      IEMS Objetivo
+                    </h3>
+                  </div>
+
+                  <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
+                    <div class="text-sm font-bold text-slate-700">
+                      <i class="fas fa-school text-amber-600 mr-2"></i>
+                      {{ getTargetedIEMSName(fullCampaign.targetedIEMS) }}
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- CARRERAS PROMOCIONADAS -->
+              @if (fullCampaign.targetedCareers && fullCampaign.targetedCareers.length > 0) {
+                <div class="space-y-4">
+                  <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+                    <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                      <i class="fas fa-graduation-cap text-amber-600"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+                      Carreras Promocionadas
+                    </h3>
+                  </div>
+
+                  <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
+                    <div class="text-sm font-bold text-slate-700">
+                      {{ fullCampaign.targetedCareers.length }} carrera(s) promocionada(s)
+                    </div>
+                  </div>
+                </div>
+              }
+            } @else {
+              <!-- Si no hay campaña completa, mostrar solo la información básica -->
+              <div class="space-y-4">
+                <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+                  <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-info-circle text-blue-600"></i>
+                  </div>
+                  <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+                    Información Básica
+                  </h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Nombre de la Campaña
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ campaign.name }}
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Institución
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ campaign.institution }}
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Estado
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
+                      <span [ngClass]="{
+                        'bg-blue-100 text-blue-700': campaign.status === 'Planificada',
+                        'bg-emerald-100 text-emerald-700': campaign.status === 'En curso',
+                        'bg-slate-100 text-slate-500': campaign.status === 'Finalizada',
+                        'bg-red-100 text-red-700': campaign.status === 'Cancelada'
+                      }" class="px-3 py-1 rounded-full text-[10px] font-black uppercase">
+                        {{ campaign.status }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Ciclo
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ campaign.cycleName }}
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Alcance
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ campaign.reach | number }}
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Inversión Total
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-mono font-bold text-slate-700">
+                      {{ campaign.cost | currency:'MXN' }}
+                    </div>
+                  </div>
+
+                  <div class="space-y-2 md:col-span-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Impacto Estimado
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
+                      <div class="flex items-center gap-3">
+                        <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div [style.width.%]="campaign.impact" class="h-full bg-blue-500"></div>
+                        </div>
+                        <span class="text-sm font-bold text-slate-700">{{ campaign.impact }}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  }
 </div>
 
 

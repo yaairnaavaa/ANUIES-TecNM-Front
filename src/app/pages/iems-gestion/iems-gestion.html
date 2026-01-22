@@ -27,12 +27,6 @@
     </div>
   </div>
 
-  <!-- STATS -->
-  <div class="flex flex-wrap gap-6 text-sm font-bold text-slate-600">
-    <span> <strong>Total:</strong> {{ filteredIEMS().length }} IEMS </span>
-    <span> <strong>Mostrando:</strong> {{ showingRange() }} </span>
-  </div>
-
   <!-- LOADING -->
   @if (isLoading()) {
     <div class="flex flex-col items-center py-20 opacity-60">
@@ -72,316 +66,275 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <div
-            class="relative inline-block text-left w-64"
-            (clickOutside)="isTypeComboOpen = false"
-          >
-            <div class="relative">
-              <input
-                type="text"
-                #typeInput
-                [value]="getTypeLabel(selectedType())"
-                (click)="toggleTypeMenu()"
-                (input)="isTypeComboOpen = true"
-                (blur)="onTypeBlur()"
-                placeholder="Buscar tipo..."
-                class="w-full px-5 py-4 bg-slate-50/50 border border-slate-100 rounded-2xl font-semibold text-slate-600 placeholder:text-slate-400 hover:bg-slate-100/50 transition-all focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:bg-white outline-none"
-              />
-              <i
-                (click)="toggleTypeMenu()"
-                class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 text-xs transition-transform cursor-pointer"
-                [class.rotate-180]="isTypeComboOpen"
-              ></i>
-            </div>
+          <!-- Combo de Tipo -->
+          <div class="relative group w-64">
+            <i class="fas fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
+            <input
+              type="text"
+              [value]="displayTypeValue()"
+              (input)="filterTypeOptions($any($event.target).value)"
+              (focus)="onTypeDropdownFocus()"
+              (blur)="onTypeDropdownBlur()"
+              placeholder="Buscar tipo..."
+              autocomplete="off"
+              class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+              [class.border-blue-500]="selectedType()"
+            />
 
-            <div
-              *ngIf="isTypeComboOpen"
-              class="absolute z-50 mt-2 w-full bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
-            >
-              <div class="max-h-60 overflow-y-auto py-1">
-                <button
-                  *ngIf="!typeInput.value || 'todos'.includes(typeInput.value.toLowerCase())"
-                  (mousedown)="
-                    selectedType.set('');
-                    currentPage.set(1);
-                    isTypeComboOpen = false;
-                    typeInput.value = ''
-                  "
-                  class="w-full text-left px-5 py-3 text-sm font-medium text-slate-400 hover:bg-slate-50 hover:text-indigo-600 border-b border-slate-50"
-                >
-                  Todos los Tipos
-                </button>
-                <ng-container *ngFor="let opt of typeOptions.slice(1)">
-                  <button
-                    *ngIf="opt.label.toLowerCase().includes(typeInput.value.toLowerCase())"
-                    (mousedown)="
-                      selectedType.set(opt.value);
-                      currentPage.set(1);
-                      isTypeComboOpen = false;
-                      typeInput.value = opt.label
-                    "
-                    class="w-full text-left px-5 py-3 text-sm font-medium transition-colors"
-                    [ngClass]="
-                      selectedType() === opt.value
-                        ? 'bg-indigo-50 text-indigo-600'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'
-                    "
+            <!-- Dropdown Tipos -->
+            @if (filteredTypeOptions().length > 0 && showTypeDropdown()) {
+              <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden max-h-60 overflow-y-auto">
+                @for (opt of filteredTypeOptions(); track opt.value) {
+                  <li
+                    (mousedown)="selectType(opt.value)"
+                    class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-bold text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                    [class.bg-blue-50]="selectedType() === opt.value"
                   >
-                    {{ opt.label }}
-                  </button>
-                </ng-container>
-              </div>
-            </div>
+                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                         [class.border-blue-600]="selectedType() === opt.value"
+                         [class.bg-blue-600]="selectedType() === opt.value"
+                         [class.border-slate-300]="selectedType() !== opt.value">
+                      @if (selectedType() === opt.value) {
+                        <i class="fas fa-check text-white text-xs"></i>
+                      }
+                    </div>
+                    <span>{{ opt.label }}</span>
+                  </li>
+                }
+              </ul>
+            }
           </div>
 
-          <div
-            class="relative inline-block text-left w-64"
-            (clickOutside)="isStateComboOpen = false"
-          >
-            <div class="relative">
-              <input
-                type="text"
-                #stateInput
-                [value]="selectedState() === 'all' ? '' : selectedState()"
-                (click)="toggleMenu()"
-                (input)="isStateComboOpen = true"
-                (blur)="onBlur()"
-                placeholder="Buscar estado..."
-                class="w-full px-5 py-4 bg-slate-50/50 border border-slate-100 rounded-2xl font-semibold text-slate-600 placeholder:text-slate-400 hover:bg-slate-100/50 transition-all focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:bg-white outline-none"
-              />
-              <i
-                (click)="toggleMenu()"
-                class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 text-xs transition-transform cursor-pointer"
-                [class.rotate-180]="isStateComboOpen"
-              ></i>
-            </div>
+          <!-- Combo de Estado -->
+          <div class="relative group w-64">
+            <i class="fas fa-flag absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
+            <input
+              type="text"
+              [value]="displayStateValue()"
+              (input)="filterStateOptions($any($event.target).value)"
+              (focus)="onStateDropdownFocus()"
+              (blur)="onStateDropdownBlur()"
+              placeholder="Buscar estado..."
+              autocomplete="off"
+              class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+              [class.border-blue-500]="selectedState() && selectedState() !== 'all'"
+            />
 
-            <div
-              *ngIf="isStateComboOpen"
-              class="absolute z-50 mt-2 w-full bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
-            >
-              <div class="max-h-60 overflow-y-auto py-1">
-                <button
-                  *ngIf="!stateInput.value"
-                  (mousedown)="selectState('all', '')"
-                  class="w-full text-left px-5 py-3 text-sm font-medium text-slate-400 hover:bg-slate-50 hover:text-indigo-600 border-b border-slate-50"
-                >
-                  Todos los estados
-                </button>
-                <ng-container *ngFor="let state of stateOptions.slice(1)">
-                  <button
-                    *ngIf="state.toLowerCase().includes(stateInput.value.toLowerCase())"
-                    (mousedown)="selectState(state, state)"
-                    class="w-full text-left px-5 py-3 text-sm font-medium transition-colors"
-                    [ngClass]="
-                      selectedState() === state
-                        ? 'bg-indigo-50 text-indigo-600'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'
-                    "
+            <!-- Dropdown Estados -->
+            @if (filteredStateOptions().length > 0 && showStateDropdown()) {
+              <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden max-h-60 overflow-y-auto">
+                @for (state of filteredStateOptions(); track state) {
+                  <li
+                    (mousedown)="selectStateFilter(state)"
+                    class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-bold text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                    [class.bg-blue-50]="selectedState() === state"
                   >
-                    {{ state }}
-                  </button>
-                </ng-container>
-              </div>
-            </div>
+                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                         [class.border-blue-600]="selectedState() === state"
+                         [class.bg-blue-600]="selectedState() === state"
+                         [class.border-slate-300]="selectedState() !== state">
+                      @if (selectedState() === state) {
+                        <i class="fas fa-check text-white text-xs"></i>
+                      }
+                    </div>
+                    <span>{{ state }}</span>
+                  </li>
+                }
+              </ul>
+            }
           </div>
         </div>
 
-        <button
-          (click)="resetFilters()"
-          class="ml-auto p-4 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all flex items-center gap-2 group"
-          title="Limpiar filtros"
-        >
-          <i class="fas fa-redo text-sm group-hover:rotate-[-45deg] transition-transform"></i>
-          <span class="text-xs font-bold uppercase tracking-wider">Limpiar</span>
-        </button>
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Mostrar:</span>
+          <select
+            [ngModel]="itemsPerPage()"
+            (ngModelChange)="onItemsPerPageChange($event)"
+            class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-all"
+          >
+            @for (option of pageSizeOptions; track option) {
+              <option [value]="option">{{ option }} filas</option>
+            }
+          </select>
+        </div>
       </div>
-      <div class="overflow-visible">
-        <table class="w-full text-left">
-          <thead>
-            <tr
-              class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-widest font-black"
-            >
-              <th class="px-8 py-5">Clave</th>
-              <th class="px-8 py-5">Nombre</th>
-              <th class="px-8 py-5">Tipo</th>
-              <th class="px-8 py-5">Ubicación</th>
-              <th class="px-8 py-5">Contacto</th>
-              <th class="px-8 py-5">Estado</th>
-              <th class="px-8 py-5 text-center">Acciones</th>
-            </tr>
-          </thead>
-
-          <tbody class="divide-y divide-slate-100">
-            @for (iems of pagedIEMS(); track iems._id) {
-              <tr
-                class="hover:bg-blue-50/30 transition-colors"
-                [style.z-index]="$any(iems).showMenu ? '50' : 'auto'"
-                [class.relative]="$any(iems).showMenu"
-              >
-                <td class="px-8 py-5 font-mono text-xs font-bold">
-                  {{ iems.code }}
-                </td>
-
-                <td class="px-8 py-5 font-black uppercase text-sm text-slate-800">
+    <div class="overflow-x-auto min-h-[400px]">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr
+            class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-widest font-black"
+          >
+            <th class="px-8 py-5">IEMS</th>
+            <th class="px-8 py-5">Clave</th>
+            <th class="px-8 py-5">Tipo</th>
+            <th class="px-8 py-5">Ubicación</th>
+            <th class="px-8 py-5">Contacto</th>
+            <th class="px-8 py-5">Estatus</th>
+            <th class="px-8 py-5 text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for (iems of pagedIEMS(); track iems._id) {
+            <tr class="hover:bg-blue-50/30 transition-colors group">
+              <td class="px-8 py-5">
+                <div class="font-black text-slate-800 leading-tight uppercase text-sm">
                   {{ iems.name }}
-                </td>
+                </div>
+              </td>
 
-                <td class="px-8 py-5">
-                  <span class="px-3 py-1 rounded-lg bg-slate-100 text-xs font-black">
-                    {{ iems.type }}
-                  </span>
-                </td>
+              <td class="px-8 py-5">
+                <span
+                  class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-mono text-xs font-bold border border-slate-200"
+                >
+                  {{ iems.code }}
+                </span>
+              </td>
 
-                <td class="px-8 py-5 font-bold text-sm">
+              <td class="px-8 py-5">
+                <span class="px-3 py-1 rounded-lg bg-slate-100 text-xs font-black text-slate-600">
+                  {{ iems.type }}
+                </span>
+              </td>
+
+              <td class="px-8 py-5">
+                <div class="text-sm font-bold text-slate-700">
                   {{ iems.address.municipality }}, {{ iems.address.state }}
-                </td>
+                </div>
+              </td>
 
-                <td class="px-8 py-5 text-xs space-y-1">
-                  @if (iems.contact?.email) {
-                    <div>
-                      <i class="fas fa-envelope mr-1 text-slate-400"></i>
-                      {{ iems.contact?.email }}
-                    </div>
-                  }
-                  @if (iems.contact?.generalPhone) {
-                    <div>
-                      <i class="fas fa-phone mr-1 text-slate-400"></i>
-                      {{ iems.contact?.generalPhone }}
-                    </div>
-                  }
-                </td>
+              <td class="px-8 py-5">
+                <div class="text-sm font-bold text-slate-700">
+                  {{ iems.contact?.email || 'N/A' }}
+                </div>
+                @if (iems.contact?.generalPhone) {
+                  <div class="text-xs text-slate-400 italic">{{ iems.contact?.generalPhone }}</div>
+                }
+              </td>
 
-                <td class="px-8 py-5">
+              <td class="px-8 py-5">
+                <span class="flex items-center gap-2 font-bold text-xs">
                   <span
-                    class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase"
+                    class="w-2 h-2 rounded-full animate-pulse"
                     [ngClass]="
-                      iems.active ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                      iems.active
+                        ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
+                        : 'bg-slate-400'
                     "
-                  >
-                    <span
-                      class="w-1.5 h-1.5 rounded-full"
-                      [ngClass]="iems.active ? 'bg-emerald-500' : 'bg-red-500'"
-                    ></span>
-                    {{ iems.active ? 'Activa' : 'Inactiva' }}
+                  ></span>
+
+                  <span [ngClass]="iems.active ? 'text-emerald-600' : 'text-slate-500'">
+                    {{ iems.active ? 'ACTIVA' : 'INACTIVA' }}
                   </span>
-                </td>
+                </span>
+              </td>
 
-                <td class="px-8 py-5 text-center relative overflow-visible">
-                  <div class="relative inline-block text-left">
-                    <button
-                      type="button"
-                      (click)="$any(iems).showMenu = !$any(iems).showMenu"
-                      class="flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all focus:outline-none"
-                    >
-                      <i class="fas fa-ellipsis-v"></i>
-                    </button>
+              <td class="px-8 py-5 text-center">
+                <div class="relative inline-block text-left">
+                  <button
+                    #anchor
+                    type="button"
+                    (click)="$any(iems).showMenu = !$any(iems).showMenu"
+                    class="flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all focus:outline-none"
+                  >
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
 
-                    <div
-                      *ngIf="$any(iems).showMenu"
-                      (clickOutside)="$any(iems).showMenu = false"
-                      class="absolute right-0 z-[9999] mt-2 w-52 rounded-2xl bg-white shadow-xl border border-slate-100 overflow-visible"
-                    >
-                      <div class="py-1">
-                        <button
-                          type="button"
-                          (click)="
-                            $event.preventDefault(); toggleStatus(iems); $any(iems).showMenu = false
-                          "
-                          class="flex items-center w-full px-4 py-3 text-sm font-semibold transition-colors"
+                  <div
+                    *ngIf="$any(iems).showMenu"
+                    (mouseleave)="$any(iems).showMenu = false"
+                    class="fixed z-[100] w-64 mt-2 origin-top-right rounded-2xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden border border-slate-100"
+                    [style.left.px]="anchor.getBoundingClientRect().left - 200"
+                    [style.top.px]="anchor.getBoundingClientRect().bottom"
+                  >
+                    <div class="p-2 space-y-1">
+                      <button
+                        type="button"
+                        (click)="
+                          $event.preventDefault(); toggleStatus(iems); $any(iems).showMenu = false
+                        "
+                        class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all"
+                        [ngClass]="
+                          iems.active
+                            ? 'hover:bg-amber-50 hover:text-amber-700'
+                            : 'hover:bg-emerald-50 hover:text-emerald-700'
+                        "
+                      >
+                        <div
+                          class="w-9 h-9 flex items-center justify-center rounded-lg mr-3 transition-all"
                           [ngClass]="
                             iems.active
-                              ? 'text-amber-600 hover:bg-amber-50'
-                              : 'text-emerald-600 hover:bg-emerald-50'
+                              ? 'bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white'
+                              : 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white'
                           "
                         >
                           <i
-                            class="fas mr-3 text-lg"
+                            class="fas"
                             [ngClass]="iems.active ? 'fa-toggle-on' : 'fa-toggle-off'"
                           ></i>
-                          {{ iems.active ? 'Desactivar' : 'Activar' }}
-                        </button>
+                        </div>
+                        {{ iems.active ? 'Desactivar' : 'Activar' }}
+                      </button>
 
-                        <button
-                          (click)="openEditIEMS(iems); $any(iems).showMenu = false"
-                          class="flex items-center w-full px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                      <button
+                        (click)="openEditIEMS(iems); $any(iems).showMenu = false"
+                        class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all"
+                      >
+                        <div
+                          class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 mr-3 group-hover:bg-blue-600 group-hover:text-white transition-all"
                         >
-                          <i class="fas fa-edit mr-3 text-slate-400"></i>
-                          Editar datos
-                        </button>
-                      </div>
+                          <i class="fas fa-edit"></i>
+                        </div>
+                        Editar datos
+                      </button>
                     </div>
                   </div>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="8" class="px-8 py-20 text-center opacity-40">
-                  <i class="fas fa-inbox text-5xl mb-4"></i>
-                  <p class="font-black uppercase">No se encontraron IEMS</p>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="px-8 py-20 text-center">
+                <div class="flex flex-col items-center gap-3">
+                  <i class="fas fa-inbox text-slate-200 text-4xl"></i>
+                  <p class="text-slate-400 font-medium italic">No se encontraron IEMS</p>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
 
-    <!-- PAGINACIÓN -->
-    <div class="flex flex-wrap items-center justify-between gap-6 pt-6">
-      <div class="flex items-center gap-3 text-sm font-bold text-slate-600">
-        <label>Mostrar</label>
-        <select
-          [value]="itemsPerPage()"
-          (change)="onItemsPerPageChange(+$any($event.target).value)"
-          class="px-3 py-2 border border-slate-200 rounded-xl"
-        >
-          <option [value]="size" *ngFor="let size of pageSizeOptions">
-            {{ size }}
-          </option>
-        </select>
-        <span>por página</span>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <button
-          (click)="goToPage(currentPage() - 1)"
-          [disabled]="currentPage() === 1"
-          class="w-10 h-10 rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-30"
-        >
-          <i class="fas fa-chevron-left"></i>
-        </button>
-
-        @for (page of [].constructor(totalPages()); track $index) {
-          @if (
-            totalPages() <= 7 ||
-            $index === 0 ||
-            $index === totalPages() - 1 ||
-            Math.abs(currentPage() - ($index + 1)) <= 2
-          ) {
-            <button
-              (click)="goToPage($index + 1)"
-              class="w-10 h-10 rounded-xl font-black"
-              [ngClass]="
-                currentPage() === $index + 1
-                  ? 'bg-slate-800 text-white'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
-              "
-            >
-              {{ $index + 1 }}
-            </button>
-          } @else if (Math.abs(currentPage() - ($index + 1)) === 3) {
-            <span class="px-2">…</span>
-          }
-        }
-
-        <button
-          (click)="goToPage(currentPage() + 1)"
-          [disabled]="currentPage() === totalPages()"
-          class="w-10 h-10 rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-30"
-        >
-          <i class="fas fa-chevron-right"></i>
-        </button>
+      <!-- PAGINACIÓN -->
+      <div
+        class="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4"
+      >
+        <div class="text-sm text-slate-500 font-bold order-2 md:order-1">
+          Mostrando <span class="text-blue-600 font-black">{{ showingRange() }}</span> de
+          <span class="text-slate-900 font-black">{{ filteredIEMS().length }}</span> IEMS
+          registradas
+        </div>
+        <div class="flex items-center gap-2 order-1 md:order-2">
+          <button
+            (click)="goToPage(currentPage() - 1)"
+            [disabled]="currentPage() === 1"
+            class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <div
+            class="flex items-center bg-white border border-slate-200 rounded-xl px-4 h-10 font-black text-xs text-slate-700 shadow-sm uppercase"
+          >
+            Pág. {{ currentPage() }} / {{ totalPages() || 1 }}
+          </div>
+          <button
+            (click)="goToPage(currentPage() + 1)"
+            [disabled]="currentPage() >= totalPages()"
+            class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
       </div>
     </div>
   }

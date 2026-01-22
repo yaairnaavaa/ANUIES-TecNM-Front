@@ -71,6 +71,10 @@ export class IesCampaignManagementComponent implements OnInit {
 
   // SELECCIÓN (Aquí vive la magia de las métricas)
   selectedCampaign = signal<CampaignDisplay | null>(null);
+  
+  // Modal de detalles
+  showDetailsModal = signal<boolean>(false);
+  viewingCampaign = signal<CampaignDisplay | null>(null);
 
   // Modal State
   showModal = signal(false);
@@ -116,10 +120,13 @@ export class IesCampaignManagementComponent implements OnInit {
   showSpecificModalityDropdown = signal(false);
   
   reachUnits = ['Personas', 'Impresiones', 'Clics', 'Vistas', 'Asistentes'];
+  filteredReachUnits = signal<string[]>(['Personas', 'Impresiones', 'Clics', 'Vistas', 'Asistentes']);
+  reachUnitSearch = signal('');
+  showReachUnitDropdown = signal(false);
   
   // Opciones de estado de campaña
-  campaignStatusOptions = ['Planificada', 'En curso', 'Finalizada', 'Cancelada'];
-  filteredCampaignStatuses = signal<string[]>(['Planificada', 'En curso', 'Finalizada', 'Cancelada']);
+  campaignStatusOptions = ['Planificada', 'En curso', 'En pausa', 'Finalizada', 'Cancelada'];
+  filteredCampaignStatuses = signal<string[]>(['Planificada', 'En curso', 'En pausa', 'Finalizada', 'Cancelada']);
   campaignStatusSearch = signal('');
   showCampaignStatusDropdown = signal(false);
 
@@ -488,37 +495,48 @@ export class IesCampaignManagementComponent implements OnInit {
   });
 
   // Paginación
-  totalPages = computed(() => Math.ceil(this.filteredCampaigns().length / this.itemsPerPage()));
+  totalPages = computed(() => Math.ceil(this.filteredCampaigns().length / this.itemsPerPage()) || 1);
+
+  showingRange = computed(() => {
+    const start = (this.currentPage() - 1) * this.itemsPerPage() + 1;
+    const end = Math.min(this.currentPage() * this.itemsPerPage(), this.filteredCampaigns().length);
+    return this.filteredCampaigns().length > 0 ? `${start} - ${end}` : '0';
+  });
 
   pagedCampaigns = computed(() => {
     const start = (this.currentPage() - 1) * this.itemsPerPage();
     return this.filteredCampaigns().slice(start, start + this.itemsPerPage());
   });
   
-  // Ajustamos el label de displayMetrics para que sea en español
+  // Métricas dinámicas basadas en las campañas filtradas de la tabla o campaña seleccionada
   displayMetrics = computed(() => {
     const selected = this.selectedCampaign();
     const data = this.filteredCampaigns();
 
-    // Cálculo de escuelas únicas (para métricas globales)
-    const uniqueInstitutions = new Set(data.map((c) => c.institution)).size;
-
+    // Si hay una campaña seleccionada, mostrar sus métricas
     if (selected) {
       return {
         reach: selected.reach,
         cost: selected.cost,
         impact: selected.impact,
-        label: `Enfoque: ${selected.name}`,
+        label: `Campaña: ${selected.name}`,
         institutionName: selected.institution,
+        institutionCount: 1,
         isGlobal: false,
       };
     }
 
+    // Si no hay selección, mostrar métricas agregadas de todas las campañas filtradas
+    const uniqueInstitutions = new Set(data.map((c) => c.institution)).size;
+    const totalReach = data.reduce((acc, c) => acc + c.reach, 0);
+    const totalCost = data.reduce((acc, c) => acc + c.cost, 0);
+    const totalImpact = totalCost > 0 ? (totalReach / totalCost) * 100 : 0;
+
     return {
-      reach: data.reduce((acc, c) => acc + c.reach, 0),
-      cost: data.reduce((acc, c) => acc + c.cost, 0),
-      impact: data.length ? data.reduce((acc, c) => acc + c.impact, 0) / data.length : 0,
-      label: 'Métricas Globales (Total Filtrado)',
+      reach: totalReach,
+      cost: totalCost,
+      impact: totalImpact,
+      label: data.length > 0 ? `Métricas de ${data.length} Campaña${data.length > 1 ? 's' : ''}` : 'Sin Campañas',
       institutionCount: uniqueInstitutions,
       isGlobal: true,
     };
@@ -536,6 +554,37 @@ export class IesCampaignManagementComponent implements OnInit {
   onSearchChange(val: string) {
     this.searchQuery.set(val);
     this.currentPage.set(1);
+  }
+
+  /**
+   * Cambiar items por página
+   */
+  onItemsPerPageChange(value: number): void {
+    this.itemsPerPage.set(value);
+    this.currentPage.set(1);
+  }
+
+  /**
+   * Obtener campaña completa desde rawCampaigns
+   */
+  getFullCampaign(campaignId: string): Campaign | null {
+    return this.rawCampaigns().find(c => c._id === campaignId) || null;
+  }
+
+  /**
+   * Abrir modal de detalles
+   */
+  openDetailsModal(campaign: CampaignDisplay): void {
+    this.viewingCampaign.set(campaign);
+    this.showDetailsModal.set(true);
+  }
+
+  /**
+   * Cerrar modal de detalles
+   */
+  closeDetailsModal(): void {
+    this.showDetailsModal.set(false);
+    this.viewingCampaign.set(null);
   }
 
   goToPage(page: number) {
@@ -618,6 +667,10 @@ export class IesCampaignManagementComponent implements OnInit {
     
     // Deshabilitar el campo después de establecer el valor
     this.campaignForm.get('responsible')?.disable();
+    
+    // Inicializar búsquedas de combos
+    this.reachUnitSearch.set('Personas');
+    this.filteredReachUnits.set(this.reachUnits);
     
     this.selectedCareers.set([]);
     this.selectedIEMS.set(null);
@@ -719,6 +772,11 @@ export class IesCampaignManagementComponent implements OnInit {
         // Configurar estado de campaña
         this.campaignStatusSearch.set(campaign.status || 'Planificada');
         this.filteredCampaignStatuses.set(this.campaignStatusOptions);
+
+        // Configurar unidad de alcance
+        const reachUnit = campaign.reach?.unit || 'Personas';
+        this.reachUnitSearch.set(reachUnit);
+        this.filteredReachUnits.set(this.reachUnits);
 
         // Configurar IEMS si existe
         if (campaign.targetedIEMS && campaign.targetedIEMS.length > 0) {
@@ -1068,6 +1126,50 @@ export class IesCampaignManagementComponent implements OnInit {
   }
 
   /**
+   * Filtrar unidad de alcance
+   */
+  filterReachUnit(query: string) {
+    this.reachUnitSearch.set(query);
+    this.showReachUnitDropdown.set(true);
+    
+    if (!query.trim()) {
+      this.filteredReachUnits.set(this.reachUnits);
+      return;
+    }
+    
+    const filtered = this.reachUnits.filter(unit => 
+      unit.toLowerCase().includes(query.toLowerCase())
+    );
+    this.filteredReachUnits.set(filtered);
+  }
+
+  /**
+   * Seleccionar unidad de alcance
+   */
+  selectReachUnit(unit: string) {
+    this.reachUnitSearch.set(unit);
+    this.campaignForm.patchValue({ reachUnit: unit });
+    this.showReachUnitDropdown.set(false);
+  }
+
+  /**
+   * Manejar blur de unidad de alcance
+   */
+  onReachUnitBlur() {
+    setTimeout(() => {
+      this.showReachUnitDropdown.set(false);
+    }, 200);
+  }
+
+  /**
+   * Obtener valor de display para unidad de alcance
+   */
+  getReachUnitDisplayValue(): string {
+    const formValue = this.campaignForm.get('reachUnit')?.value;
+    return formValue || this.reachUnitSearch() || 'Seleccionar unidad...';
+  }
+
+  /**
    * Filtrar IEMS
    */
   filterIEMS(query: string) {
@@ -1206,6 +1308,34 @@ export class IesCampaignManagementComponent implements OnInit {
   getIEMSName(iemsId: string): string {
     const iems = this.iemsList().find(i => i._id === iemsId);
     return iems ? `${iems.address.state} - ${iems.name}` : '';
+  }
+
+  /**
+   * Obtener nombre del IEMS objetivo desde el array targetedIEMS
+   */
+  getTargetedIEMSName(targetedIEMS: any): string {
+    if (!targetedIEMS || !Array.isArray(targetedIEMS) || targetedIEMS.length === 0) {
+      return 'Sin nombre';
+    }
+    
+    const firstItem = targetedIEMS[0];
+    
+    // Si es un objeto con iemsName
+    if (typeof firstItem === 'object' && firstItem !== null && 'iemsName' in firstItem) {
+      return firstItem.iemsName || 'Sin nombre';
+    }
+    
+    // Si es un string (ID), buscar el nombre
+    if (typeof firstItem === 'string') {
+      return this.getIEMSName(firstItem);
+    }
+    
+    // Si es un objeto con iemsId
+    if (typeof firstItem === 'object' && firstItem !== null && 'iemsId' in firstItem) {
+      return this.getIEMSName(firstItem.iemsId);
+    }
+    
+    return 'Sin nombre';
   }
 
   // ==========================================

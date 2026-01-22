@@ -88,8 +88,21 @@
           (input)="onSearch($event)"
           [value]="searchTerm()"
           placeholder="Buscar por nombre o correo..."
-          class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+          class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium"
         />
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Mostrar:</span>
+        <select
+          [ngModel]="itemsPerPage()"
+          (ngModelChange)="onItemsPerPageChange($event)"
+          class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-all"
+        >
+          @for (option of pageSizeOptions; track option) {
+            <option [value]="option">{{ option }} filas</option>
+          }
+        </select>
       </div>
     </div>
 
@@ -100,14 +113,12 @@
             <th class="px-8 py-5">Aspirante / Contacto</th>
             <th class="px-8 py-5">Escuela de Origen</th>
             <th class="px-8 py-5">Intereses (Carreras)</th>
-            <th class="px-8 py-5 text-center">Seleccionado</th>
+            <th class="px-8 py-5 text-center">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          @for(a of filteredAspirants(); track a._id) {
-            <tr (click)="selectAspirant(a)" 
-                class="cursor-pointer transition-all hover:bg-blue-50/30 group"
-                [class.bg-blue-50/50]="selectedAspirant()?._id === a._id">
+          @for(a of paginatedAspirants(); track a._id) {
+            <tr class="transition-all hover:bg-blue-50/30 group">
               
               <td class="px-8 py-5">
                 <div class="font-bold text-slate-800 uppercase">{{ a.fullName }}</div>
@@ -135,14 +146,33 @@
                 </div>
               </td>
 
-              <td class="px-8 py-5 text-center">
-                 <div class="w-8 h-8 rounded-xl flex items-center justify-center mx-auto transition-all"
-                      [class.bg-blue-600]="selectedAspirant()?._id === a._id"
-                      [class.bg-slate-100]="selectedAspirant()?._id !== a._id">
-                   <i class="fas fa-check text-[10px]" 
-                      [class.text-white]="selectedAspirant()?._id === a._id"
-                      [class.text-slate-300]="selectedAspirant()?._id !== a._id"></i>
-                 </div>
+              <td class="px-8 py-5 text-center relative overflow-visible">
+                <div class="relative inline-block text-left">
+                  <button
+                    type="button"
+                    (click)="$any(a).showMenu = !$any(a).showMenu; $event.stopPropagation()"
+                    class="flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all focus:outline-none"
+                  >
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+
+                  <div
+                    *ngIf="$any(a).showMenu"
+                    (clickOutside)="$any(a).showMenu = false"
+                    class="absolute right-0 z-[9999] mt-2 w-52 rounded-2xl bg-white shadow-xl border border-slate-100 overflow-visible"
+                  >
+                    <div class="py-1">
+                      <button
+                        type="button"
+                        (click)="openDetailsModal(a); $any(a).showMenu = false"
+                        class="flex items-center w-full px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      >
+                        <i class="fas fa-eye mr-3 text-slate-400"></i>
+                        Ver Detalles
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </td>
             </tr>
           } @empty {
@@ -157,64 +187,337 @@
           }
 
         </tbody>
-
-        <div class="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4">
-  
-  <div class="flex items-center gap-3">
-    <span class="text-sm text-slate-500 font-medium">Mostrar</span>
-    <select 
-      (change)="onItemsPerPageChange($event)"
-      class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20">
-      <option value="5" selected>5</option>
-      <option value="10">10</option>
-      <option value="25">25</option>
-      <option value="50">50</option>
-    </select>
-    <span class="text-sm text-slate-500 font-medium italic">aspirantes</span>
-  </div>
-
-  <div class="flex items-center gap-6">
-    <div class="text-sm text-slate-500 font-medium">
-      Página <span class="text-slate-900 font-bold">{{ currentPage() }}</span> de 
-      <span class="text-slate-900 font-bold">{{ totalPages() }}</span>
-    </div>
-
-    <div class="flex items-center gap-2">
-      <button 
-        (click)="prevPage()"
-        [disabled]="currentPage() === 1"
-        class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 transition-all hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed">
-        <i class="fas fa-chevron-left text-xs"></i>
-      </button>
-
-      <button 
-        (click)="nextPage()"
-        [disabled]="currentPage() === totalPages()"
-        class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 transition-all hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed">
-        <i class="fas fa-chevron-right text-xs"></i>
-      </button>
-    </div>
-  </div>
-</div>
       </table>
     </div>
 
-    <div class="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="text-sm text-slate-500 font-medium">
-        Mostrando <span class="text-slate-900 font-bold">{{ filteredAspirants().length }}</span> de
-        <span class="text-slate-900 font-bold">{{ aspirants().length }}</span> registros
+    <div
+      class="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4"
+    >
+      <div class="text-sm text-slate-500 font-bold order-2 md:order-1">
+        Mostrando <span class="text-blue-600 font-black">{{ showingRange() }}</span> de
+        <span class="text-slate-900 font-black">{{ filteredAspirants().length }}</span> aspirantes
       </div>
-      <div class="flex items-center gap-2">
-        <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 transition-all hover:bg-slate-100">
-          <i class="fas fa-chevron-left text-xs"></i>
+      <div class="flex items-center gap-2 order-1 md:order-2">
+        <button
+          (click)="prevPage()"
+          [disabled]="currentPage() === 1"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
+        >
+          <i class="fas fa-chevron-left"></i>
         </button>
-        <div class="bg-white border border-slate-200 rounded-xl px-4 h-10 flex items-center font-bold text-sm text-slate-700">
-          Página 1
+        <div
+          class="flex items-center bg-white border border-slate-200 rounded-xl px-4 h-10 font-black text-xs text-slate-700 shadow-sm uppercase"
+        >
+          Pág. {{ currentPage() }} / {{ totalPages() || 1 }}
         </div>
-        <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 transition-all hover:bg-slate-100">
-          <i class="fas fa-chevron-right text-xs"></i>
+        <button
+          (click)="nextPage()"
+          [disabled]="currentPage() >= totalPages()"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
+        >
+          <i class="fas fa-chevron-right"></i>
         </button>
       </div>
     </div>
   </div>
+
+  <!-- MODAL DE DETALLES DEL ASPIRANTE -->
+  @if (showDetailsModal() && viewingAspirant()) {
+    <div class="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-fade-in">
+      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="closeDetailsModal()"></div>
+
+      <div
+        class="relative bg-white w-full max-w-4xl max-h-[90vh] rounded-[3rem] shadow-2xl animate-slide-up border border-white/20 flex flex-col overflow-hidden"
+      >
+        <!-- Header -->
+        <div
+          class="px-10 py-8 border-b-2 border-slate-100 bg-white flex justify-between items-center shrink-0"
+        >
+          <div class="flex items-center gap-4">
+            <div
+              class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200"
+            >
+              <i class="fas fa-user-graduate text-xl"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight">
+                Detalles del Aspirante
+              </h3>
+              <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">
+                Información Completa
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="closeDetailsModal()"
+            class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-500 transition-all active:scale-90"
+          >
+            <i class="fas fa-times text-2xl"></i>
+          </button>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 overflow-y-auto p-10 space-y-8">
+          @if (viewingAspirant(); as aspirant) {
+            <!-- DATOS PERSONALES -->
+            <div class="space-y-4">
+              <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+                <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                  <i class="fas fa-user text-blue-600"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+                  Datos Personales
+                </h3>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    Nombre Completo
+                  </label>
+                  <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                    {{ aspirant.fullName || (aspirant.firstName + ' ' + aspirant.lastName + (aspirant.secondLastName ? ' ' + aspirant.secondLastName : '')) }}
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    CURP
+                  </label>
+                  <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-mono font-bold text-slate-700 uppercase">
+                    {{ aspirant.curp || 'No especificada' }}
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    Fecha de Nacimiento
+                  </label>
+                  <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                    @if (getBirthDateFromCurp(aspirant.curp)) {
+                      {{ getBirthDateFromCurp(aspirant.curp)! | date:'dd/MM/yyyy' }}
+                    } @else if (aspirant.birthDate) {
+                      {{ aspirant.birthDate | date:'dd/MM/yyyy' }}
+                    } @else {
+                      No especificada
+                    }
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    Género
+                  </label>
+                  <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                    {{ aspirant.gender || 'No especificado' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- DATOS DE CONTACTO -->
+            <div class="space-y-4">
+              <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+                <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                  <i class="fas fa-address-book text-emerald-600"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+                  Datos de Contacto
+                </h3>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    Email
+                  </label>
+                  <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                    {{ aspirant.email }}
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    Teléfono Móvil
+                  </label>
+                  <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                    {{ aspirant.phone.mobile || 'No especificado' }}
+                  </div>
+                </div>
+
+                 @if (aspirant.phone.landline) {
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Teléfono Fijo
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ aspirant.phone.landline }}
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- DIRECCIÓN -->
+            @if (aspirant.address) {
+              <div class="space-y-4">
+                <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+                  <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-map-marker-alt text-purple-600"></i>
+                  </div>
+                  <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+                    Dirección
+                  </h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  @if (aspirant.address.street) {
+                    <div class="space-y-2 md:col-span-2">
+                      <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                        Calle
+                      </label>
+                      <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                        {{ aspirant.address.street }} {{ aspirant.address.number || '' }}
+                      </div>
+                    </div>
+                  }
+
+                  @if (aspirant.address.neighborhood) {
+                    <div class="space-y-2">
+                      <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                        Colonia
+                      </label>
+                      <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                        {{ aspirant.address.neighborhood }}
+                      </div>
+                    </div>
+                  }
+
+                  @if (aspirant.address.municipality) {
+                    <div class="space-y-2">
+                      <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                        Municipio
+                      </label>
+                      <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                        {{ aspirant.address.municipality }}
+                      </div>
+                    </div>
+                  }
+
+                  @if (aspirant.address.state) {
+                    <div class="space-y-2">
+                      <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                        Estado
+                      </label>
+                      <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                        {{ aspirant.address.state }}
+                      </div>
+                    </div>
+                  }
+
+                  @if (aspirant.address.postalCode) {
+                    <div class="space-y-2">
+                      <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                        Código Postal
+                      </label>
+                      <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                        {{ aspirant.address.postalCode }}
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- PROCEDENCIA ACADÉMICA -->
+            <div class="space-y-4">
+              <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+                <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                  <i class="fas fa-school text-amber-600"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+                  Procedencia Académica
+                </h3>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    Escuela de Origen
+                  </label>
+                  <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                    {{ aspirant.originIEMSName || aspirant.originIEMS || 'No especificada' }}
+                  </div>
+                </div>
+
+                @if (aspirant.iemsCareer) {
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Carrera en IEMS
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ aspirant.iemsCareer }}
+                    </div>
+                  </div>
+                }
+
+                @if (aspirant.iemsAverage) {
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Promedio IEMS
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ aspirant.iemsAverage }}
+                    </div>
+                  </div>
+                }
+
+                @if (aspirant.averageGrade) {
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      Promedio General
+                    </label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ aspirant.averageGrade }}
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- INTERESES EN CARRERAS -->
+            @if (aspirant.careerInterests && aspirant.careerInterests.length > 0) {
+              <div class="space-y-4">
+                <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+                  <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-graduation-cap text-blue-600"></i>
+                  </div>
+                  <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+                    Intereses en Carreras
+                  </h3>
+                </div>
+
+                <div class="space-y-3">
+                  @for (interest of aspirant.careerInterests; track $index) {
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] flex items-center justify-between">
+                      <div>
+                        <div class="font-bold text-slate-700 uppercase">{{ interest.career }}</div>
+                        <div class="text-xs text-slate-400 font-medium mt-1">
+                          Prioridad {{ interest.priority }}
+                        </div>
+                      </div>
+                      <div class="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-xs font-black">
+                        #{{ interest.priority }}
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  }
 </div>

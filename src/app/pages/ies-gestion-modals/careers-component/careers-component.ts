@@ -25,6 +25,12 @@ export class CareersComponent implements OnInit {
   isFormOpen = signal(false);
   editingCarrera = signal<Career | null>(null);
 
+  // Signals para el combo de modalidad
+  modalitySearchQuery = signal('');
+  showModalityDropdown = signal(false);
+  modalityOptions: ('Presencial' | 'Virtual')[] = ['Presencial', 'Virtual'];
+  filteredModalities = signal<('Presencial' | 'Virtual')[]>(['Presencial', 'Virtual']);
+
   // Formulario adaptado a la interfaz Career
   carreraForm = signal<Partial<Career>>({
     code: '',
@@ -135,6 +141,7 @@ export class CareersComponent implements OnInit {
       active: true,
       capacityPerSemester: 0,
     });
+    this.modalitySearchQuery.set('Presencial');
     this.isFormOpen.set(true);
   }
 
@@ -171,6 +178,7 @@ export class CareersComponent implements OnInit {
           
           this.editingCarrera.set(mappedCareer);
           this.carreraForm.set(mappedCareer);
+          this.modalitySearchQuery.set(mappedCareer.modality || 'Presencial');
           this.isFormOpen.set(true);
         }
         
@@ -186,6 +194,66 @@ export class CareersComponent implements OnInit {
 
   toggleActiveForm() {
     this.carreraForm.update((prev) => ({ ...prev, active: !prev.active }));
+  }
+
+  /**
+   * Filtrar opciones de modalidad
+   */
+  filterModalities(query: string) {
+    this.modalitySearchQuery.set(query);
+    this.showModalityDropdown.set(true);
+    
+    if (!query.trim()) {
+      this.filteredModalities.set(this.modalityOptions);
+      return;
+    }
+    
+    const filtered = this.modalityOptions.filter(modality => 
+      modality.toLowerCase().includes(query.toLowerCase())
+    );
+    this.filteredModalities.set(filtered);
+  }
+
+  /**
+   * Seleccionar modalidad
+   */
+  selectModality(modality: 'Presencial' | 'Virtual') {
+    this.carreraForm.update((prev) => ({ ...prev, modality }));
+    this.modalitySearchQuery.set(modality);
+    this.showModalityDropdown.set(false);
+  }
+
+  /**
+   * Manejar focus del combo de modalidad
+   */
+  onModalityDropdownFocus() {
+    this.showModalityDropdown.set(true);
+    if (!this.modalitySearchQuery()) {
+      this.filteredModalities.set(this.modalityOptions);
+    }
+  }
+
+  /**
+   * Manejar blur del combo de modalidad
+   */
+  onModalityDropdownBlur() {
+    setTimeout(() => {
+      this.showModalityDropdown.set(false);
+      if (!this.carreraForm().modality) {
+        this.modalitySearchQuery.set('');
+      }
+    }, 200);
+  }
+
+  /**
+   * Obtener el valor a mostrar en el input de modalidad
+   */
+  getModalityDisplayValue(): string {
+    if (this.modalitySearchQuery()) return this.modalitySearchQuery();
+    if (this.carreraForm().modality) {
+      return this.carreraForm().modality || '';
+    }
+    return '';
   }
 
   deleteCarrera(id: string) {

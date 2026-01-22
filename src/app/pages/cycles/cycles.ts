@@ -51,7 +51,8 @@ export class Cycles implements OnInit {
   searchTerm = signal('');
   isModalOpen = signal(false);
   currentPage = signal(1);
-  pageSize = signal(10);
+  itemsPerPage = signal(5);
+  pageSizeOptions = [5, 10, 20, 50];
   isLoading = signal(false);
   errorMessage = signal('');
   successMessage = signal('');
@@ -196,8 +197,21 @@ export class Cycles implements OnInit {
   // Active Cycle Helper
   activeCycle = computed(() => this.cyclesList().find((c) => c.status === 'Activo' || c.isCurrent));
 
+  // Paginated cycles
+  pagedCycles = computed(() => {
+    const startIndex = (this.currentPage() - 1) * this.itemsPerPage();
+    const endIndex = startIndex + this.itemsPerPage();
+    return this.filteredCycles().slice(startIndex, endIndex);
+  });
+
   // Pagination Helper
-  totalPages = computed(() => Math.ceil(this.filteredCycles().length / this.pageSize()));
+  totalPages = computed(() => Math.ceil(this.filteredCycles().length / this.itemsPerPage()) || 1);
+
+  showingRange = computed(() => {
+    const start = (this.currentPage() - 1) * this.itemsPerPage() + 1;
+    const end = Math.min(this.currentPage() * this.itemsPerPage(), this.filteredCycles().length);
+    return this.filteredCycles().length > 0 ? `${start} - ${end}` : '0';
+  });
 
   openModal() {
     this.cycleForm.reset({
@@ -217,6 +231,24 @@ export class Cycles implements OnInit {
 
   clearSearch() {
     this.searchTerm.set('');
+    this.currentPage.set(1);
+  }
+
+  /**
+   * Cambiar página
+   */
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  /**
+   * Cambiar items por página
+   */
+  onItemsPerPageChange(value: number): void {
+    this.itemsPerPage.set(value);
+    this.currentPage.set(1);
   }
 
   activeActionMenu = signal<string | null>(null);

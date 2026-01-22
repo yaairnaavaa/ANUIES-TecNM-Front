@@ -1,36 +1,40 @@
-<div class="p-8 bg-[#f8fafc] min-h-screen font-sans text-[#1e293b]">
-  <div class="flex justify-between items-center mb-10">
+<div class="p-6 lg:p-10 space-y-8 bg-slate-50/50 min-h-screen animate-fade-in">
+  <!-- HEADER -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
     <div>
-      <h1 class="text-3xl font-black text-slate-900 tracking-tight italic">Gestión de Ciclos</h1>
+      <h1 class="text-3xl font-black text-slate-900 tracking-tight italic flex items-center gap-3">
+        <i class="fas fa-sync-alt text-blue-600"></i>
+        Gestión de Ciclos
+      </h1>
       <p class="text-slate-500 font-medium italic">Historial y periodos académicos</p>
     </div>
+
     <button
       (click)="openModal()"
-      class="bg-[#2563eb] hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95"
+      class="px-6 py-3 bg-blue-600 text-white font-black rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 flex items-center gap-2"
     >
-      <i class="fas fa-plus text-sm"></i>
+      <i class="fas fa-plus"></i>
       Nuevo Ciclo
     </button>
   </div>
 
-  <!-- Loading State -->
-  <div *ngIf="isLoading()" class="flex justify-center items-center py-12">
-    <div class="flex items-center gap-3">
-      <i class="fas fa-circle-notch fa-spin text-blue-500 text-2xl"></i>
-      <span class="text-slate-600 font-bold">Cargando ciclos...</span>
+  <!-- LOADING -->
+  @if (isLoading()) {
+    <div class="flex flex-col items-center py-20 opacity-60">
+      <i class="fas fa-circle-notch animate-spin text-3xl mb-4"></i>
+      <p class="font-black uppercase tracking-widest text-sm">Cargando ciclos...</p>
     </div>
-  </div>
+  }
 
-  <!-- Error Message -->
-  <div
-    *ngIf="errorMessage() && !isLoading()"
-    class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-xl"
-  >
-    <div class="flex items-center gap-3">
-      <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
-      <p class="text-sm font-bold text-red-700">{{ errorMessage() }}</p>
+  <!-- ERROR -->
+  @if (errorMessage() && !isLoading()) {
+    <div
+      class="bg-red-50 border border-red-200 rounded-2xl p-6 text-red-600 font-bold flex items-center gap-3"
+    >
+      <i class="fas fa-exclamation-circle"></i>
+      {{ errorMessage() }}
     </div>
-  </div>
+  }
 
   <div
     *ngIf="activeCycle() as active; else noActiveCycle"
@@ -116,145 +120,184 @@
     </div>
   </ng-template>
 
-  <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 overflow-hidden">
+  <div class="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
     <div
-      class="p-6 border-b border-slate-100 bg-white flex flex-col md:flex-row md:items-center  gap-4"
+      class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4"
     >
-      <div class="relative flex-1 max-w-md">
-        <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+      <div class="relative w-full md:w-96">
+        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
         <input
-          [(ngModel)]="searchTerm"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event); currentPage.set(1)"
           type="text"
           placeholder="Buscar por nombre del ciclo..."
-          class="w-full pl-12 pr-5 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all font-medium text-sm shadow-sm"
+          class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium"
         />
       </div>
-      <button
-        (click)="clearSearch()"
-        class="text-xs font-black text-slate-400 hover:text-slate-600 uppercase tracking-widest flex items-center gap-2 transition-colors"
-      >
-        <i class="fas fa-redo-alt"></i> Limpiar
-      </button>
-    </div>
-    <table class="w-full text-left border-collapse">
-      <thead>
-        <tr
-          class="border-b border-slate-50 text-[10px] uppercase tracking-[0.15em] text-slate-400 font-black"
-        >
-          <th class="px-8 py-5">Nombre del Ciclo</th>
-          <th class="px-8 py-5">Inicio</th>
-          <th class="px-8 py-5">Fin</th>
-          <th class="px-8 py-5">Estado</th>
-          <th class="px-8 py-5 text-right">Acciones</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-50">
-        <tr
-          *ngFor="let cycle of filteredCycles()"
-          class="hover:bg-slate-50/50 transition-colors group"
-        >
-          <td class="px-8 py-5">
-            <div class="font-black text-[#1e293b] text-sm uppercase">{{ cycle.name }}</div>
-            <div class="text-xs text-slate-500 font-bold mt-1">{{ cycle.code }}</div>
-            <div *ngIf="cycle.description" class="text-xs text-slate-400 mt-1 italic">
-              {{ cycle.description }}
-            </div>
-          </td>
-          <td class="px-8 py-5 text-sm text-slate-500 font-bold">
-            {{ cycle.period.startDate | date: 'dd MMM, yyyy' : '' : 'es' }}
-          </td>
-          <td class="px-8 py-5 text-sm text-slate-500 font-bold">
-            {{ cycle.period.endDate | date: 'dd MMM, yyyy' : '' : 'es' }}
-          </td>
-          <td class="px-8 py-5">
-            <span
-              class="px-3 py-1 text-[9px] font-black uppercase rounded-lg"
-              [class.bg-slate-100]="cycle.status === 'Finalizado' || cycle.status === 'Cerrado'"
-              [class.text-slate-500]="cycle.status === 'Finalizado' || cycle.status === 'Cerrado'"
-              [class.bg-emerald-100]="cycle.status === 'Activo'"
-              [class.text-emerald-600]="cycle.status === 'Activo'"
-              [class.bg-blue-100]="cycle.status === 'Planificado'"
-              [class.text-blue-600]="cycle.status === 'Planificado'"
-              [class.bg-yellow-100]="cycle.status === 'En curso'"
-              [class.text-yellow-600]="cycle.status === 'En curso'"
-            >
-              {{ cycle.status }}
-            </span>
-          </td>
-          <td class="px-8 py-5 text-right relative">
-            <button
-              (click)="toggleActions(cycle._id)"
-              class="w-10 h-10 inline-flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 transition-all"
-            >
-              <i class="fas fa-ellipsis-v"></i>
-            </button>
 
-            @if (activeActionMenu() === cycle._id) {
-              <div
-                class="absolute right-8 top-14 z-[110] w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 animate-in fade-in zoom-in duration-200"
-              >
-                <button
-                  (click)="editCycle(cycle)"
-                  class="w-full px-5 py-3 text-left flex items-center gap-3 hover:bg-slate-50 transition-colors"
-                >
-                  <i class="far fa-edit text-blue-500"></i>
-                  <span class="text-sm font-bold text-slate-700">Editar datos</span>
-                </button>
-
-                <button
-                  (click)="toggleStatus(cycle)"
-                  class="w-full px-5 py-3 text-left flex items-center gap-3 hover:bg-slate-50 transition-colors"
-                >
-                  <i
-                    class="fas fa-power-off"
-                    [class.text-orange-500]="cycle.active"
-                    [class.text-emerald-500]="!cycle.active"
-                  ></i>
-                  <span class="text-sm font-bold text-slate-700">
-                    {{ cycle.active ? 'Desactivar' : 'Activar' }}
-                  </span>
-                </button>
-              </div>
-            }
-          </td>
-        </tr>
-        <tr *ngIf="filteredCycles().length === 0 && !isLoading()">
-          <td colspan="4" class="px-8 py-12 text-center text-slate-400 font-bold">
-            <i class="fas fa-inbox text-4xl mb-3 block"></i>
-            <div>No se encontraron ciclos en el historial</div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div
-      class="p-6 border-t border-slate-50 flex justify-between items-center text-sm font-bold text-slate-500"
-    >
       <div class="flex items-center gap-3">
-        Mostrar
+        <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Mostrar:</span>
         <select
-          class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500"
+          [ngModel]="itemsPerPage()"
+          (ngModelChange)="onItemsPerPageChange($event)"
+          class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-all"
         >
-          <option>10</option>
-          <option>25</option>
+          @for (option of pageSizeOptions; track option) {
+            <option [value]="option">{{ option }} filas</option>
+          }
         </select>
-        por página
       </div>
-      <div class="flex items-center gap-2">
+    </div>
+
+    <div class="overflow-x-auto min-h-[400px]">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr
+            class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-widest font-black"
+          >
+            <th class="px-8 py-5">Ciclo</th>
+            <th class="px-8 py-5">Código</th>
+            <th class="px-8 py-5">Inicio</th>
+            <th class="px-8 py-5">Fin</th>
+            <th class="px-8 py-5">Estatus</th>
+            <th class="px-8 py-5 text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for (cycle of pagedCycles(); track cycle._id) {
+            <tr class="hover:bg-blue-50/30 transition-colors group">
+              <td class="px-8 py-5">
+                <div class="font-black text-slate-800 leading-tight uppercase text-sm">
+                  {{ cycle.name }}
+                </div>
+                @if (cycle.description) {
+                  <div class="text-xs text-slate-400 italic mt-1">{{ cycle.description }}</div>
+                }
+              </td>
+              <td class="px-8 py-5">
+                <span
+                  class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-mono text-xs font-bold border border-slate-200"
+                >
+                  {{ cycle.code }}
+                </span>
+              </td>
+              <td class="px-8 py-5">
+                <div class="text-sm font-bold text-slate-700">
+                  {{ cycle.period.startDate | date: 'dd MMM, yyyy' : '' : 'es' }}
+                </div>
+              </td>
+              <td class="px-8 py-5">
+                <div class="text-sm font-bold text-slate-700">
+                  {{ cycle.period.endDate | date: 'dd MMM, yyyy' : '' : 'es' }}
+                </div>
+              </td>
+              <td class="px-8 py-5">
+                <span class="flex items-center gap-2 font-bold text-xs">
+                  <span
+                    class="w-2 h-2 rounded-full animate-pulse"
+                    [ngClass]="
+                      cycle.status === 'Activo'
+                        ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
+                        : 'bg-slate-400'
+                    "
+                  ></span>
+
+                  <span [ngClass]="cycle.status === 'Activo' ? 'text-emerald-600' : 'text-slate-500'">
+                    {{ cycle.status || 'Finalizado' }}
+                  </span>
+                </span>
+              </td>
+              <td class="px-8 py-5 text-center">
+                <div class="relative inline-block text-left">
+                  <button
+                    #anchor
+                    type="button"
+                    (click)="toggleActions(cycle._id)"
+                    class="flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all focus:outline-none"
+                  >
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+
+                  <div
+                    *ngIf="activeActionMenu() === cycle._id"
+                    (mouseleave)="activeActionMenu.set(null)"
+                    class="fixed z-[100] w-64 mt-2 origin-top-right rounded-2xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden border border-slate-100"
+                    [style.left.px]="anchor.getBoundingClientRect().left - 200"
+                    [style.top.px]="anchor.getBoundingClientRect().bottom"
+                  >
+                    <div class="p-2 space-y-1">
+                      <button
+                        (click)="editCycle(cycle); activeActionMenu.set(null)"
+                        class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all"
+                      >
+                        <div
+                          class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 mr-3 group-hover:bg-blue-600 group-hover:text-white transition-all"
+                        >
+                          <i class="fas fa-edit"></i>
+                        </div>
+                        Editar datos
+                      </button>
+
+                      <button
+                        (click)="toggleStatus(cycle); activeActionMenu.set(null)"
+                        class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl transition-all"
+                      >
+                        <div
+                          class="w-9 h-9 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 mr-3 group-hover:bg-emerald-600 group-hover:text-white transition-all"
+                        >
+                          <i
+                            class="fas"
+                            [ngClass]="cycle.active ? 'fa-toggle-on' : 'fa-toggle-off'"
+                          ></i>
+                        </div>
+                        {{ cycle.active ? 'Desactivar' : 'Activar' }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="px-8 py-20 text-center">
+                <div class="flex flex-col items-center gap-3">
+                  <i class="fas fa-inbox text-slate-200 text-4xl"></i>
+                  <p class="text-slate-400 font-medium italic">No se encontraron ciclos</p>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div
+      class="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4"
+    >
+      <div class="text-sm text-slate-500 font-bold order-2 md:order-1">
+        Mostrando <span class="text-blue-600 font-black">{{ showingRange() }}</span> de
+        <span class="text-slate-900 font-black">{{ filteredCycles().length }}</span> ciclos
+      </div>
+      <div class="flex items-center gap-2 order-1 md:order-2">
         <button
-          class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 hover:bg-slate-50 disabled:opacity-30"
+          (click)="goToPage(currentPage() - 1)"
+          [disabled]="currentPage() === 1"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
         >
-          <i class="fas fa-chevron-left text-xs"></i>
+          <i class="fas fa-chevron-left"></i>
         </button>
-        <button
-          class="w-10 h-10 flex items-center justify-center rounded-xl bg-[#0f172a] text-white"
+        <div
+          class="flex items-center bg-white border border-slate-200 rounded-xl px-4 h-10 font-black text-xs text-slate-700 shadow-sm uppercase"
         >
-          1
-        </button>
+          Pág. {{ currentPage() }} / {{ totalPages() || 1 }}
+        </div>
         <button
-          class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 hover:bg-slate-50"
+          (click)="goToPage(currentPage() + 1)"
+          [disabled]="currentPage() >= totalPages()"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
         >
-          <i class="fas fa-chevron-right text-xs"></i>
+          <i class="fas fa-chevron-right"></i>
         </button>
       </div>
     </div>
