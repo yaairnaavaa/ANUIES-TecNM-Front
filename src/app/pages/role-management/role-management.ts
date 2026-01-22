@@ -240,10 +240,10 @@ export class RoleManagementComponent implements OnInit {
   // Helpers para la vista
   getScopeClass(scope: string): string {
     const classes: Record<string, string> = {
-      'Nacional': 'bg-blue-100 text-blue-800',
-      'IES': 'bg-green-100 text-green-800',
-      'IEMS': 'bg-purple-100 text-purple-800',
-      'General': 'bg-gray-100 text-gray-800'
+      'Nacional': 'bg-blue-100 text-blue-700',
+      'IES': 'bg-emerald-100 text-emerald-700',
+      'IEMS': 'bg-purple-100 text-purple-700',
+      'General': 'bg-slate-100 text-slate-700'
     };
     return classes[scope] || classes['General'];
   }

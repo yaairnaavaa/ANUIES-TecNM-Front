@@ -39,10 +39,10 @@ export class UserService {
   }
 
   /**
-   * Crear nuevo usuario (usando el endpoint de auth/register)
+   * Crear nuevo usuario (usando el endpoint de users, NO auth/register)
    */
   createUser(userData: Partial<User>): Observable<ApiResponse<User>> {
-    return this.http.post<ApiResponse<User>>(`${this.authUrl}/register`, userData);
+    return this.http.post<ApiResponse<User>>(`${this.baseUrl}`, userData);
   }
 
   /**
