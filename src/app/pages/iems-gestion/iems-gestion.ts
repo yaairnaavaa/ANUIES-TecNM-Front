@@ -34,6 +34,76 @@ export class IemsGestion implements OnInit {
   // Datos
   iemsList = signal<IEMS[]>([]);
 
+  // --- ESTADO DE LOS COMBOS DEL MODAL ---
+  isFormTypeComboOpen = false;
+  isFormStateComboOpen = false;
+  formTypeSearchTerm = signal('');
+  formStateSearchTerm = signal('');
+
+  // --- FILTROS REACTIVOS PARA EL MODAL ---
+  filteredFormTypes = computed(() => {
+    const term = this.formTypeSearchTerm().toLowerCase();
+    const options = this.typeOptions.slice(1);
+    return term ? options.filter((o) => o.label.toLowerCase().includes(term)) : options;
+  });
+
+  filteredFormStates = computed(() => {
+    const term = this.formStateSearchTerm().toLowerCase();
+    const options = this.stateOptions.slice(1);
+    return term ? options.filter((s) => s.toLowerCase().includes(term)) : options;
+  });
+
+  // --- FUNCIONES DE SELECCIÓN PARA EL MODAL ---
+  selectFormType(value: string) {
+    this.updateType(value);
+    this.isFormTypeComboOpen = false;
+    this.formTypeSearchTerm.set(''); // Limpiamos para que la próxima vez salga la lista completa
+  }
+
+  selectFormState(state: string) {
+    this.updateState(state);
+    this.isFormStateComboOpen = false;
+    this.formStateSearchTerm.set(''); // Limpiamos buscador
+  }
+
+  // Función para manejar cuando el usuario borra manualmente el input
+  onTypeInput(value: string) {
+    this.formTypeSearchTerm.set(value);
+    // Si borra todo el texto manualmente, podrías resetear el valor del form si lo deseas:
+    if (!value) {
+      this.updateType('');
+    }
+  }
+
+  // 1. Función Toggle para Tipo
+  toggleFormType() {
+    this.isFormTypeComboOpen = !this.isFormTypeComboOpen;
+    if (this.isFormTypeComboOpen) {
+      this.formTypeSearchTerm.set(''); // Limpia búsqueda al abrir para ver todo
+    }
+  }
+
+  // 2. Función Toggle para Estado
+  toggleFormState() {
+    this.isFormStateComboOpen = !this.isFormStateComboOpen;
+    if (this.isFormStateComboOpen) {
+      this.formStateSearchTerm.set(''); // Limpia búsqueda al abrir
+    }
+  }
+
+  // 3. Cierres con retraso (Opcional pero recomendado para evitar conflictos con clicOutside)
+  closeTypeWithDelay() {
+    setTimeout(() => {
+      this.isFormTypeComboOpen = false;
+    }, 200);
+  }
+
+  closeStateWithDelay() {
+    setTimeout(() => {
+      this.isFormStateComboOpen = false;
+    }, 200);
+  }
+
   // Modal para crear/editar
   isAddingIEMS = signal(false);
   editingIEMS = signal<IEMS | null>(null);
