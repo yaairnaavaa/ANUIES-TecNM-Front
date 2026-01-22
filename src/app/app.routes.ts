@@ -11,6 +11,7 @@ import { loginGuard } from './guards/login.guard';
 import { Aspirant } from './pages/aspirant/aspirant';
 import { Home } from './pages/home/home';
 import { Cycles } from './pages/cycles/cycles';
+import { RoleManagementComponent } from './pages/role-management/role-management';
 
 export const routes: Routes = [
   {
@@ -39,6 +40,7 @@ export const routes: Routes = [
       { path: 'iems', component: IemsGestion },
       { path: 'aspirant', component: Aspirant },
       { path: 'ciclos', component: Cycles},
+      { path: 'roles', component: RoleManagementComponent },
       { path: '', redirectTo: 'ies-gestion', pathMatch: 'full' },
     ],
   },
