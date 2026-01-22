@@ -369,27 +369,62 @@
         <span class="text-slate-900 font-black">{{ allFilteredResults().length }}</span> IES
         registradas
       </div>
-      <div class="flex items-center gap-2 order-1 md:order-2">
-        <button
-          (click)="goToPage(currentPage() - 1)"
-          [disabled]="currentPage() === 1"
-          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
-        >
-          <i class="fas fa-chevron-left"></i>
-        </button>
-        <div
-          class="flex items-center bg-white border border-slate-200 rounded-xl px-4 h-10 font-black text-xs text-slate-700 shadow-sm uppercase"
-        >
-          Pág. {{ currentPage() }} / {{ totalPages() || 1 }}
+      
+      @if (totalPages() > 1) {
+        <div class="flex items-center gap-2 order-1 md:order-2">
+          <!-- Botón grupo anterior -->
+          @if (hasPreviousGroup()) {
+            <button
+              (click)="goToPreviousGroup()"
+              class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+            >
+              <i class="fas fa-chevron-double-left text-xs"></i>
+            </button>
+          }
+          
+          <!-- Botón página anterior -->
+          <button
+            (click)="goToPage(currentPage() - 1)"
+            [disabled]="currentPage() === 1"
+            class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          
+          <!-- Números de páginas (grupos de 5) -->
+          @for (page of visiblePages(); track page) {
+            <button
+              (click)="goToPage(page)"
+              [class]="
+                page === currentPage()
+                  ? 'w-10 h-10 flex items-center justify-center rounded-xl bg-blue-600 text-white font-black shadow-lg shadow-blue-200'
+                  : 'w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-blue-50 font-bold transition-all shadow-sm'
+              "
+            >
+              {{ page }}
+            </button>
+          }
+          
+          <!-- Botón página siguiente -->
+          <button
+            (click)="goToPage(currentPage() + 1)"
+            [disabled]="currentPage() >= totalPages()"
+            class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </button>
+          
+          <!-- Botón grupo siguiente -->
+          @if (hasNextGroup()) {
+            <button
+              (click)="goToNextGroup()"
+              class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+            >
+              <i class="fas fa-chevron-double-right text-xs"></i>
+            </button>
+          }
         </div>
-        <button
-          (click)="goToPage(currentPage() + 1)"
-          [disabled]="currentPage() >= totalPages()"
-          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
-        >
-          <i class="fas fa-chevron-right"></i>
-        </button>
-      </div>
+      }
     </div>
   </div>
 

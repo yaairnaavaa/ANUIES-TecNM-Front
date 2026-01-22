@@ -1,0 +1,467 @@
+<div class="p-6 lg:p-10 space-y-8 animate-fade-in bg-slate-50/50 min-h-screen">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div>
+      <h1 class="text-3xl font-black text-slate-900 tracking-tight italic">
+        Gestión de Roles y Permisos
+      </h1>
+      <p class="text-slate-500 font-medium italic">
+        Administra los roles del sistema y sus permisos asociados
+      </p>
+    </div>
+
+    <button
+      (click)="openCreateModal()"
+      class="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-200 active:scale-95 hover:bg-blue-700"
+    >
+      <i class="fas fa-plus"></i>
+      <span>Crear Rol</span>
+    </button>
+  </div>
+
+  <!-- Mensajes -->
+  @if (successMessage()) {
+    <div class="p-4 bg-green-50 border-l-4 border-green-500 text-green-800 rounded-2xl animate-slide-down">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-check-circle text-green-500"></i>
+        <span class="font-medium">{{ successMessage() }}</span>
+      </div>
+    </div>
+  }
+  @if (errorMessage()) {
+    <div class="p-4 bg-red-50 border-l-4 border-red-500 text-red-800 rounded-2xl animate-slide-down">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-exclamation-circle text-red-500"></i>
+        <span class="font-medium">{{ errorMessage() }}</span>
+      </div>
+    </div>
+  }
+
+  <!-- Vista de lista -->
+  @if (currentView() === 'list') {
+    <div class="bg-white rounded-[2.5rem] border-2 border-blue-50 shadow-xl shadow-blue-900/10 overflow-hidden">
+      <!-- Barra de búsqueda -->
+      <div class="p-6 border-b border-slate-100 bg-gradient-to-br from-blue-50/50 to-white">
+        <div class="relative max-w-md">
+          <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input
+            type="text"
+            placeholder="Buscar rol por nombre o ámbito..."
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="searchQuery.set($event)"
+            class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm"
+          />
+        </div>
+      </div>
+
+      <!-- Tabla de roles -->
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-slate-50/50">
+            <tr class="border-b border-slate-100">
+              <th class="px-8 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Rol</th>
+              <th class="px-8 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Ámbito</th>
+              <th class="px-8 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Nivel</th>
+              <th class="px-8 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Permisos</th>
+              <th class="px-8 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Estado</th>
+              <th class="px-8 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            @if (isLoading()) {
+              <tr>
+                <td colspan="6" class="px-8 py-20 text-center">
+                  <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                    <p class="font-black text-slate-400 uppercase tracking-tighter animate-pulse">
+                      Cargando roles...
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            } @else if (paginatedRoles().length === 0) {
+              <tr>
+                <td colspan="6" class="px-8 py-20 text-center">
+                  <div class="flex flex-col items-center gap-4">
+                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
+                      <i class="fas fa-inbox text-slate-300 text-2xl"></i>
+                    </div>
+                    <p class="font-bold text-slate-400 italic">No se encontraron roles</p>
+                  </div>
+                </td>
+              </tr>
+            } @else {
+              @for (role of paginatedRoles(); track role._id) {
+                <tr class="hover:bg-blue-50/30 transition-colors group">
+                  <td class="px-8 py-5">
+                    <div class="font-bold text-slate-700">{{ role.displayName }}</div>
+                    <div class="text-xs text-slate-400 font-mono">{{ role.name }}</div>
+                    @if (role.description) {
+                      <div class="text-xs text-slate-400 italic mt-1">{{ role.description }}</div>
+                    }
+                  </td>
+                  <td class="px-8 py-5">
+                    <span 
+                      [class]="'px-3 py-1.5 text-xs font-black rounded-full ' + getScopeClass(role.scope)"
+                    >
+                      {{ role.scope }}
+                    </span>
+                  </td>
+                  <td class="px-8 py-5">
+                    <div class="flex items-center gap-2">
+                      <div class="w-8 h-8 bg-blue-100 text-blue-700 rounded-lg flex items-center justify-center font-bold text-sm">
+                        {{ role.level }}
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-8 py-5">
+                    <div class="flex items-center gap-2">
+                      <i class="fas fa-shield-alt text-slate-400 text-xs"></i>
+                      <span class="text-sm font-bold text-slate-600">{{ role.permissions.length }}</span>
+                      <span class="text-xs text-slate-400">permisos</span>
+                    </div>
+                  </td>
+                  <td class="px-8 py-5">
+                    @if (role.active) {
+                      <span class="flex items-center gap-2 font-bold text-xs">
+                        <span class="w-2 h-2 rounded-full animate-pulse bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                        <span class="text-emerald-600">ACTIVO</span>
+                      </span>
+                    } @else {
+                      <span class="flex items-center gap-2 font-bold text-xs">
+                        <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                        <span class="text-slate-500">INACTIVO</span>
+                      </span>
+                    }
+                  </td>
+                  <td class="px-8 py-5 text-center">
+                    <div class="flex justify-center gap-2">
+                      <button
+                        (click)="openEditModal(role)"
+                        class="w-9 h-9 flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white transition-all group-hover:scale-110 active:scale-95"
+                        title="Editar rol"
+                      >
+                        <i class="fas fa-edit text-sm"></i>
+                      </button>
+                      <button
+                        (click)="deleteRole(role)"
+                        class="w-9 h-9 flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all group-hover:scale-110 active:scale-95"
+                        title="Eliminar rol"
+                      >
+                        <i class="fas fa-trash text-sm"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      @if (totalPages() > 1) {
+        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-bold text-slate-500">Mostrar:</span>
+            <select
+              [value]="itemsPerPage()"
+              (change)="changePageSize($event)"
+              class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+            >
+              @for (size of pageSizeOptions; track size) {
+                <option [value]="size">{{ size }}</option>
+              }
+            </select>
+            <span class="text-xs text-slate-400">registros</span>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <!-- Botón grupo anterior -->
+            @if (hasPreviousGroup()) {
+              <button
+                (click)="goToPreviousGroup()"
+                class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-95"
+              >
+                <i class="fas fa-chevron-double-left text-xs"></i>
+              </button>
+            }
+            
+            <!-- Botón página anterior -->
+            <button
+              (click)="goToPage(currentPage() - 1)"
+              [disabled]="currentPage() === 1"
+              class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <!-- Números de páginas (grupos de 5) -->
+            @for (page of visiblePages(); track page) {
+              <button
+                (click)="goToPage(page)"
+                [class]="
+                  page === currentPage()
+                    ? 'w-10 h-10 flex items-center justify-center rounded-xl bg-blue-600 text-white font-black shadow-lg shadow-blue-200'
+                    : 'w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-blue-50 font-bold transition-all shadow-sm active:scale-95'
+                "
+              >
+                {{ page }}
+              </button>
+            }
+            
+            <!-- Botón página siguiente -->
+            <button
+              (click)="goToPage(currentPage() + 1)"
+              [disabled]="currentPage() === totalPages()"
+              class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <!-- Botón grupo siguiente -->
+            @if (hasNextGroup()) {
+              <button
+                (click)="goToNextGroup()"
+                class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-95"
+              >
+                <i class="fas fa-chevron-double-right text-xs"></i>
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Modal de Crear/Editar -->
+  @if (currentView() === 'create' || currentView() === 'edit') {
+    <div 
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
+      (click)="closeModal()"
+    >
+      <div class="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto animate-slide-down" (click)="$event.stopPropagation()">
+        <div class="bg-white rounded-[2.5rem] border-2 border-blue-50 shadow-xl shadow-blue-900/10 overflow-hidden">
+          <!-- Modal Header -->
+          <div class="flex items-center justify-between px-8 py-5 border-b border-slate-100 bg-white sticky top-0 z-10">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                <i class="fas fa-user-shield text-xl"></i>
+              </div>
+              <div>
+                <h2 class="text-lg font-black text-slate-800 leading-none">
+                  {{ currentView() === 'create' ? 'Crear Nuevo Rol' : 'Editar Rol' }}
+                </h2>
+                <p class="text-xs text-slate-500 italic mt-1">
+                  {{ currentView() === 'create' ? 'Define un nuevo rol y sus permisos' : 'Modifica el rol y sus permisos' }}
+                </p>
+              </div>
+            </div>
+            <button
+              (click)="closeModal()"
+              class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition active:scale-95"
+            >
+              <i class="fas fa-times text-slate-500"></i>
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <form [formGroup]="roleForm" (ngSubmit)="saveRole()" class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Nombre técnico -->
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Nombre Técnico <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <i class="fas fa-code absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                  <input
+                    type="text"
+                    formControlName="name"
+                    placeholder="ej: admin-ies"
+                    class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-mono text-sm"
+                  />
+                </div>
+              </div>
+
+              <!-- Nombre para mostrar -->
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Nombre para Mostrar <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <i class="fas fa-tag absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                  <input
+                    type="text"
+                    formControlName="displayName"
+                    placeholder="ej: Administrador de IES"
+                    class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm"
+                  />
+                </div>
+              </div>
+
+              <!-- Nivel -->
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Nivel <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <i class="fas fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                  <input
+                    type="number"
+                    formControlName="level"
+                    min="1"
+                    max="10"
+                    class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm"
+                  />
+                </div>
+              </div>
+
+              <!-- Ámbito -->
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Ámbito <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <i class="fas fa-globe absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                  <select
+                    formControlName="scope"
+                    class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm appearance-none"
+                  >
+                    <option value="Nacional">Nacional</option>
+                    <option value="IES">IES</option>
+                    <option value="IEMS">IEMS</option>
+                    <option value="General">General</option>
+                  </select>
+                  <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none"></i>
+                </div>
+              </div>
+
+              <!-- Descripción -->
+              <div class="md:col-span-2 space-y-1.5">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Descripción
+                </label>
+                <div class="relative">
+                  <i class="fas fa-align-left absolute left-4 top-4 text-slate-300"></i>
+                  <textarea
+                    formControlName="description"
+                    rows="3"
+                    placeholder="Descripción del rol..."
+                    class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm resize-none"
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- Checkboxes -->
+              <div class="md:col-span-2 flex items-center gap-6 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
+                <label class="flex items-center gap-3 cursor-pointer group">
+                  <div class="relative">
+                    <input
+                      type="checkbox"
+                      formControlName="requiresIES"
+                      class="w-5 h-5 text-blue-600 rounded-lg focus:ring-2 focus:ring-blue-500/20 border-slate-300 cursor-pointer"
+                    />
+                  </div>
+                  <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition">Requiere IES</span>
+                </label>
+
+                <label class="flex items-center gap-3 cursor-pointer group">
+                  <div class="relative">
+                    <input
+                      type="checkbox"
+                      formControlName="active"
+                      class="w-5 h-5 text-emerald-600 rounded-lg focus:ring-2 focus:ring-emerald-500/20 border-slate-300 cursor-pointer"
+                    />
+                  </div>
+                  <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition">Activo</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Permisos -->
+            <div class="mt-8">
+              <div class="flex items-center gap-3 mb-5">
+                <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <i class="fas fa-shield-alt text-purple-600"></i>
+                </div>
+                <div>
+                  <h3 class="text-base font-black text-slate-800 leading-none">
+                    Permisos del Rol
+                  </h3>
+                  <p class="text-xs text-slate-500 italic mt-1">Selecciona los permisos asociados</p>
+                </div>
+              </div>
+              
+              @if (availablePermissions().length === 0) {
+                <div class="p-8 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                  <i class="fas fa-spinner fa-spin text-slate-300 text-2xl mb-2"></i>
+                  <p class="text-sm text-slate-400 font-medium">Cargando permisos...</p>
+                </div>
+              } @else {
+                <div class="space-y-4">
+                  @for (category of getPermissionCategories(); track category) {
+                    <div class="border border-slate-200 rounded-2xl overflow-hidden">
+                      <div class="bg-gradient-to-r from-slate-50 to-slate-100/50 px-5 py-3 border-b border-slate-200">
+                        <h4 class="font-black text-slate-700 text-sm uppercase tracking-wide">
+                          <i class="fas fa-folder text-slate-400 mr-2 text-xs"></i>
+                          {{ category }}
+                        </h4>
+                      </div>
+                      <div class="p-4 bg-white">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          @for (permission of groupPermissionsByCategory()[category]; track permission._id) {
+                            <label class="flex items-start gap-3 p-3 hover:bg-blue-50/50 rounded-xl cursor-pointer transition-all group border border-transparent hover:border-blue-100">
+                              <input
+                                type="checkbox"
+                                [checked]="isPermissionSelected(permission._id)"
+                                (change)="togglePermission(permission._id)"
+                                class="mt-1 w-5 h-5 text-blue-600 rounded-lg focus:ring-2 focus:ring-blue-500/20 border-slate-300 cursor-pointer"
+                              />
+                              <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2">
+                                  <i [class]="permission.icon + ' text-slate-500 text-sm group-hover:text-blue-600 transition'"></i>
+                                  <span class="text-sm font-bold text-slate-700 group-hover:text-slate-900 transition">{{ permission.label }}</span>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-1 font-mono truncate">{{ permission.routerLink }}</p>
+                              </div>
+                            </label>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-slate-100">
+              <button
+                type="button"
+                (click)="closeModal()"
+                class="px-6 py-3 border-2 border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all active:scale-95"
+              >
+                <i class="fas fa-times mr-2"></i>
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                [disabled]="roleForm.invalid || isLoading()"
+                class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none active:scale-95 flex items-center gap-2"
+              >
+                @if (isLoading()) {
+                  <i class="fas fa-circle-notch fa-spin"></i>
+                  <span>Guardando...</span>
+                } @else {
+                  <i class="fas fa-save"></i>
+                  <span>{{ currentView() === 'create' ? 'Crear Rol' : 'Guardar Cambios' }}</span>
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+</div>
