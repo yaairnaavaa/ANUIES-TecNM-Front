@@ -70,6 +70,8 @@ export class RegistrationForm implements OnInit {
   iesList = signal<IES[]>([]);
   campaignsList = signal<Campaign[]>([]);
   currentCampaign = signal<Campaign | null>(null);
+  iesLoadedCareers = signal<any[]>([]); // Carreras de la IES seleccionada
+  isLoadingCareers = signal(false); // Estado de carga de carreras
 
   @ViewChild('iemsContainer') iemsContainer!: ElementRef;
 
@@ -85,24 +87,17 @@ export class RegistrationForm implements OnInit {
   }
 
   // --- Computed Properties ---
-  // Cambia tu propiedad computada por esta:
   majorsList = computed(() => {
-    const ies = this.selectedIES();
-
-    // Si hay una IES seleccionada Y tiene carreras activas, las mostramos
-    if (ies?.careers && ies.careers.filter((c) => c.active).length > 0) {
-      return ies.careers
-        .filter((c) => c.active)
-        .map((c) => ({
-          id: c.code || c.name,
-          name: c.name,
-          meta: `${c.modality || 'Presencial'} · ${c.duration || 9} semestres`,
-        }));
+    // Si hay carreras cargadas de la IES seleccionada, mostrar esas
+    const loadedCareers = this.iesLoadedCareers();
+    if (loadedCareers.length > 0) {
+      console.log('📚 Mostrando carreras de la IES seleccionada:', loadedCareers.length);
+      return loadedCareers;
     }
 
-    // Si no hay IES o la IES no tiene carreras registradas aún,
-    // mostramos la lista por defecto para que el formulario no se vea vacío
-    return this.defaultMajorsList;
+    // Si no hay carreras cargadas, devolver array vacío
+    // Esto permitirá ocultar la sección de carreras
+    return [];
   });
 
   registrationForm = new FormGroup({
@@ -148,7 +143,7 @@ export class RegistrationForm implements OnInit {
           
           // Pre-llenar el campo de campaña en el formulario
           this.registrationForm.patchValue({
-            campaign: campaignData.name || campaignId
+            campaign: campaignData._id || campaignId
           });
         } else {
           console.warn('⚠️ No se pudo cargar la campaña');
@@ -157,6 +152,45 @@ export class RegistrationForm implements OnInit {
       error: (error) => {
         console.error('❌ Error al cargar la campaña:', error);
         this.errorMessage.set('No se pudo cargar la información de la campaña');
+      }
+    });
+  }
+
+  /**
+   * Cargar carreras de la IES seleccionada
+   */
+  loadIESCareers(iesId: string): void {
+    this.isLoadingCareers.set(true);
+    
+    this.iesService.getCareersIES(iesId).subscribe({
+      next: (response: any) => {
+        console.log('✅ Respuesta de carreras de la IES:', response);
+        
+        // Manejar diferentes estructuras de respuesta
+        const isSuccess = response.success === true || response.status === 'success';
+        const careersData = response.data?.careers || response.data || [];
+        
+        if (isSuccess && careersData.length > 0) {
+          // Mapear las carreras al formato que espera el componente
+          const mappedCareers = careersData.map((c: any) => ({
+            id: c.carreraId || c._id || c.code || c.name,
+            name: c.carreraName || c.name,
+            meta: c.modality || 'Programa Académico'
+          }));
+          
+          console.log('📚 Carreras cargadas:', mappedCareers.length);
+          this.iesLoadedCareers.set(mappedCareers);
+        } else {
+          console.warn('⚠️ No se encontraron carreras para esta IES');
+          this.iesLoadedCareers.set([]);
+        }
+        
+        this.isLoadingCareers.set(false);
+      },
+      error: (error) => {
+        console.error('❌ Error al cargar carreras de la IES:', error);
+        this.iesLoadedCareers.set([]);
+        this.isLoadingCareers.set(false);
       }
     });
   }
@@ -253,6 +287,16 @@ export class RegistrationForm implements OnInit {
     this.showIesList = false;
     // Reseteamos el filtro para la próxima vez que abra
     this.filteredIes.set(this.iesList());
+    
+    // Limpiar carreras previas y selección
+    this.iesLoadedCareers.set([]);
+    this.selectedMajors = [];
+    
+    // Cargar carreras de la IES seleccionada
+    if (ies._id) {
+      console.log('🎓 Cargando carreras de la IES seleccionada:', ies._id);
+      this.loadIESCareers(ies._id);
+    }
   }
 
   onBlurIes(): void {
@@ -363,10 +407,4 @@ export class RegistrationForm implements OnInit {
       this.showIemsList = false;
     }, 150);
   }
-
-  defaultMajorsList = [
-    { id: 'industrial', name: 'Ingeniería Industrial', meta: 'Procesos' },
-    { id: 'systems', name: 'Ingeniería en Sistemas', meta: 'Software' },
-    { id: 'mechatronics', name: 'Ingeniería Mecatrónica', meta: 'Robótica' },
-  ];
 }

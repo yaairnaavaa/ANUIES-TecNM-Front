@@ -230,58 +230,80 @@
         </div>
       </section>
 
-      <section class="space-y-4 pt-6 border-t border-gray-50">
-        <div
-          class="flex items-center gap-2 text-blue-900 font-extrabold text-[10px] uppercase tracking-[0.2em]"
-        >
-          <i class="fas fa-graduation-cap text-sm"></i> Carreras de interés
-        </div>
+      <!-- Sección de carreras - solo se muestra cuando hay un tecnológico seleccionado -->
+      @if (selectedIES()) {
+        <section class="space-y-4 pt-6 border-t border-gray-50">
+          <div
+            class="flex items-center gap-2 text-blue-900 font-extrabold text-[10px] uppercase tracking-[0.2em]"
+          >
+            <i class="fas fa-graduation-cap text-sm"></i> Carreras de interés
+          </div>
 
-        <div
-          class="bg-cyan-50/50 text-cyan-700 p-4 rounded-2xl flex items-center gap-3 text-sm font-bold"
-        >
-          <i class="fas fa-info-circle text-lg text-cyan-500"></i>
-          Selecciona hasta 3 carreras en orden de preferencia
-        </div>
+          <!-- Mensaje de carga de carreras -->
+          @if (isLoadingCareers()) {
+            <div class="bg-blue-50/50 text-blue-700 p-6 rounded-2xl flex items-center gap-3 text-sm font-bold justify-center">
+              <i class="fas fa-spinner fa-spin text-lg text-blue-500"></i>
+              <span>Cargando carreras disponibles...</span>
+            </div>
+          }
 
-        <div class="grid grid-cols-1 gap-3">
-          @for (major of majorsList(); track major.id) {
+          <!-- Contenido de carreras -->
+          @if (!isLoadingCareers() && majorsList().length > 0) {
             <div
-              (click)="toggleMajor(major.id)"
-              [ngClass]="{
-                'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500': selectedMajors.includes(
-                  major.id
-                ),
-              }"
-              class="flex items-center gap-4 p-5 border border-gray-100 rounded-3xl cursor-pointer hover:border-blue-200 transition-all group"
+              class="bg-cyan-50/50 text-cyan-700 p-4 rounded-2xl flex items-center gap-3 text-sm font-bold"
             >
-              <div
-                class="w-6 h-6 border-2 rounded-lg flex items-center justify-center transition-all"
-                [ngClass]="
-                  selectedMajors.includes(major.id)
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-gray-200 group-hover:border-blue-300'
-                "
-              >
-                <i class="fas fa-check text-[10px]"></i>
-              </div>
+              <i class="fas fa-info-circle text-lg text-cyan-500"></i>
+              Selecciona hasta 3 carreras en orden de preferencia
+            </div>
 
-              <div class="flex-1">
-                <div class="font-bold text-gray-800 text-base">{{ major.name }}</div>
-                <div class="text-xs text-gray-400 font-medium">{{ major.meta }}</div>
-              </div>
-
-              @if (selectedMajors.includes(major.id)) {
+            <div class="grid grid-cols-1 gap-3">
+              @for (major of majorsList(); track major.id) {
                 <div
-                  class="bg-blue-900 text-white w-9 h-9 rounded-full flex items-center justify-center font-black text-sm shadow-lg shadow-blue-900/20"
+                  (click)="toggleMajor(major.id)"
+                  [ngClass]="{
+                    'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500': selectedMajors.includes(
+                      major.id
+                    ),
+                  }"
+                  class="flex items-center gap-4 p-5 border border-gray-100 rounded-3xl cursor-pointer hover:border-blue-200 transition-all group"
                 >
-                  {{ getPriority(major.id) }}
+                  <div
+                    class="w-6 h-6 border-2 rounded-lg flex items-center justify-center transition-all"
+                    [ngClass]="
+                      selectedMajors.includes(major.id)
+                        ? 'bg-blue-600 border-blue-600 text-white'
+                        : 'border-gray-200 group-hover:border-blue-300'
+                    "
+                  >
+                    <i class="fas fa-check text-[10px]"></i>
+                  </div>
+
+                  <div class="flex-1">
+                    <div class="font-bold text-gray-800 text-base">{{ major.name }}</div>
+                    <div class="text-xs text-gray-400 font-medium">{{ major.meta }}</div>
+                  </div>
+
+                  @if (selectedMajors.includes(major.id)) {
+                    <div
+                      class="bg-blue-900 text-white w-9 h-9 rounded-full flex items-center justify-center font-black text-sm shadow-lg shadow-blue-900/20"
+                    >
+                      {{ getPriority(major.id) }}
+                    </div>
+                  }
                 </div>
               }
             </div>
           }
-        </div>
-      </section>
+
+          <!-- Mensaje cuando no hay carreras -->
+          @if (!isLoadingCareers() && majorsList().length === 0) {
+            <div class="bg-amber-50/50 text-amber-700 p-6 rounded-2xl flex items-center gap-3 text-sm font-bold justify-center">
+              <i class="fas fa-exclamation-triangle text-lg text-amber-500"></i>
+              <span>No hay carreras disponibles para este Tecnológico</span>
+            </div>
+          }
+        </section>
+      }
 
       <section class="pt-4">
         <label
