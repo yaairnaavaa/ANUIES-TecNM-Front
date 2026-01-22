@@ -7,7 +7,7 @@ import { Period, ApiResponse } from '../models/api.models';
 @Injectable({ providedIn: 'root' })
 export class CycleService {
   private http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/cycles`;
+  private readonly baseUrl = `${environment.apiUrl}/ciclos`;
 
   /**
    * Obtener todos los ciclos

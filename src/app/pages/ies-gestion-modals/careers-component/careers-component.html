@@ -171,32 +171,48 @@
 
   @if (isFormOpen()) {
     <div
-      class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 animate-fade-in"
+      class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-6 animate-fade-in"
     >
       <div
-        class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-slide-up border border-slate-100"
+        class="bg-white w-full max-w-xl rounded-[3rem] shadow-2xl overflow-hidden animate-slide-up border border-slate-100"
       >
         <div
-          class="px-8 py-6 border-b border-slate-50 bg-purple-50/30 flex justify-between items-center"
+          class="px-10 py-8 border-b border-slate-50 bg-purple-50/30 flex justify-between items-center"
         >
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-4">
             <div
-              class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-purple-200"
+              class="w-12 h-12 bg-purple-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-purple-200"
             >
-              <i class="fas fa-plus text-sm"></i>
+              <i class="fas fa-graduation-cap text-lg"></i>
             </div>
-            <h3 class="font-black text-slate-800 uppercase tracking-tight">
+            <h3 class="font-black text-slate-800 uppercase tracking-tight text-lg">
               {{ editingCarrera() ? 'Editar' : 'Nueva' }} Carrera
             </h3>
           </div>
-          <button (click)="isFormOpen.set(false)" class="text-slate-400 hover:text-slate-600">
-            <i class="fas fa-times"></i>
+          <button
+            (click)="isFormOpen.set(false)"
+            class="text-slate-400 hover:text-red-500 transition-all"
+          >
+            <i class="fas fa-times text-xl"></i>
           </button>
         </div>
 
-        <form (submit)="saveCarrera()" class="p-8 space-y-6">
-          <div class="grid grid-cols-3 gap-4">
-            <div class="col-span-1 space-y-2">
+        <form (submit)="saveCarrera()" class="p-10 space-y-7">
+          <div class="space-y-2">
+            <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
+              >Nombre del Programa Académico</label
+            >
+            <input
+              type="text"
+              [(ngModel)]="carreraForm().name"
+              name="name"
+              placeholder="Ej. Ingeniería Mecatrónica y Automatización"
+              class="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] focus:bg-white focus:border-purple-400 outline-none transition-all font-bold text-slate-700 shadow-inner"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-6">
+            <div class="space-y-2">
               <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
                 >Código</label
               >
@@ -204,25 +220,10 @@
                 type="text"
                 [(ngModel)]="carreraForm().code"
                 name="code"
-                placeholder="Ej. IM"
-                class="w-full px-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:border-purple-400 outline-none transition-all font-mono font-bold text-slate-700 shadow-inner uppercase"
+                placeholder="Ej. IMA"
+                class="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] focus:bg-white focus:border-purple-400 outline-none transition-all font-mono font-bold text-slate-700 shadow-inner uppercase"
               />
             </div>
-            <div class="col-span-2 space-y-2">
-              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
-                >Nombre Completo</label
-              >
-              <input
-                type="text"
-                [(ngModel)]="carreraForm().name"
-                name="name"
-                placeholder="Ej. Ingeniería Mecatrónica"
-                class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:border-purple-400 outline-none transition-all font-bold text-slate-700 shadow-inner"
-              />
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
             <div class="space-y-2">
               <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
                 >Modalidad</label
@@ -230,52 +231,53 @@
               <select
                 [(ngModel)]="carreraForm().modality"
                 name="modality"
-                class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:border-purple-400 outline-none transition-all font-bold text-slate-600 cursor-pointer"
+                class="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] focus:bg-white focus:border-purple-400 outline-none transition-all font-bold text-slate-600 cursor-pointer appearance-none shadow-inner"
               >
                 <option value="Presencial">Presencial</option>
                 <option value="Virtual">Virtual</option>
                 <option value="Mixta">Mixta</option>
               </select>
             </div>
-            <div class="space-y-2">
-              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
-                >Estado</label
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
+              >Estado de la Carrera</label
+            >
+            <div
+              (click)="toggleActiveForm()"
+              class="flex items-center justify-between px-6 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] cursor-pointer hover:bg-slate-100 transition-all shadow-inner"
+            >
+              <span
+                class="text-xs font-black uppercase"
+                [class.text-emerald-600]="carreraForm().active"
+                [class.text-slate-400]="!carreraForm().active"
               >
+                Esta carrera se encuentra {{ carreraForm().active ? 'Activa' : 'Inactiva' }}
+              </span>
               <div
-                (click)="toggleActiveForm()"
-                class="flex items-center justify-between px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl cursor-pointer hover:bg-slate-100 transition-all shadow-inner"
+                class="w-10 h-5 rounded-full transition-all relative"
+                [class]="carreraForm().active ? 'bg-emerald-500' : 'bg-slate-300'"
               >
-                <span
-                  class="text-xs font-black uppercase"
-                  [class.text-emerald-600]="carreraForm().active"
-                  [class.text-slate-400]="!carreraForm().active"
-                >
-                  {{ carreraForm().active ? 'Activa' : 'Inactiva' }}
-                </span>
                 <div
-                  class="w-8 h-4 rounded-full transition-colors relative"
-                  [class]="carreraForm().active ? 'bg-emerald-500' : 'bg-slate-300'"
-                >
-                  <div
-                    class="absolute top-1 w-2 h-2 bg-white rounded-full transition-all"
-                    [style.left]="carreraForm().active ? '20px' : '4px'"
-                  ></div>
-                </div>
+                  class="absolute top-1 w-3 h-3 bg-white rounded-full transition-all"
+                  [style.left]="carreraForm().active ? '24px' : '4px'"
+                ></div>
               </div>
             </div>
           </div>
 
-          <div class="flex gap-3 pt-4">
+          <div class="flex gap-4 pt-4">
             <button
               type="button"
               (click)="isFormOpen.set(false)"
-              class="flex-1 py-4 font-black text-[11px] uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors"
+              class="flex-1 py-5 font-black text-[11px] uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              class="flex-[2] py-4 bg-purple-600 text-white font-black rounded-2xl text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-purple-100 hover:bg-purple-700 active:scale-95 transition-all"
+              class="flex-[2] py-5 bg-purple-600 text-white font-black rounded-[1.5rem] text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-purple-100 hover:bg-purple-700 active:scale-95 transition-all"
             >
               Guardar Carrera
             </button>
