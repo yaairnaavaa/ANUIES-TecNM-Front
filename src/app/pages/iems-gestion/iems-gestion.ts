@@ -17,11 +17,12 @@ export class IemsGestion implements OnInit {
   private authService = inject(AuthService);
   public isStateComboOpen: boolean = false;
   public isTypeComboOpen: boolean = false;
+  public successMessage = signal<string | null>(null);
+  public errorMessage = signal<string | null>(null);
   // Exponer Math para el template
   protected readonly Math = Math;
 
   isLoading = signal(false);
-  errorMessage = signal('');
   searchQuery = signal('');
   selectedType = signal<string>('');
   selectedState = signal<string>('all');
@@ -309,45 +310,51 @@ export class IemsGestion implements OnInit {
   saveIEMS(): void {
     const iemsData = this.iemsForm();
 
+    // 1. Validación con mensaje de error en lugar de alert
     if (
       !iemsData.code ||
       !iemsData.name ||
       !iemsData.address?.municipality ||
       !iemsData.address?.state
     ) {
-      alert('Por favor completa todos los campos requeridos');
+      this.showError('Por favor completa todos los campos requeridos');
       return;
     }
 
     this.isLoading.set(true);
 
+    const observer = {
+      next: () => {
+        const msg = this.editingIEMS() ? 'IEMS actualizada con éxito' : 'IEMS creada con éxito';
+        this.showSuccess(msg);
+        this.loadIEMS();
+        this.closeModal();
+      },
+      error: (error: any) => {
+        console.error('Error:', error);
+        this.showError(
+          this.editingIEMS() ? 'Error al actualizar la IEMS' : 'Error al crear la IEMS',
+        );
+        this.isLoading.set(false);
+      },
+    };
+
     if (this.editingIEMS()) {
-      // Actualizar
-      this.iemsService.updateIEMS(this.editingIEMS()!._id!, iemsData).subscribe({
-        next: () => {
-          this.loadIEMS();
-          this.closeModal();
-        },
-        error: (error) => {
-          console.error('Error actualizando IEMS:', error);
-          alert('Error al actualizar la IEMS');
-          this.isLoading.set(false);
-        },
-      });
+      this.iemsService.updateIEMS(this.editingIEMS()!._id!, iemsData).subscribe(observer);
     } else {
-      // Crear
-      this.iemsService.createIEMS(iemsData).subscribe({
-        next: () => {
-          this.loadIEMS();
-          this.closeModal();
-        },
-        error: (error) => {
-          console.error('Error creando IEMS:', error);
-          alert('Error al crear la IEMS');
-          this.isLoading.set(false);
-        },
-      });
+      this.iemsService.createIEMS(iemsData).subscribe(observer);
     }
+  }
+
+  // Métodos auxiliares para gestionar el auto-cierre de mensajes
+  private showSuccess(message: string) {
+    this.successMessage.set(message);
+    setTimeout(() => this.successMessage.set(null), 5000);
+  }
+
+  private showError(message: string) {
+    this.errorMessage.set(message);
+    setTimeout(() => this.errorMessage.set(null), 7000);
   }
 
   /**
@@ -497,3 +504,4 @@ export class IemsGestion implements OnInit {
     this.iemsForm.update((f) => ({ ...f, contact: { ...f.contact!, directorName: value } }));
   }
 }
+
