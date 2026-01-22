@@ -50,8 +50,16 @@ export class IesService {
   }
 
   createCareerIES(iesId: string, career: Partial<Career>): Observable<ApiResponse<Career>> {
-  return this.http.post<ApiResponse<Career>>(`${this.baseUrl}/${iesId}/carreras`, career);
-}
+    return this.http.post<ApiResponse<Career>>(`${this.baseUrl}/${iesId}/carreras`, career);
+  }
+
+  /**
+   * Obtener una carrera específica por ID
+   */
+  getCareerById(careerId: string): Observable<ApiResponse<Career>> {
+    return this.http.get<ApiResponse<Career>>(`${environment.apiUrl}/careers/${careerId}`);
+  }
+
   /**
    * Eliminar IES
    */

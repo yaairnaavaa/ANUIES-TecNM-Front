@@ -29,6 +29,8 @@ export class CareersComponent implements OnInit {
   carreraForm = signal<Partial<Career>>({
     code: '',
     name: '',
+    shortName: '',
+    careerLink: '',
     modality: 'Presencial',
     active: true,
     capacityPerSemester: 0,
@@ -51,7 +53,9 @@ export class CareersComponent implements OnInit {
           // Guardamos el ID aunque no esté en la interfaz (opcional, para delete/edit)
           id: c.carreraId || c._id,
           name: c.carreraName, // Mapeo de carreraName -> name
+          shortName: c.shortName || '',
           code: c.code || 'S/C',
+          careerLink: c.careerLink || '',
           modality: c.modality || 'Presencial',
           active: c.active !== undefined ? c.active : true,
           capacityPerSemester: c.capacityPerSemester || 0,
@@ -92,7 +96,9 @@ export class CareersComponent implements OnInit {
     // A veces el backend espera 'carreraName' en lugar de 'name' al crear
     const payload = {
       name: data.name,
+      shortName: data.shortName || '',
       code: data.code,
+      careerLink: data.careerLink || '',
       modality: data.modality,
       active: data.active,
     };
@@ -133,9 +139,49 @@ export class CareersComponent implements OnInit {
   }
 
   openEditCarrera(carrera: Career) {
-    this.editingCarrera.set(carrera);
-    this.carreraForm.set({ ...carrera });
-    this.isFormOpen.set(true);
+    // Consultar la información completa de la carrera desde el API
+    const careerId = (carrera as any).id || (carrera as any)._id;
+    
+    if (!careerId) {
+      console.error('No se encontró ID de la carrera');
+      return;
+    }
+
+    this.isLoading.set(true);
+    
+    this.iesService.getCareerById(careerId).subscribe({
+      next: (response: any) => {
+        console.log('📋 Carrera obtenida:', response);
+        
+        // Manejar diferentes estructuras de respuesta
+        const careerData = response.data || response;
+        
+        if (careerData) {
+          // Mapear los datos de la API al formulario
+          const mappedCareer: any = {
+            id: careerData._id || careerData.id, // Guardamos el ID para la edición
+            name: careerData.name,
+            shortName: careerData.shortName || '',
+            code: careerData.code || '',
+            careerLink: careerData.careerLink || '',
+            modality: careerData.modality || 'Presencial',
+            active: careerData.active !== undefined ? careerData.active : true,
+            capacityPerSemester: careerData.capacityPerSemester || 0,
+          };
+          
+          this.editingCarrera.set(mappedCareer);
+          this.carreraForm.set(mappedCareer);
+          this.isFormOpen.set(true);
+        }
+        
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('❌ Error al cargar la carrera:', error);
+        this.isLoading.set(false);
+        alert('Error al cargar la información de la carrera');
+      }
+    });
   }
 
   toggleActiveForm() {

@@ -39,7 +39,7 @@
               type="text"
               [ngModel]="searchQuery()"
               (ngModelChange)="searchQuery.set($event)"
-              placeholder="Buscar por nombre o código..."
+              placeholder="Buscar por nombre..."
               class="w-full pl-12 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:border-purple-400 outline-none transition-all text-sm font-bold"
             />
           </div>
@@ -65,7 +65,6 @@
             <table class="w-full border-separate border-spacing-y-3">
               <thead>
                 <tr class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                  <th class="px-8 py-2 text-left">Cod.</th>
                   <th class="px-8 py-2 text-left">Programa Académico</th>
                   <th class="px-8 py-2 text-left">Modalidad</th>
                   <th class="px-8 py-2 text-center">Estatus</th>
@@ -77,15 +76,6 @@
                   <tr class="group transition-all">
                     <td
                       class="px-8 py-5 bg-white first:rounded-l-[2rem] border-y border-l border-slate-100 group-hover:border-purple-200"
-                    >
-                      <span
-                        class="px-3 py-1 bg-purple-50 text-purple-600 rounded-lg text-[10px] font-mono font-black border border-purple-100 uppercase"
-                      >
-                        {{ carrera.code || 'N/A' }}
-                      </span>
-                    </td>
-                    <td
-                      class="px-8 py-5 bg-white border-y border-slate-100 group-hover:border-purple-200"
                     >
                       <div class="flex items-center gap-4">
                         <div
@@ -171,33 +161,47 @@
 
   @if (isFormOpen()) {
     <div
-      class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-6 animate-fade-in"
+      class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in"
     >
+      <!-- Overlay -->
+      <div class="absolute inset-0" (click)="isFormOpen.set(false)"></div>
+
+      <!-- Modal Container -->
       <div
-        class="bg-white w-full max-w-xl rounded-[3rem] shadow-2xl overflow-hidden animate-slide-up border border-slate-100"
+        class="relative bg-white w-full max-w-xl max-h-[90vh] rounded-[3rem] shadow-2xl animate-slide-up border border-white/20 flex flex-col overflow-hidden"
       >
+        <!-- Header (no scroll) -->
         <div
-          class="px-10 py-8 border-b border-slate-50 bg-purple-50/30 flex justify-between items-center"
+          class="px-10 py-8 border-b-2 border-slate-100 bg-white flex justify-between items-center shrink-0"
         >
           <div class="flex items-center gap-4">
             <div
-              class="w-12 h-12 bg-purple-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-purple-200"
+              class="w-14 h-14 bg-purple-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-purple-200"
             >
-              <i class="fas fa-graduation-cap text-lg"></i>
+              <i class="fas fa-graduation-cap text-xl"></i>
             </div>
-            <h3 class="font-black text-slate-800 uppercase tracking-tight text-lg">
-              {{ editingCarrera() ? 'Editar' : 'Nueva' }} Carrera
-            </h3>
+            <div>
+              <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight">
+                {{ editingCarrera() ? 'Editar' : 'Nueva' }} Carrera
+              </h3>
+              <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">
+                Oferta Educativa
+              </p>
+            </div>
           </div>
           <button
+            type="button"
             (click)="isFormOpen.set(false)"
-            class="text-slate-400 hover:text-red-500 transition-all"
+            class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-500 transition-all active:scale-90"
           >
-            <i class="fas fa-times text-xl"></i>
+            <i class="fas fa-times text-2xl"></i>
           </button>
         </div>
 
-        <form (submit)="saveCarrera()" class="p-10 space-y-7">
+        <!-- Form -->
+        <form (submit)="saveCarrera(); $event.preventDefault()" class="flex-1 flex flex-col overflow-hidden">
+          <!-- Form Content (con scroll) -->
+          <div class="flex-1 overflow-y-auto p-10 space-y-7">
           <div class="space-y-2">
             <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
               >Nombre del Programa Académico</label
@@ -206,21 +210,38 @@
               type="text"
               [(ngModel)]="carreraForm().name"
               name="name"
-              placeholder="Ej. Ingeniería Mecatrónica y Automatización"
+              placeholder="Ej. Ingeniería En Sistemas Computacionales"
               class="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] focus:bg-white focus:border-purple-400 outline-none transition-all font-bold text-slate-700 shadow-inner"
             />
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
+              >Nombre Corto</label
+            >
+            <input
+              type="text"
+              [(ngModel)]="carreraForm().shortName"
+              name="shortName"
+              placeholder="Ej. ISC"
+              class="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] focus:bg-white focus:border-purple-400 outline-none transition-all font-bold text-slate-700 shadow-inner"
+            />
+            <p class="text-[10px] text-slate-400 italic font-medium ml-1">
+              <i class="fas fa-info-circle mr-1"></i>
+              Versión abreviada del nombre para visualización rápida
+            </p>
           </div>
 
           <div class="grid grid-cols-2 gap-6">
             <div class="space-y-2">
               <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
-                >Código</label
+                >Clave</label
               >
               <input
                 type="text"
                 [(ngModel)]="carreraForm().code"
                 name="code"
-                placeholder="Ej. IMA"
+                placeholder="Ej. ISIC-2010-224"
                 class="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] focus:bg-white focus:border-purple-400 outline-none transition-all font-mono font-bold text-slate-700 shadow-inner uppercase"
               />
             </div>
@@ -238,6 +259,26 @@
                 <option value="Mixta">Mixta</option>
               </select>
             </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
+              >Enlace a Plan de Estudios</label
+            >
+            <div class="relative">
+              <i class="fas fa-link absolute left-6 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <input
+                type="url"
+                [(ngModel)]="carreraForm().careerLink"
+                name="careerLink"
+                placeholder="https://ejemplo.com/plan-estudios.pdf"
+                class="w-full pl-14 pr-6 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] focus:bg-white focus:border-purple-400 outline-none transition-all font-medium text-slate-700 shadow-inner"
+              />
+            </div>
+            <p class="text-[10px] text-slate-400 italic font-medium ml-1">
+              <i class="fas fa-info-circle mr-1"></i>
+              URL del documento PDF o página web con el plan de estudios
+            </p>
           </div>
 
           <div class="space-y-2">
@@ -266,21 +307,26 @@
               </div>
             </div>
           </div>
+          </div>
 
-          <div class="flex gap-4 pt-4">
-            <button
-              type="button"
-              (click)="isFormOpen.set(false)"
-              class="flex-1 py-5 font-black text-[11px] uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              class="flex-[2] py-5 bg-purple-600 text-white font-black rounded-[1.5rem] text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-purple-100 hover:bg-purple-700 active:scale-95 transition-all"
-            >
-              Guardar Carrera
-            </button>
+          <!-- Footer con botones (no scroll) -->
+          <div class="px-10 py-6 bg-slate-50 border-t-2 border-slate-100 shrink-0">
+            <div class="flex gap-4">
+              <button
+                type="button"
+                (click)="isFormOpen.set(false)"
+                class="flex-1 py-4 font-black text-xs uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors rounded-2xl hover:bg-slate-100"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                class="flex-[2] py-4 bg-purple-600 text-white font-black rounded-2xl text-xs uppercase tracking-[0.2em] shadow-xl shadow-purple-100 hover:bg-purple-700 active:scale-95 transition-all"
+              >
+                <i class="fas fa-save mr-2"></i>
+                Guardar Carrera
+              </button>
+            </div>
           </div>
         </form>
       </div>

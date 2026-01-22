@@ -71,7 +71,9 @@ export interface IES {
 
 export interface Career {
   name: string;
+  shortName?: string;
   code?: string;
+  careerLink?: string;
   modality: 'Presencial' | 'Mixta' | 'Virtual';
   duration?: number;
   shift?: Array<'Matutino' | 'Vespertino' | 'Nocturno' | 'Mixto'>;
