@@ -119,10 +119,14 @@ export class Cycles implements OnInit {
   /**
    * Guardar nuevo ciclo
    */
+  /**
+   * Lógica unificada para Guardar (Crear o Actualizar)
+   */
   saveCycle() {
+    // 1. Validación inicial
     if (this.cycleForm.invalid) {
       this.markFormGroupTouched(this.cycleForm);
-      this.errorMessage.set('Por favor, completa todos los campos requeridos.');
+      this.errorMessage.set('Por favor, completa todos los campos requeridos correctamente.');
       return;
     }
 
@@ -130,6 +134,7 @@ export class Cycles implements OnInit {
     this.errorMessage.set('');
     this.successMessage.set('');
 
+    // 2. Estructurar la data según el modelo del API
     const cycleData = {
       name: this.cycleForm.value.name,
       code: this.cycleForm.value.code,
@@ -141,22 +146,35 @@ export class Cycles implements OnInit {
       active: this.cycleForm.value.active,
     };
 
-    this.cycleService
-      .createCycle(cycleData)
-      .pipe(
-        tap((response) => {
-          this.successMessage.set('Ciclo creado exitosamente.');
-          this.loadCycles(); // Recargar lista
+    // 3. Determinar si es Creación o Actualización
+    const isEditMode = this.isEditing();
+    const cycleId = this.selectedCycleId();
 
-          // Cerrar modal después de 2 segundos
+    const request$ =
+      isEditMode && cycleId
+        ? this.cycleService.updateCycle(cycleId, cycleData) // <-- Tu nuevo método
+        : this.cycleService.createCycle(cycleData);
+
+    // 4. Ejecutar petición
+    request$
+      .pipe(
+        tap(() => {
+          const successText = isEditMode
+            ? 'Ciclo actualizado correctamente.'
+            : 'Ciclo creado exitosamente.';
+
+          this.successMessage.set(successText);
+          this.loadCycles(); // Recargar la lista para ver los cambios
+
+          // Cerrar modal tras un breve delay para que el usuario vea el mensaje de éxito
           setTimeout(() => {
             this.closeModal();
-          }, 2000);
+          }, 1500);
         }),
         catchError((error) => {
-          console.error('Error al guardar ciclo:', error);
+          console.error('Error en la operación:', error);
           this.errorMessage.set(
-            error.error?.message || 'Error al crear el ciclo. Por favor, intenta de nuevo.',
+            error.error?.message || 'Error al procesar la solicitud. Intenta de nuevo.',
           );
           return of(null);
         }),
@@ -249,20 +267,30 @@ export class Cycles implements OnInit {
     }, 500);
   }
 
-  // Preparar modal para edición
-  editCycle(cycle: any) {
-    this.isEditing.set(true);
-    this.selectedCycleId.set(cycle.id);
-    this.activeActionMenu.set(null); // Cerrar menú
+  /**
+   * Helper para formatear fechas al formato de input date (YYYY-MM-DD)
+   */
+  private formatDate(date: any): string {
+    if (!date) return '';
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];
+  }
 
-    // Seteamos los valores en el form
+  /**
+   * Preparar modal para edición
+   */
+  editCycle(cycle: Cycle) {
+    this.isEditing.set(true);
+    this.selectedCycleId.set(cycle._id); // Asegúrate de usar _id
+    this.activeActionMenu.set(null);
+
     this.cycleForm.patchValue({
       name: cycle.name,
       code: cycle.code,
       active: cycle.active,
       description: cycle.description,
-      startDate: cycle.period.startDate, // Asegúrate que el formato sea YYYY-MM-DD
-      endDate: cycle.period.endDate,
+      startDate: this.formatDate(cycle.period.startDate),
+      endDate: this.formatDate(cycle.period.endDate),
     });
 
     this.isModalOpen.set(true);

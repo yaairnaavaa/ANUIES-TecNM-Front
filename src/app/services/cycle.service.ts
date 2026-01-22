@@ -48,7 +48,7 @@ export class CycleService {
    * Actualizar ciclo
    */
   updateCycle(id: string, cycle: Partial<Period>): Observable<ApiResponse<Period>> {
-    return this.http.put<ApiResponse<Period>>(`${this.baseUrl}/${id}`, cycle);
+    return this.http.patch<ApiResponse<Period>>(`${this.baseUrl}/${id}`, cycle);
   }
 
   /**
