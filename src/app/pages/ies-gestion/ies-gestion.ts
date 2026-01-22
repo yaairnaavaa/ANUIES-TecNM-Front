@@ -6,12 +6,13 @@ import { IesService } from '../../services/ies.service';
 import { AuthService } from '../../services/auth.service';
 import { IesUserManagement } from '../ies-gestion-modals/ies-user-management/ies-user-management';
 import { IesEditComponent } from '../ies-gestion-modals/ies-edit-component/ies-edit-component';
-type ViewState = 'list' | 'add' | 'edit' | 'users';
+import { CareersComponent } from '../ies-gestion-modals/careers-component/careers-component';
+type ViewState = 'list' | 'add' | 'edit' | 'users' | 'careers';
 
 @Component({
   selector: 'app-ies-gestion',
   standalone: true,
-  imports: [IesEditComponent, CommonModule, FormsModule, ReactiveFormsModule, IesUserManagement],
+  imports: [IesEditComponent, CareersComponent, CommonModule, FormsModule, ReactiveFormsModule, IesUserManagement],
   templateUrl: './ies-gestion.html',
 })
 export class IesGestion implements OnInit {
@@ -34,7 +35,9 @@ export class IesGestion implements OnInit {
 
   // Datos desde backend
   iesList = signal<IES[]>([]);
-  errorMessage = signal<string>('');
+  // Agrega | null para que TypeScript permita resetearlas con null
+  errorMessage = signal<string | null>(null);
+  successMessage = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadIES();
@@ -60,6 +63,10 @@ export class IesGestion implements OnInit {
     });
   }
 
+  closeModal() {
+    this.isAdding.set(false);
+  }
+
   // Métodos para cambiar de vista
   openEdit(ies: IES) {
     this.selectedIes.set(ies);
@@ -70,6 +77,13 @@ export class IesGestion implements OnInit {
     this.selectedIes.set(ies);
     this.currentView.set('users');
   }
+
+
+  manageCareers(ies: IES) {
+  this.selectedIes.set(ies); // Primero establecemos la IES seleccionada
+  this.currentView.set('careers'); // Luego cambiamos la vista para que el @if se active
+}
+
 
   backToList() {
     this.currentView.set('list');
@@ -159,22 +173,39 @@ export class IesGestion implements OnInit {
 
   saveIES() {
     this.isLoading.set(true);
-    this.errorMessage.set('');
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
 
     this.iesService.createIES(this.newIes()).subscribe({
       next: (response) => {
-        this.loadIES(); // Recargar lista
+        // 1. Establecemos el mensaje (se verá en el toast externo)
+        this.successMessage.set('Institución registrada correctamente');
+
+        // 2. CERRAMOS EL MODAL INMEDIATAMENTE
+        this.isAdding.set(false); // O llama a this.closeModal() si limpia más datos
+
+        this.loadIES();
         this.isLoading.set(false);
-        this.toggleAdd();
+
+        // Limpiar el toast después de unos segundos
+        setTimeout(() => this.successMessage.set(null), 3500);
       },
       error: (error) => {
         console.error('Error creando IES:', error);
-        this.errorMessage.set('Error al crear la IES');
+        this.errorMessage.set('Error al guardar: Verifique los datos');
+
+        // 3. OPCIONAL: Cerrar también en error
+        // Si quieres que el usuario corrija, no lo cierres aquí.
+        // Pero si quieres que se cierre como pediste:
+        this.isAdding.set(false);
+
         this.isLoading.set(false);
+        setTimeout(() => this.errorMessage.set(null), 5000);
       },
     });
   }
 
+  
   onSave(updatedIes: any) {
     console.log('Datos recibidos del hijo:', updatedIes);
     // Aquí iría tu lógica para llamar al servicio y actualizar en la BD

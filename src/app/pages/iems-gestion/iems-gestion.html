@@ -53,7 +53,7 @@
             (input)="isTypeComboOpen = true"
             (blur)="onTypeBlur()"
             placeholder="Buscar tipo..."
-            class="w-full px-5 py-4 bg-slate-700 border border-slate-600 rounded-2xl font-bold text-white placeholder:text-slate-500 hover:bg-slate-600 transition-all focus:outline-none shadow-lg outline-none focus:ring-2 focus:ring-blue-500/50"
+            class="w-full px-5 py-4 bg-slate-50/50 border border-slate-100 rounded-2xl font-semibold text-slate-600 placeholder:text-slate-400 hover:bg-slate-100/50 transition-all focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:bg-white outline-none"
           />
           <i
             (click)="toggleTypeMenu()"
@@ -64,9 +64,9 @@
 
         <div
           *ngIf="isTypeComboOpen"
-          class="absolute z-50 mt-2 w-full bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
+          class="absolute z-50 mt-2 w-full bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
         >
-          <div class="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 py-1">
+          <div class="max-h-60 overflow-y-auto py-1">
             <button
               *ngIf="!typeInput.value || 'todos'.includes(typeInput.value.toLowerCase())"
               (mousedown)="
@@ -75,11 +75,10 @@
                 isTypeComboOpen = false;
                 typeInput.value = ''
               "
-              class="w-full text-left px-5 py-3 text-sm font-semibold text-slate-400 hover:bg-slate-700 hover:text-white border-b border-slate-700/50"
+              class="w-full text-left px-5 py-3 text-sm font-medium text-slate-400 hover:bg-slate-50 hover:text-indigo-600 border-b border-slate-50"
             >
               Todos los Tipos
             </button>
-
             <ng-container *ngFor="let opt of typeOptions.slice(1)">
               <button
                 *ngIf="opt.label.toLowerCase().includes(typeInput.value.toLowerCase())"
@@ -89,11 +88,11 @@
                   isTypeComboOpen = false;
                   typeInput.value = opt.label
                 "
-                class="w-full text-left px-5 py-3 text-sm font-semibold transition-colors"
+                class="w-full text-left px-5 py-3 text-sm font-medium transition-colors"
                 [ngClass]="
                   selectedType() === opt.value
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                    ? 'bg-indigo-50 text-indigo-600'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'
                 "
               >
                 {{ opt.label }}
@@ -113,7 +112,7 @@
             (input)="isStateComboOpen = true"
             (blur)="onBlur()"
             placeholder="Buscar estado..."
-            class="w-full px-5 py-4 bg-slate-700 border border-slate-600 rounded-2xl font-bold text-white placeholder:text-slate-500 hover:bg-slate-600 transition-all focus:outline-none shadow-lg outline-none focus:ring-2 focus:ring-blue-500/50"
+            class="w-full px-5 py-4 bg-slate-50/50 border border-slate-100 rounded-2xl font-semibold text-slate-600 placeholder:text-slate-400 hover:bg-slate-100/50 transition-all focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:bg-white outline-none"
           />
           <i
             (click)="toggleMenu()"
@@ -124,26 +123,25 @@
 
         <div
           *ngIf="isStateComboOpen"
-          class="absolute z-50 mt-2 w-full bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
+          class="absolute z-50 mt-2 w-full bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
         >
-          <div class="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 py-1">
+          <div class="max-h-60 overflow-y-auto py-1">
             <button
               *ngIf="!stateInput.value"
               (mousedown)="selectState('all', '')"
-              class="w-full text-left px-5 py-3 text-sm font-semibold text-slate-400 hover:bg-slate-700 hover:text-white border-b border-slate-700/50"
+              class="w-full text-left px-5 py-3 text-sm font-medium text-slate-400 hover:bg-slate-50 hover:text-indigo-600 border-b border-slate-50"
             >
               Todos los estados
             </button>
-
             <ng-container *ngFor="let state of stateOptions.slice(1)">
               <button
                 *ngIf="state.toLowerCase().includes(stateInput.value.toLowerCase())"
                 (mousedown)="selectState(state, state)"
-                class="w-full text-left px-5 py-3 text-sm font-semibold transition-colors"
+                class="w-full text-left px-5 py-3 text-sm font-medium transition-colors"
                 [ngClass]="
                   selectedState() === state
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                    ? 'bg-indigo-50 text-indigo-600'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'
                 "
               >
                 {{ state }}
