@@ -104,17 +104,17 @@ export class CampaignService {
   /**
    * Obtener modalidades específicas por tipo de campaña
    */
-  getModalitiesByType(type: 'Presencial' | 'Virtual'): string[] {
+  getModalitiesByType(type: 'Presencial' | 'Digital'): string[] {
     const modalities = {
       'Presencial': [
         'Feria/Evento',
         'Visita a escuela'
       ],
-      'Virtual': [
+      'Digital': [
         'Facebook',
         'Instagram',
         'TikTok',
-        'YouTube'
+        'YouTube',
       ]
     };
 

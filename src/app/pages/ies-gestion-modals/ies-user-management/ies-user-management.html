@@ -122,15 +122,43 @@
               <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
                 Rol *
               </label>
-              <select
-                [(ngModel)]="newUser().role"
-                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
-              >
-                <option value="">Seleccionar rol...</option>
-                @for (role of availableRoles(); track role._id) {
-                  <option [value]="role._id">{{ role.displayName }}</option>
+              <div class="relative group">
+                <i class="fas fa-user-tag absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
+                <input
+                  type="text"
+                  [value]="getRoleDisplayValue()"
+                  (input)="filterRoles($any($event.target).value)"
+                  (focus)="onRoleDropdownFocus()"
+                  (blur)="onRoleDropdownBlur()"
+                  placeholder="Seleccionar rol..."
+                  autocomplete="off"
+                  class="w-full pl-12 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium"
+                  [class.border-blue-500]="newUser().role"
+                />
+
+                <!-- Dropdown Roles -->
+                @if (filteredRoles().length > 0 && showRoleDropdown()) {
+                  <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden max-h-60 overflow-y-auto">
+                    @for (role of filteredRoles(); track role._id) {
+                      <li
+                        (mousedown)="selectRole(role._id!)"
+                        class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-bold text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                        [class.bg-blue-50]="newUser().role === role._id"
+                      >
+                        <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                             [class.border-blue-600]="newUser().role === role._id"
+                             [class.bg-blue-600]="newUser().role === role._id"
+                             [class.border-slate-300]="newUser().role !== role._id">
+                          @if (newUser().role === role._id) {
+                            <i class="fas fa-check text-white text-xs"></i>
+                          }
+                        </div>
+                        <span>{{ role.displayName || role.name }}</span>
+                      </li>
+                    }
+                  </ul>
                 }
-              </select>
+              </div>
             </div>
           </div>
 

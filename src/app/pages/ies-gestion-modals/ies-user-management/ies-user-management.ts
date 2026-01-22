@@ -65,6 +65,11 @@ export class IesUserManagement implements OnInit {
   rawUsers = signal<User[]>([]);
   availableRoles = signal<Role[]>([]);
 
+  // Signals para el combo de rol
+  roleSearchQuery = signal('');
+  showRoleDropdown = signal(false);
+  filteredRoles = signal<Role[]>([]);
+
   // Formulario para nuevo usuario
   newUser = signal<NewUserForm>({
     firstName: '',
@@ -89,15 +94,80 @@ export class IesUserManagement implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           // Filtrar solo roles relacionados con IES
-          this.availableRoles.set(response.data.filter(r => 
+          const roles = response.data.filter(r => 
             r.name === 'Admin IES' || r.name === 'Operativo IES'
-          ));
+          );
+          this.availableRoles.set(roles);
+          this.filteredRoles.set(roles);
         }
       },
       error: (error) => {
         console.error('Error cargando roles:', error);
       },
     });
+  }
+
+  /**
+   * Filtrar opciones de rol
+   */
+  filterRoles(query: string) {
+    this.roleSearchQuery.set(query);
+    this.showRoleDropdown.set(true);
+    
+    if (!query.trim()) {
+      this.filteredRoles.set(this.availableRoles());
+      return;
+    }
+    
+    const filtered = this.availableRoles().filter(role => 
+      role.displayName?.toLowerCase().includes(query.toLowerCase()) ||
+      role.name?.toLowerCase().includes(query.toLowerCase())
+    );
+    this.filteredRoles.set(filtered);
+  }
+
+  /**
+   * Seleccionar rol
+   */
+  selectRole(roleId: string) {
+    this.newUser.update(user => ({ ...user, role: roleId }));
+    const selectedRole = this.availableRoles().find(r => r._id === roleId);
+    this.roleSearchQuery.set(selectedRole ? (selectedRole.displayName || selectedRole.name) : '');
+    this.showRoleDropdown.set(false);
+  }
+
+  /**
+   * Manejar focus del combo de rol
+   */
+  onRoleDropdownFocus() {
+    this.showRoleDropdown.set(true);
+    if (!this.roleSearchQuery()) {
+      this.filteredRoles.set(this.availableRoles());
+    }
+  }
+
+  /**
+   * Manejar blur del combo de rol
+   */
+  onRoleDropdownBlur() {
+    setTimeout(() => {
+      this.showRoleDropdown.set(false);
+      if (!this.newUser().role) {
+        this.roleSearchQuery.set('');
+      }
+    }, 200);
+  }
+
+  /**
+   * Obtener el valor a mostrar en el input del rol
+   */
+  getRoleDisplayValue(): string {
+    if (this.roleSearchQuery()) return this.roleSearchQuery();
+    if (this.newUser().role) {
+      const role = this.availableRoles().find(r => r._id === this.newUser().role);
+      return role ? (role.displayName || role.name) : '';
+    }
+    return '';
   }
 
   /**
@@ -246,6 +316,7 @@ export class IesUserManagement implements OnInit {
       phone: '',
       role: ''
     });
+    this.roleSearchQuery.set('');
   }
 
   /**

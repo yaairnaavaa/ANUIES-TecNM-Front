@@ -27,10 +27,36 @@ export class IemsGestion implements OnInit {
   selectedType = signal<string>('');
   selectedState = signal<string>('all');
 
+  // Signals para búsqueda en combos de filtros
+  typeSearchQuery = signal('');
+  stateSearchQuery = signal('');
+  showTypeDropdown = signal(false);
+  showStateDropdown = signal(false);
+  filteredTypeOptions = signal<{ value: string; label: string }[]>([]);
+  filteredStateOptions = signal<string[]>([]);
+
+  // Computed para mostrar el valor seleccionado en los inputs
+  displayTypeValue = computed(() => {
+    if (this.typeSearchQuery()) return this.typeSearchQuery();
+    if (this.selectedType()) {
+      const option = this.typeOptions.find(opt => opt.value === this.selectedType());
+      return option ? option.label : '';
+    }
+    return '';
+  });
+
+  displayStateValue = computed(() => {
+    if (this.stateSearchQuery()) return this.stateSearchQuery();
+    if (this.selectedState() && this.selectedState() !== 'all') {
+      return this.selectedState();
+    }
+    return '';
+  });
+
   // Paginación
   currentPage = signal(1);
-  itemsPerPage = signal(10);
-  pageSizeOptions = [10, 25, 50, 100];
+  itemsPerPage = signal(5);
+  pageSizeOptions = [5, 10, 25, 50, 100];
 
   // Datos
   iemsList = signal<IEMS[]>([]);
@@ -193,6 +219,9 @@ export class IemsGestion implements OnInit {
 
   ngOnInit(): void {
     this.loadIEMS();
+    // Inicializar opciones filtradas
+    this.filteredTypeOptions.set(this.typeOptions.slice(1));
+    this.filteredStateOptions.set(this.stateOptions.slice(1));
   }
 
   /**
@@ -262,6 +291,36 @@ export class IemsGestion implements OnInit {
     const start = (this.currentPage() - 1) * this.itemsPerPage() + 1;
     const end = Math.min(this.currentPage() * this.itemsPerPage(), this.filteredIEMS().length);
     return this.filteredIEMS().length > 0 ? `${start} - ${end}` : '0';
+  });
+
+  /**
+   * Calcular las páginas a mostrar (grupos de 5)
+   */
+  visiblePages = computed(() => {
+    const total = this.totalPages();
+    if (total === 0) return [];
+    
+    const current = this.currentPage();
+    const pages: number[] = [];
+    
+    // Si hay 5 o menos páginas, mostrar todas
+    if (total <= 5) {
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+      return pages;
+    }
+    
+    // Calcular el rango de páginas a mostrar (grupos de 5)
+    const pageGroup = Math.floor((current - 1) / 5);
+    const startPage = pageGroup * 5 + 1;
+    const endPage = Math.min(startPage + 4, total);
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
   });
 
   /**
@@ -412,6 +471,115 @@ export class IemsGestion implements OnInit {
     }, 250);
   }
 
+  /**
+   * Filtrar opciones de tipo
+   */
+  filterTypeOptions(query: string) {
+    this.typeSearchQuery.set(query);
+    this.showTypeDropdown.set(true);
+    
+    if (!query.trim()) {
+      // Si el usuario borra todo, limpiamos la selección y mostramos todas las opciones
+      this.selectedType.set('');
+      this.filteredTypeOptions.set(this.typeOptions.slice(1));
+      return;
+    }
+    
+    const filtered = this.typeOptions.slice(1).filter(opt => 
+      opt.label.toLowerCase().includes(query.toLowerCase())
+    );
+    this.filteredTypeOptions.set(filtered);
+  }
+
+  /**
+   * Seleccionar tipo
+   */
+  selectType(typeValue: string) {
+    this.selectedType.set(typeValue);
+    const selectedOption = this.typeOptions.find(opt => opt.value === typeValue);
+    this.typeSearchQuery.set(selectedOption ? selectedOption.label : '');
+    this.showTypeDropdown.set(false);
+    this.currentPage.set(1);
+  }
+
+  /**
+   * Manejar focus del combo de tipo
+   */
+  onTypeDropdownFocus() {
+    this.showTypeDropdown.set(true);
+    // Si no hay texto de búsqueda, mostramos todas las opciones
+    if (!this.typeSearchQuery()) {
+      this.filteredTypeOptions.set(this.typeOptions.slice(1));
+    }
+  }
+
+  /**
+   * Manejar blur del combo de tipo
+   */
+  onTypeDropdownBlur() {
+    setTimeout(() => {
+      this.showTypeDropdown.set(false);
+      // Si no hay selección, limpiamos el texto de búsqueda
+      if (!this.selectedType()) {
+        this.typeSearchQuery.set('');
+      }
+    }, 200);
+  }
+
+  /**
+   * Filtrar opciones de estado
+   */
+  filterStateOptions(query: string) {
+    this.stateSearchQuery.set(query);
+    this.showStateDropdown.set(true);
+    
+    if (!query.trim()) {
+      // Si el usuario borra todo, limpiamos la selección y mostramos todas las opciones
+      this.selectedState.set('all');
+      this.filteredStateOptions.set(this.stateOptions.slice(1));
+      return;
+    }
+    
+    const filtered = this.stateOptions.slice(1).filter(state => 
+      state.toLowerCase().includes(query.toLowerCase())
+    );
+    this.filteredStateOptions.set(filtered);
+  }
+
+  /**
+   * Seleccionar estado
+   */
+  selectStateFilter(state: string) {
+    this.selectedState.set(state);
+    this.stateSearchQuery.set(state);
+    this.showStateDropdown.set(false);
+    this.currentPage.set(1);
+  }
+
+  /**
+   * Manejar focus del combo de estado
+   */
+  onStateDropdownFocus() {
+    this.showStateDropdown.set(true);
+    // Si no hay texto de búsqueda, mostramos todas las opciones
+    if (!this.stateSearchQuery()) {
+      this.filteredStateOptions.set(this.stateOptions.slice(1));
+    }
+  }
+
+  /**
+   * Manejar blur del combo de estado
+   */
+  onStateDropdownBlur() {
+    setTimeout(() => {
+      this.showStateDropdown.set(false);
+      // Si no hay selección o es 'all', limpiamos el texto de búsqueda
+      if (!this.selectedState() || this.selectedState() === 'all') {
+        this.stateSearchQuery.set('');
+      }
+    }, 200);
+  }
+
   toggleStatus(iems: any): void {
     const nuevoEstado = !iems.active;
 
@@ -442,6 +610,58 @@ export class IemsGestion implements OnInit {
   }
 
   /**
+   * Ir al grupo anterior de páginas (5 páginas atrás)
+   */
+  goToPreviousGroup(): void {
+    const current = this.currentPage();
+    const pageGroup = Math.floor((current - 1) / 5);
+    if (pageGroup > 0) {
+      const newPage = (pageGroup - 1) * 5 + 1;
+      this.goToPage(newPage);
+    }
+  }
+
+  /**
+   * Ir al grupo siguiente de páginas (5 páginas adelante)
+   */
+  goToNextGroup(): void {
+    const current = this.currentPage();
+    const total = this.totalPages();
+    const pageGroup = Math.floor((current - 1) / 5);
+    const maxGroup = Math.floor((total - 1) / 5);
+    
+    if (pageGroup < maxGroup) {
+      const newPage = (pageGroup + 1) * 5 + 1;
+      this.goToPage(newPage);
+    }
+  }
+
+  /**
+   * Verificar si hay un grupo anterior
+   */
+  hasPreviousGroup = computed(() => {
+    const total = this.totalPages();
+    if (total <= 5) return false;
+    
+    const current = this.currentPage();
+    const pageGroup = Math.floor((current - 1) / 5);
+    return pageGroup > 0;
+  });
+
+  /**
+   * Verificar si hay un grupo siguiente
+   */
+  hasNextGroup = computed(() => {
+    const total = this.totalPages();
+    if (total <= 5) return false;
+    
+    const current = this.currentPage();
+    const pageGroup = Math.floor((current - 1) / 5);
+    const maxGroup = Math.floor((total - 1) / 5);
+    return pageGroup < maxGroup;
+  });
+
+  /**
    * Cambiar items por página
    */
   onItemsPerPageChange(value: number): void {
@@ -454,8 +674,10 @@ export class IemsGestion implements OnInit {
    */
   resetFilters(): void {
     this.searchQuery.set('');
-    this.selectedType.set('all');
+    this.selectedType.set('');
     this.selectedState.set('all');
+    this.typeSearchQuery.set('');
+    this.stateSearchQuery.set('');
     this.currentPage.set(1);
   }
 

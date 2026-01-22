@@ -18,11 +18,14 @@ export class Aspirant implements OnInit {
   aspirants = signal<Prospect[]>([]);
   selectedAspirant = signal<Prospect | null>(null);
   isLoading = signal<boolean>(false);
+  showDetailsModal = signal<boolean>(false);
+  viewingAspirant = signal<Prospect | null>(null);
 
   // Signals para Búsqueda y Paginación
   searchTerm = signal<string>('');
   currentPage = signal<number>(1);
   itemsPerPage = signal<number>(5); // Ahora es un signal
+  pageSizeOptions = [5, 10, 20, 50];
 
   filteredAspirants = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
@@ -45,6 +48,12 @@ export class Aspirant implements OnInit {
 
   totalPages = computed(() => {
     return Math.ceil(this.filteredAspirants().length / this.itemsPerPage()) || 1;
+  });
+
+  showingRange = computed(() => {
+    const start = (this.currentPage() - 1) * this.itemsPerPage() + 1;
+    const end = Math.min(this.currentPage() * this.itemsPerPage(), this.filteredAspirants().length);
+    return this.filteredAspirants().length > 0 ? `${start} - ${end}` : '0';
   });
 
   // ========================================
@@ -125,10 +134,9 @@ export class Aspirant implements OnInit {
     this.currentPage.set(1);
   }
 
-  // Manejador para el combo de cantidad (5, 10, 25...)
-  onItemsPerPageChange(event: Event): void {
-    const element = event.target as HTMLSelectElement;
-    this.itemsPerPage.set(Number(element.value));
+  // Manejador para el combo de cantidad (5, 10, 20, 50)
+  onItemsPerPageChange(value: number): void {
+    this.itemsPerPage.set(value);
     this.currentPage.set(1);
   }
 
@@ -158,5 +166,69 @@ export class Aspirant implements OnInit {
   // Función para obtener la abreviación de una carrera
   getCareerAbbr(careerName: string): string {
     return getCareerAbbreviation(careerName);
+  }
+
+  // Abrir modal de detalles
+  openDetailsModal(aspirant: Prospect): void {
+    this.viewingAspirant.set(aspirant);
+    this.showDetailsModal.set(true);
+  }
+
+  // Cerrar modal de detalles
+  closeDetailsModal(): void {
+    this.showDetailsModal.set(false);
+    this.viewingAspirant.set(null);
+  }
+
+  /**
+   * Extraer fecha de nacimiento del CURP
+   * El CURP tiene el formato: AAAA + AAMMDD + ...
+   * Donde AAMMDD son: Año (2 dígitos), Mes (2 dígitos), Día (2 dígitos)
+   * Si el año es >= 50, pertenece al siglo 20 (1900-1999)
+   * Si el año es < 50, pertenece al siglo 21 (2000-2049)
+   */
+  getBirthDateFromCurp(curp: string | undefined): Date | null {
+    if (!curp || curp.length < 10) {
+      return null;
+    }
+
+    try {
+      const cleanCurp = curp.trim().toUpperCase();
+      
+      // Extraer año, mes y día (posiciones 4-9)
+      const yearStr = cleanCurp.substring(4, 6);
+      const monthStr = cleanCurp.substring(6, 8);
+      const dayStr = cleanCurp.substring(8, 10);
+
+      const year = parseInt(yearStr, 10);
+      const month = parseInt(monthStr, 10);
+      const day = parseInt(dayStr, 10);
+
+      // Validar que sean números válidos
+      if (isNaN(year) || isNaN(month) || isNaN(day)) {
+        return null;
+      }
+
+      // Determinar el siglo: si el año es >= 50, es 1900, si no es 2000
+      const fullYear = year >= 50 ? 1900 + year : 2000 + year;
+
+      // Validar mes y día
+      if (month < 1 || month > 12 || day < 1 || day > 31) {
+        return null;
+      }
+
+      // Crear la fecha
+      const date = new Date(fullYear, month - 1, day);
+      
+      // Validar que la fecha sea válida (por ejemplo, 31 de febrero no es válido)
+      if (date.getFullYear() !== fullYear || date.getMonth() !== month - 1 || date.getDate() !== day) {
+        return null;
+      }
+
+      return date;
+    } catch (error) {
+      console.error('Error al extraer fecha del CURP:', error);
+      return null;
+    }
   }
 }
