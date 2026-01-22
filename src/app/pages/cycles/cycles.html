@@ -22,7 +22,10 @@
   </div>
 
   <!-- Error Message -->
-  <div *ngIf="errorMessage() && !isLoading()" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-xl">
+  <div
+    *ngIf="errorMessage() && !isLoading()"
+    class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-xl"
+  >
     <div class="flex items-center gap-3">
       <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
       <p class="text-sm font-bold text-red-700">{{ errorMessage() }}</p>
@@ -30,9 +33,16 @@
   </div>
 
   <div
-    *ngIf="activeCycle() as active"
+    *ngIf="activeCycle() as active; else noActiveCycle"
     class="bg-[#0f172a] rounded-[2rem] p-8 mb-10 text-white relative overflow-hidden shadow-xl"
   >
+    <button
+      (click)="editCycle(active)"
+      class="absolute top-8 right-8 z-20 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-white/10"
+    >
+      <i class="far fa-edit"></i>
+      Editar Ciclo
+    </button>
     <div class="relative z-10">
       <span
         class="bg-[#10b981]/20 text-[#10b981] text-[10px] font-black px-3 py-1 rounded-full border border-[#10b981]/30 uppercase tracking-widest"
@@ -72,6 +82,18 @@
     ></i>
   </div>
 
+  <ng-template #noActiveCycle>
+    <div
+      class="bg-slate-100 border-2 border-dashed border-slate-300 rounded-[2rem] p-8 mb-10 text-center"
+    >
+      <i class="fas fa-calendar-times text-slate-400 text-4xl mb-3 block"></i>
+      <h2 class="text-xl font-bold text-slate-600">No hay un ciclo académico activo actualmente</h2>
+      <p class="text-slate-500 text-sm">
+        Activa un ciclo desde el historial o crea uno nuevo para comenzar.
+      </p>
+    </div>
+  </ng-template>
+
   <div class="flex flex-wrap items-center gap-4 mb-6">
     <div class="relative flex-1 max-w-md">
       <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -100,6 +122,7 @@
           <th class="px-8 py-5">Inicio</th>
           <th class="px-8 py-5">Fin</th>
           <th class="px-8 py-5">Estado</th>
+          <th class="px-8 py-5 text-right">Acciones</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-50">
@@ -110,7 +133,9 @@
           <td class="px-8 py-5">
             <div class="font-black text-[#1e293b] text-sm uppercase">{{ cycle.name }}</div>
             <div class="text-xs text-slate-500 font-bold mt-1">{{ cycle.code }}</div>
-            <div *ngIf="cycle.description" class="text-xs text-slate-400 mt-1 italic">{{ cycle.description }}</div>
+            <div *ngIf="cycle.description" class="text-xs text-slate-400 mt-1 italic">
+              {{ cycle.description }}
+            </div>
           </td>
           <td class="px-8 py-5 text-sm text-slate-500 font-bold">
             {{ cycle.period.startDate | date: 'dd MMM, yyyy' : '' : 'es' }}
@@ -132,6 +157,42 @@
             >
               {{ cycle.status }}
             </span>
+          </td>
+          <td class="px-8 py-5 text-right relative">
+            <button
+              (click)="toggleActions(cycle._id)"
+              class="w-10 h-10 inline-flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 transition-all"
+            >
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+
+            @if (activeActionMenu() === cycle._id) {
+              <div
+                class="absolute right-8 top-14 z-[110] w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 animate-in fade-in zoom-in duration-200"
+              >
+                <button
+                  (click)="editCycle(cycle)"
+                  class="w-full px-5 py-3 text-left flex items-center gap-3 hover:bg-slate-50 transition-colors"
+                >
+                  <i class="far fa-edit text-blue-500"></i>
+                  <span class="text-sm font-bold text-slate-700">Editar datos</span>
+                </button>
+
+                <button
+                  (click)="toggleStatus(cycle)"
+                  class="w-full px-5 py-3 text-left flex items-center gap-3 hover:bg-slate-50 transition-colors"
+                >
+                  <i
+                    class="fas fa-power-off"
+                    [class.text-orange-500]="cycle.active"
+                    [class.text-emerald-500]="!cycle.active"
+                  ></i>
+                  <span class="text-sm font-bold text-slate-700">
+                    {{ cycle.active ? 'Desactivar' : 'Activar' }}
+                  </span>
+                </button>
+              </div>
+            }
           </td>
         </tr>
         <tr *ngIf="filteredCycles().length === 0 && !isLoading()">
@@ -188,11 +249,14 @@
   >
     <div class="p-8">
       <h2 class="text-xl font-black text-slate-900 mb-6 uppercase tracking-tight">
-        Registrar Nuevo Ciclo
+        {{ isEditing() ? 'Editar Ciclo Académico' : 'Registrar Nuevo Ciclo' }}
       </h2>
 
       <!-- Success/Error Messages -->
-      <div *ngIf="successMessage()" class="mb-4 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-xl">
+      <div
+        *ngIf="successMessage()"
+        class="mb-4 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-xl"
+      >
         <div class="flex items-center gap-3">
           <i class="fas fa-check-circle text-emerald-500 text-xl"></i>
           <p class="text-sm font-bold text-emerald-700">{{ successMessage() }}</p>
@@ -209,8 +273,10 @@
       <form [formGroup]="cycleForm" (ngSubmit)="saveCycle()" class="space-y-6">
         <!-- Información Básica -->
         <div class="space-y-4">
-          <h3 class="text-sm font-black text-slate-700 uppercase tracking-wider">Información del Ciclo</h3>
-          
+          <h3 class="text-sm font-black text-slate-700 uppercase tracking-wider">
+            Información del Ciclo
+          </h3>
+
           <div class="space-y-4">
             <div>
               <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">
@@ -221,7 +287,9 @@
                 type="text"
                 placeholder="Ej. Ciclo Agosto 2026 - Julio 2027"
                 class="w-full px-5 py-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-sm outline-none focus:border-blue-500 transition-all"
-                [class.border-red-300]="cycleForm.get('name')?.invalid && cycleForm.get('name')?.touched"
+                [class.border-red-300]="
+                  cycleForm.get('name')?.invalid && cycleForm.get('name')?.touched
+                "
               />
             </div>
 
@@ -235,7 +303,9 @@
                   type="text"
                   placeholder="Ej. 2026-2027"
                   class="w-full px-5 py-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-sm outline-none focus:border-blue-500 transition-all"
-                  [class.border-red-300]="cycleForm.get('code')?.invalid && cycleForm.get('code')?.touched"
+                  [class.border-red-300]="
+                    cycleForm.get('code')?.invalid && cycleForm.get('code')?.touched
+                  "
                 />
               </div>
 
@@ -243,14 +313,14 @@
                 <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">
                   Estado *
                 </label>
-                <div class="flex items-center gap-4 px-5 py-3 bg-slate-50 rounded-xl border border-slate-200">
+                <div
+                  class="flex items-center gap-4 px-5 py-3 bg-slate-50 rounded-xl border border-slate-200"
+                >
                   <label class="relative inline-flex items-center cursor-pointer">
-                    <input
-                      formControlName="active"
-                      type="checkbox"
-                      class="sr-only peer"
-                    />
-                    <div class="w-14 h-7 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
+                    <input formControlName="active" type="checkbox" class="sr-only peer" />
+                    <div
+                      class="w-14 h-7 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"
+                    ></div>
                   </label>
                   <div>
                     <p class="text-xs font-bold text-slate-800">
@@ -277,8 +347,10 @@
 
         <!-- Fechas del Periodo -->
         <div class="space-y-4">
-          <h3 class="text-sm font-black text-slate-700 uppercase tracking-wider">Periodo del Ciclo</h3>
-          
+          <h3 class="text-sm font-black text-slate-700 uppercase tracking-wider">
+            Periodo del Ciclo
+          </h3>
+
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">
@@ -288,7 +360,9 @@
                 formControlName="startDate"
                 type="date"
                 class="w-full px-5 py-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-sm outline-none focus:border-blue-500 transition-all"
-                [class.border-red-300]="cycleForm.get('startDate')?.invalid && cycleForm.get('startDate')?.touched"
+                [class.border-red-300]="
+                  cycleForm.get('startDate')?.invalid && cycleForm.get('startDate')?.touched
+                "
               />
             </div>
 
@@ -300,7 +374,9 @@
                 formControlName="endDate"
                 type="date"
                 class="w-full px-5 py-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-sm outline-none focus:border-blue-500 transition-all"
-                [class.border-red-300]="cycleForm.get('endDate')?.invalid && cycleForm.get('endDate')?.touched"
+                [class.border-red-300]="
+                  cycleForm.get('endDate')?.invalid && cycleForm.get('endDate')?.touched
+                "
               />
             </div>
           </div>
@@ -323,7 +399,11 @@
             [disabled]="isLoading()"
           >
             <i *ngIf="isLoading()" class="fas fa-circle-notch fa-spin"></i>
-            <span>{{ isLoading() ? 'Guardando...' : 'Guardar Ciclo' }}</span>
+            <span>
+              {{
+                isLoading() ? 'Guardando...' : isEditing() ? 'Actualizar Cambios' : 'Guardar Ciclo'
+              }}
+            </span>
           </button>
         </div>
       </form>

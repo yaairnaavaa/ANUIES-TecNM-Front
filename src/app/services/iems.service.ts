@@ -48,7 +48,7 @@ export class IemsService {
    * Actualizar IEMS
    */
   updateIEMS(id: string, iems: Partial<IEMS>): Observable<ApiResponse<IEMS>> {
-    return this.http.put<ApiResponse<IEMS>>(`${this.baseUrl}/${id}`, iems);
+    return this.http.patch<ApiResponse<IEMS>>(`${this.baseUrl}/${id}`, iems);
   }
 
   /**
