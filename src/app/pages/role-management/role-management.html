@@ -177,27 +177,57 @@
           </div>
           
           <div class="flex items-center gap-2">
+            <!-- Botón grupo anterior -->
+            @if (hasPreviousGroup()) {
+              <button
+                (click)="goToPreviousGroup()"
+                class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-95"
+              >
+                <i class="fas fa-chevron-double-left text-xs"></i>
+              </button>
+            }
+            
+            <!-- Botón página anterior -->
             <button
               (click)="goToPage(currentPage() - 1)"
               [disabled]="currentPage() === 1"
-              class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-all active:scale-95"
+              class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
             >
-              <i class="fas fa-chevron-left text-xs mr-1"></i>
-              Anterior
+              <i class="fas fa-chevron-left"></i>
             </button>
-            <div class="px-4 py-2 bg-blue-50 border border-blue-100 rounded-xl">
-              <span class="text-sm font-black text-blue-700">{{ currentPage() }}</span>
-              <span class="text-sm text-blue-400 mx-1">/</span>
-              <span class="text-sm font-bold text-blue-500">{{ totalPages() }}</span>
-            </div>
+            
+            <!-- Números de páginas (grupos de 5) -->
+            @for (page of visiblePages(); track page) {
+              <button
+                (click)="goToPage(page)"
+                [class]="
+                  page === currentPage()
+                    ? 'w-10 h-10 flex items-center justify-center rounded-xl bg-blue-600 text-white font-black shadow-lg shadow-blue-200'
+                    : 'w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-blue-50 font-bold transition-all shadow-sm active:scale-95'
+                "
+              >
+                {{ page }}
+              </button>
+            }
+            
+            <!-- Botón página siguiente -->
             <button
               (click)="goToPage(currentPage() + 1)"
               [disabled]="currentPage() === totalPages()"
-              class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-all active:scale-95"
+              class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
             >
-              Siguiente
-              <i class="fas fa-chevron-right text-xs ml-1"></i>
+              <i class="fas fa-chevron-right"></i>
             </button>
+            
+            <!-- Botón grupo siguiente -->
+            @if (hasNextGroup()) {
+              <button
+                (click)="goToNextGroup()"
+                class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-95"
+              >
+                <i class="fas fa-chevron-double-right text-xs"></i>
+              </button>
+            }
           </div>
         </div>
       }

@@ -232,6 +232,72 @@ export class RoleManagementComponent implements OnInit {
     this.currentPage.set(1);
   }
 
+  // Paginación avanzada con grupos de 5 páginas
+  visiblePages = computed(() => {
+    const total = this.totalPages();
+    if (total === 0) return [];
+    
+    const current = this.currentPage();
+    const pages: number[] = [];
+    
+    if (total <= 5) {
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+      return pages;
+    }
+    
+    const pageGroup = Math.floor((current - 1) / 5);
+    const startPage = pageGroup * 5 + 1;
+    const endPage = Math.min(startPage + 4, total);
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  });
+
+  goToPreviousGroup(): void {
+    const current = this.currentPage();
+    const pageGroup = Math.floor((current - 1) / 5);
+    if (pageGroup > 0) {
+      const newPage = (pageGroup - 1) * 5 + 1;
+      this.goToPage(newPage);
+    }
+  }
+
+  goToNextGroup(): void {
+    const current = this.currentPage();
+    const total = this.totalPages();
+    const pageGroup = Math.floor((current - 1) / 5);
+    const maxGroup = Math.floor((total - 1) / 5);
+    
+    if (pageGroup < maxGroup) {
+      const newPage = (pageGroup + 1) * 5 + 1;
+      this.goToPage(newPage);
+    }
+  }
+
+  hasPreviousGroup = computed(() => {
+    const total = this.totalPages();
+    if (total <= 5) return false;
+    
+    const current = this.currentPage();
+    const pageGroup = Math.floor((current - 1) / 5);
+    return pageGroup > 0;
+  });
+
+  hasNextGroup = computed(() => {
+    const total = this.totalPages();
+    if (total <= 5) return false;
+    
+    const current = this.currentPage();
+    const pageGroup = Math.floor((current - 1) / 5);
+    const maxGroup = Math.floor((total - 1) / 5);
+    return pageGroup < maxGroup;
+  });
+
   clearMessages(): void {
     this.errorMessage.set(null);
     this.successMessage.set(null);
