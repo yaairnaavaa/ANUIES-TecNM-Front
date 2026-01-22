@@ -39,7 +39,7 @@ export class IesService {
    * Actualizar IES
    */
   updateIES(id: string, ies: Partial<IES>): Observable<ApiResponse<IES>> {
-    return this.http.put<ApiResponse<IES>>(`${this.baseUrl}/${id}`, ies);
+    return this.http.patch<ApiResponse<IES>>(`${this.baseUrl}/${id}`, ies);
   }
 
   /**
