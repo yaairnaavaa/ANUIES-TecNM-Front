@@ -6,12 +6,13 @@ import { IesService } from '../../services/ies.service';
 import { AuthService } from '../../services/auth.service';
 import { IesUserManagement } from '../ies-gestion-modals/ies-user-management/ies-user-management';
 import { IesEditComponent } from '../ies-gestion-modals/ies-edit-component/ies-edit-component';
-type ViewState = 'list' | 'add' | 'edit' | 'users';
+import { CareersComponent } from '../ies-gestion-modals/careers-component/careers-component';
+type ViewState = 'list' | 'add' | 'edit' | 'users' | 'careers';
 
 @Component({
   selector: 'app-ies-gestion',
   standalone: true,
-  imports: [IesEditComponent, CommonModule, FormsModule, ReactiveFormsModule, IesUserManagement],
+  imports: [IesEditComponent, CareersComponent, CommonModule, FormsModule, ReactiveFormsModule, IesUserManagement],
   templateUrl: './ies-gestion.html',
 })
 export class IesGestion implements OnInit {
@@ -76,6 +77,13 @@ export class IesGestion implements OnInit {
     this.selectedIes.set(ies);
     this.currentView.set('users');
   }
+
+
+  manageCareers(ies: IES) {
+  this.selectedIes.set(ies); // Primero establecemos la IES seleccionada
+  this.currentView.set('careers'); // Luego cambiamos la vista para que el @if se active
+}
+
 
   backToList() {
     this.currentView.set('list');
@@ -197,6 +205,7 @@ export class IesGestion implements OnInit {
     });
   }
 
+  
   onSave(updatedIes: any) {
     console.log('Datos recibidos del hijo:', updatedIes);
     // Aquí iría tu lógica para llamar al servicio y actualizar en la BD
