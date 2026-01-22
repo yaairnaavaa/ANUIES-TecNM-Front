@@ -1,6 +1,12 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { CycleService } from '../../services/cycle.service';
 import { Period } from '../../models/api.models';
 import { tap, catchError, finalize } from 'rxjs/operators';
@@ -8,7 +14,7 @@ import { of } from 'rxjs';
 
 // Interfaz adaptada para los datos reales del API
 interface CycleApiResponse {
-  _id?: string;
+  _id: string;
   name: string;
   code: string;
   description?: string;
@@ -79,7 +85,8 @@ export class Cycles implements OnInit {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    this.cycleService.getAllCycles()
+    this.cycleService
+      .getAllCycles()
       .pipe(
         tap((response: any) => {
           if (response.data && Array.isArray(response.data)) {
@@ -94,15 +101,17 @@ export class Cycles implements OnInit {
             this.cyclesList.set([]);
           }
         }),
-        catchError(error => {
+        catchError((error) => {
           console.error('Error al cargar ciclos:', error);
-          this.errorMessage.set(`Error al cargar los ciclos: ${error.message || 'Por favor, intenta de nuevo.'}`);
+          this.errorMessage.set(
+            `Error al cargar los ciclos: ${error.message || 'Por favor, intenta de nuevo.'}`,
+          );
           this.cyclesList.set([]);
           return of(null);
         }),
         finalize(() => {
           this.isLoading.set(false);
-        })
+        }),
       )
       .subscribe();
   }
@@ -132,27 +141,28 @@ export class Cycles implements OnInit {
       active: this.cycleForm.value.active,
     };
 
-    this.cycleService.createCycle(cycleData)
+    this.cycleService
+      .createCycle(cycleData)
       .pipe(
-        tap(response => {
+        tap((response) => {
           this.successMessage.set('Ciclo creado exitosamente.');
           this.loadCycles(); // Recargar lista
-          
+
           // Cerrar modal después de 2 segundos
           setTimeout(() => {
             this.closeModal();
           }, 2000);
         }),
-        catchError(error => {
+        catchError((error) => {
           console.error('Error al guardar ciclo:', error);
           this.errorMessage.set(
-            error.error?.message || 'Error al crear el ciclo. Por favor, intenta de nuevo.'
+            error.error?.message || 'Error al crear el ciclo. Por favor, intenta de nuevo.',
           );
           return of(null);
         }),
         finalize(() => {
           this.isLoading.set(false);
-        })
+        }),
       )
       .subscribe();
   }
@@ -161,7 +171,7 @@ export class Cycles implements OnInit {
    * Marcar todos los campos del formulario como touched
    */
   private markFormGroupTouched(formGroup: FormGroup) {
-    Object.keys(formGroup.controls).forEach(key => {
+    Object.keys(formGroup.controls).forEach((key) => {
       const control = formGroup.get(key);
       control?.markAsTouched();
       if (control instanceof FormGroup) {
@@ -174,7 +184,7 @@ export class Cycles implements OnInit {
   filteredCycles = computed(() => {
     const term = this.searchTerm().toLowerCase();
     const allCycles = this.cyclesList();
-    
+
     // Filtrar por término de búsqueda y excluir ciclos activos
     return allCycles.filter((c) => {
       const matchesSearch = c.name.toLowerCase().includes(term);
@@ -200,12 +210,61 @@ export class Cycles implements OnInit {
 
   closeModal() {
     this.isModalOpen.set(false);
-    this.cycleForm.reset();
-    this.errorMessage.set('');
-    this.successMessage.set('');
+    this.isEditing.set(false);
+    this.selectedCycleId.set(null);
+    this.cycleForm.reset({ active: true });
   }
 
   clearSearch() {
     this.searchTerm.set('');
+  }
+
+  activeActionMenu = signal<string | null>(null);
+  isEditing = signal<boolean>(false);
+  selectedCycleId = signal<string | null>(null);
+
+  // Abrir menú de acciones
+  toggleActions(id: string) {
+    this.activeActionMenu.set(this.activeActionMenu() === id ? null : id);
+  }
+  toggleStatus(cycle: any) {
+    // Cerramos el menú de acciones primero
+    this.activeActionMenu.set(null);
+
+    // Lógica para cambiar el estado (puedes adaptarlo a tu servicio)
+    const newStatus = cycle.active ? false : true;
+
+    // Aquí llamarías a tu servicio, por ahora actualizamos localmente
+    this.isLoading.set(true);
+
+    // Ejemplo de llamada al servicio (ajusta según tu iesService)
+    // this.cycleService.updateCycleStatus(cycle._id, newStatus).subscribe(...)
+
+    console.log('Cambiando estado de:', cycle.name, 'a:', newStatus);
+
+    // Simulación de éxito
+    setTimeout(() => {
+      cycle.active = newStatus;
+      this.isLoading.set(false);
+    }, 500);
+  }
+
+  // Preparar modal para edición
+  editCycle(cycle: any) {
+    this.isEditing.set(true);
+    this.selectedCycleId.set(cycle.id);
+    this.activeActionMenu.set(null); // Cerrar menú
+
+    // Seteamos los valores en el form
+    this.cycleForm.patchValue({
+      name: cycle.name,
+      code: cycle.code,
+      active: cycle.active,
+      description: cycle.description,
+      startDate: cycle.period.startDate, // Asegúrate que el formato sea YYYY-MM-DD
+      endDate: cycle.period.endDate,
+    });
+
+    this.isModalOpen.set(true);
   }
 }
