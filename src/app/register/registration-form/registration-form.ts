@@ -19,6 +19,7 @@ import {
   FormControl,
   Validators,
 } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
 import { curpValidator } from '../../validators/curp.validator';
 import { ProspectService } from '../../services/prospect.service';
@@ -26,6 +27,7 @@ import { IemsService } from '../../services/iems.service';
 import { IesService } from '../../services/ies.service';
 import { CampaignService } from '../../services/campaign.service';
 import { IES, Campaign, Prospect } from '../../models/api.models';
+import { environment } from '../../../environments/environment';
 
 interface IemsBasicInfo {
   name: string;
@@ -44,6 +46,7 @@ export class RegistrationForm implements OnInit {
   private iemsService = inject(IemsService);
   private iesService = inject(IesService);
   private campaignService = inject(CampaignService);
+  private http = inject(HttpClient);
 
   @Input() campaignId: string | null = null;
   @Output() onRegistrationSuccess = new EventEmitter<void>();
@@ -59,12 +62,22 @@ export class RegistrationForm implements OnInit {
   filteredIes = signal<IES[]>([]);
   selectedIES = signal<IES | null>(null);
 
+  // --- UI State (Género) ---
+  genderOptions = ['Masculino', 'Femenino', 'Otro', 'Prefiero no decir'];
+  filteredGenderOptions = signal<string[]>(['Masculino', 'Femenino', 'Otro', 'Prefiero no decir']);
+  genderSearchQuery = signal('');
+  showGenderDropdown = signal(false);
+
   // --- Form State ---
   selectedMajors: string[] = [];
   isLoading = signal(false);
   showSuccess = signal(false);
   errorMessage = signal<string | null>(null);
   successData: any = null;
+  
+  // --- Email State ---
+  isSendingEmail = signal(false);
+  emailSent = signal(false);
 
   // --- Data Lists ---
   iesList = signal<IES[]>([]);
@@ -104,7 +117,8 @@ export class RegistrationForm implements OnInit {
     fullName: new FormControl('', Validators.required),
     email: new FormControl('', [Validators.required, Validators.email]),
     phoneNumber: new FormControl('', [Validators.required, Validators.pattern('^[0-9]{10}$')]),
-    curp: new FormControl('', [curpValidator()]),
+    curp: new FormControl('', [Validators.required, curpValidator()]),
+    gender: new FormControl('', Validators.required),
     previousSchool: new FormControl('', Validators.required),
     currentSemester: new FormControl(''),
     technicalMajor: new FormControl(''),
@@ -116,6 +130,13 @@ export class RegistrationForm implements OnInit {
     this.loadIEMS();
     this.loadIES();
     this.listenSchoolInput();
+    
+    // Sincronizar el valor del género con el input de búsqueda
+    this.registrationForm.get('gender')?.valueChanges.subscribe(value => {
+      if (value) {
+        this.genderSearchQuery.set(value);
+      }
+    });
     
     // Cargar campaña si se proporciona un ID
     if (this.campaignId) {
@@ -343,6 +364,7 @@ export class RegistrationForm implements OnInit {
       email: formValue.email!,
       phone: { mobile: formValue.phoneNumber! },
       curp: formValue.curp?.trim().toUpperCase() || undefined,
+      gender: formValue.gender || undefined,
       originIEMSName: formValue.previousSchool!,
       currentSemester: formValue.currentSemester || undefined,
       technicalMajor: formValue.technicalMajor || undefined,
@@ -364,11 +386,14 @@ export class RegistrationForm implements OnInit {
         next: (res) => {
           if (res.success && res.data) {
             const data = res.data as any;
+            const prospectId = data.id || data._id;
             this.successData = {
+              id: prospectId,
+              _id: prospectId, // Guardar también como _id para compatibilidad
               fullName: data.fullName,
               school: prospectData.originIEMSName,
               firstChoice: firstCareer?.name || 'N/A',
-              folio: (data.id || data._id).toString().substring(0, 8).toUpperCase(),
+              folio: prospectId.toString().substring(0, 8).toUpperCase(),
             };
             this.showSuccess.set(true);
             this.onRegistrationSuccess.emit();
@@ -399,6 +424,10 @@ export class RegistrationForm implements OnInit {
     this.successData = null;
     this.errorMessage.set(null);
     this.selectedIES.set(null);
+    this.genderSearchQuery.set('');
+    this.filteredGenderOptions.set(this.genderOptions);
+    this.isSendingEmail.set(false);
+    this.emailSent.set(false);
   }
 
   onBlurIems() {
@@ -406,5 +435,90 @@ export class RegistrationForm implements OnInit {
     setTimeout(() => {
       this.showIemsList = false;
     }, 150);
+  }
+
+  // --- Lógica de Género ---
+  
+  /**
+   * Filtrar opciones de género
+   */
+  filterGender(query: string): void {
+    this.genderSearchQuery.set(query);
+    this.showGenderDropdown.set(true);
+    
+    if (!query.trim()) {
+      this.filteredGenderOptions.set(this.genderOptions);
+      return;
+    }
+    
+    const filtered = this.genderOptions.filter(option => 
+      option.toLowerCase().includes(query.toLowerCase())
+    );
+    this.filteredGenderOptions.set(filtered);
+  }
+
+  /**
+   * Seleccionar género
+   */
+  selectGender(gender: string): void {
+    this.genderSearchQuery.set(gender);
+    this.registrationForm.patchValue({ gender });
+    this.showGenderDropdown.set(false);
+  }
+
+  /**
+   * Manejar blur del género
+   */
+  onGenderBlur(): void {
+    setTimeout(() => {
+      this.showGenderDropdown.set(false);
+    }, 200);
+  }
+
+  // --- Email Notification ---
+  
+  /**
+   * Enviar notificación por correo electrónico al prospecto
+   */
+  sendEmailNotification(): void {
+    if (!this.successData) {
+      console.error('No hay datos del registro para enviar');
+      return;
+    }
+
+    this.isSendingEmail.set(true);
+    this.emailSent.set(false);
+
+    // Construir el payload con la información del registro
+    const emailData = {
+      prospectId: this.successData._id, // Usar el _id del prospecto guardado
+      fullName: this.successData.fullName,
+      email: this.registrationForm.value.email,
+      campaignId: this.campaignId || undefined,
+      campaignName: this.currentCampaign()?.name || 'Registro ANUIES',
+      iesName: this.selectedIES()?.name || 'N/A',
+      firstChoice: this.successData.firstChoice || 'N/A',
+      folio: this.successData.folio
+    };
+
+    console.log('📧 Enviando correo con datos:', emailData);
+
+    this.http.post(`${environment.apiUrl}/notifications/emailCampaign`, emailData)
+      .pipe(finalize(() => this.isSendingEmail.set(false)))
+      .subscribe({
+        next: (response: any) => {
+          console.log('✅ Correo enviado exitosamente:', response);
+          this.emailSent.set(true);
+          
+          // Resetear el estado después de 3 segundos
+          setTimeout(() => {
+            this.emailSent.set(false);
+          }, 3000);
+        },
+        error: (error) => {
+          console.error('❌ Error al enviar correo:', error);
+          this.errorMessage.set('Error al enviar el correo electrónico. Por favor intenta de nuevo.');
+        }
+      });
   }
 }

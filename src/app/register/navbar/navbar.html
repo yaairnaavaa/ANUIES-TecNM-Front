@@ -81,16 +81,20 @@
       <div
         class="bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem] p-6 mb-6 inline-block mx-auto"
       >
-        <div
-          class="w-48 h-48 flex items-center justify-center bg-white rounded-xl shadow-inner overflow-hidden"
-        >
-          <img
-            [src]="qrImage()"
-            [alt]="'QR Code para ' + qrUrl()"
-            class="w-full h-full object-contain"
-            onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%23f3f4f6\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%239ca3af\' font-family=\'Arial\' font-size=\'14\'%3EError cargando QR%3C/text%3E%3C/svg%3E'"
-          />
-        </div>
+        @if (customQRImage()) {
+          <div class="flex items-center justify-center bg-white rounded-xl shadow-inner overflow-hidden">
+            <img
+              [src]="customQRImage()"
+              [alt]="'QR Code para ' + qrUrl()"
+              class="max-w-full h-auto object-contain"
+              onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%23f3f4f6\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%239ca3af\' font-family=\'Arial\' font-size=\'14\'%3EError cargando QR%3C/text%3E%3C/svg%3E'"
+            />
+          </div>
+        } @else {
+          <div class="w-48 h-48 flex items-center justify-center bg-white rounded-xl shadow-inner">
+            <i class="fas fa-spinner fa-spin text-gray-400 text-3xl"></i>
+          </div>
+        }
       </div>
 
       <h3 class="text-xl font-black text-gray-800 mb-2">Registro por QR</h3>
