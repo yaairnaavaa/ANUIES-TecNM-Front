@@ -7,48 +7,9 @@ import { Career } from '../models/api.models';
 @Injectable({ providedIn: 'root' })
 export class IesService {
   private http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/ies`;
+  private readonly baseUrl = `${environment.apiUrl}/careers`;
 
-  /**
-   * Obtener todas las IES
-   */
-  getAllIES(filters?: { state?: string; active?: boolean }): Observable<ApiResponse<IES[]>> {
-    let params = new HttpParams();
-
-    if (filters?.state) params = params.set('state', filters.state);
-    if (filters?.active !== undefined) params = params.set('active', filters.active.toString());
-
-    return this.http.get<ApiResponse<IES[]>>(this.baseUrl, { params });
-  }
-
-  /**
-   * Obtener IES por ID
-   */
-  getIESById(id: string): Observable<ApiResponse<IES>> {
-    return this.http.get<ApiResponse<IES>>(`${this.baseUrl}/${id}`);
-  }
-
-  /**
-   * Crear nueva IES
-   */
-  createIES(ies: Partial<IES>): Observable<ApiResponse<IES>> {
-    return this.http.post<ApiResponse<IES>>(this.baseUrl, ies);
-  }
-
-  /**
-   * Actualizar IES
-   */
-  updateIES(id: string, ies: Partial<IES>): Observable<ApiResponse<IES>> {
-    return this.http.patch<ApiResponse<IES>>(`${this.baseUrl}/${id}`, ies);
-  }
-
-  /**
-   * Obtener carreras de una IES
-   */
-  getCareersIES(id: string): Observable<ApiResponse<any[]>> {
-    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/${id}/carreras`);
-  }
-
+ 
   createCareerIES(iesId: string, career: Partial<Career>): Observable<ApiResponse<Career>> {
     return this.http.post<ApiResponse<Career>>(`${this.baseUrl}/${iesId}/carreras`, career);
   }

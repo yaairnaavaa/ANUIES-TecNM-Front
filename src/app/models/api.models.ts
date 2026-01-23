@@ -70,6 +70,7 @@ export interface IES {
 }
 
 export interface Career {
+  id: string;
   name: string;
   shortName?: string;
   code?: string;
