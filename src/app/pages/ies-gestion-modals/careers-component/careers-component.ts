@@ -24,6 +24,8 @@ export class CareersComponent implements OnInit {
   searchQuery = signal('');
   isFormOpen = signal(false);
   editingCarrera = signal<Career | null>(null);
+  errorMessage = signal<string | null>(null);
+  successMessage = signal<string | null>(null);
 
   // Signals para el combo de modalidad
   modalitySearchQuery = signal('');
@@ -127,14 +129,25 @@ export class CareersComponent implements OnInit {
       }
 
       this.iesService.updateCareerIES(careerId, payload).subscribe({
-        next: () => this.handleSuccess('Carrera actualizada'),
+        next: () => {
+          this.handleSuccess('Carrera actualizada');
+          this.showToast('success', '¡Carrera actualizada correctamente!');
+          this.isFormOpen.set(false);
+        },
         error: (err) => this.handleError('Error al actualizar la carrera', err),
       });
     } else {
       // Lógica de creación...
       this.iesService.createCareerIES(this.iesId(), payload).subscribe({
-        next: () => this.handleSuccess('Carrera creada'),
-        error: (err) => this.handleError('Error al crear', err),
+        next: () => {
+          this.handleSuccess('Carrera creada');
+          this.showToast('success', '¡Carrera guardada correctamente!');
+          this.isFormOpen.set(false);
+        },
+        error: (err) => {
+          this.handleError('Error al crear', err);
+          this.showToast('error', 'No se pudo guardar la carrera.');
+        },
       });
     }
   }
@@ -283,6 +296,17 @@ export class CareersComponent implements OnInit {
     if (confirm('¿Eliminar esta carrera?')) {
       // Nota: Aquí asumo que guardaste el id en el mapeo
       this.carrerasList.update((list: any[]) => list.filter((c) => c.id !== id));
+    }
+  }
+
+  // Función auxiliar para mostrar mensajes con auto-cierre
+  showToast(type: 'success' | 'error', message: string) {
+    if (type === 'success') {
+      this.successMessage.set(message);
+      setTimeout(() => this.successMessage.set(null), 4000);
+    } else {
+      this.errorMessage.set(message);
+      setTimeout(() => this.errorMessage.set(null), 5000);
     }
   }
 }
