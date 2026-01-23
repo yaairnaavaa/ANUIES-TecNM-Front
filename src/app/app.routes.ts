@@ -12,6 +12,7 @@ import { Aspirant } from './pages/aspirant/aspirant';
 import { Home } from './pages/home/home';
 import { Cycles } from './pages/cycles/cycles';
 import { RoleManagementComponent } from './pages/role-management/role-management';
+import { StudentRegistrationComponent } from './pages/student-registration/student-registration';
 
 export const routes: Routes = [
   {
@@ -26,6 +27,10 @@ export const routes: Routes = [
   {
     path: 'register',
     component: Register,
+  },
+  {
+    path: 'registerStudent/:prospectId',
+    component: StudentRegistrationComponent,
   },
   //  Rutas del usuario administrativo de un sistema de universidades
   {

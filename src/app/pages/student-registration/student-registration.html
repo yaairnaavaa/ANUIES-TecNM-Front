@@ -1,0 +1,705 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-3xl mx-auto">
+    
+    <!-- Loading State -->
+    <div *ngIf="isLoadingProspect()" class="bg-white rounded-[2.5rem] shadow-2xl p-12 text-center">
+      <div class="w-20 h-20 mx-auto mb-6">
+        <i class="fas fa-circle-notch fa-spin text-5xl text-blue-600"></i>
+      </div>
+      <p class="text-gray-600 font-bold text-lg">Cargando información del registro...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="!isLoadingProspect() && errorMessage() && !prospectData()" class="bg-white rounded-[2.5rem] shadow-2xl p-12">
+      <div class="text-center">
+        <div class="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-200">
+          <i class="fas fa-times text-4xl"></i>
+        </div>
+        <h3 class="text-2xl font-black text-gray-800 mb-3">Error al cargar el registro</h3>
+        <p class="text-gray-500 font-medium mb-8">{{ errorMessage() }}</p>
+        <div class="mt-6">
+          <a href="/login" class="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 hover:bg-blue-700 transition-all uppercase text-[10px] tracking-widest">
+            <i class="fas fa-home"></i> Ir al inicio
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success State -->
+    <div *ngIf="showSuccess()" class="bg-white rounded-[2.5rem] shadow-2xl p-12 animate-zoom-in">
+      <div class="text-center">
+        <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-200">
+          <i class="fas fa-check text-4xl"></i>
+        </div>
+        <h3 class="text-3xl font-black text-gray-800 mb-3">¡Registro completado!</h3>
+        <p class="text-gray-500 font-medium mb-8 leading-relaxed">
+          Gracias por completar tu información. El tecnológico se pondrá en contacto contigo pronto.
+        </p>
+        <div class="bg-blue-50/50 rounded-[2rem] p-6 mb-8 border border-blue-100">
+          <div class="flex items-start gap-3">
+            <i class="fas fa-info-circle text-blue-600 text-xl mt-0.5"></i>
+            <p class="text-sm text-gray-700 font-bold text-left">
+              <strong class="text-blue-700">Importante:</strong> Revisa tu correo electrónico para más información sobre el proceso de admisión.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prospect Info Summary -->
+    <div *ngIf="!isLoadingProspect() && !showSuccess() && prospectData()" class="mb-6 animate-zoom-in">
+      <div class="bg-white rounded-[2.5rem] shadow-2xl p-8 border-t-4 border-blue-600 relative overflow-hidden">
+        
+        <!-- Decorative background pattern -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full opacity-20 -mr-32 -mt-32"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-purple-100 to-pink-100 rounded-full opacity-20 -ml-24 -mb-24"></div>
+        
+        <div class="relative z-10">
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-6 pb-4 border-b-2 border-gray-100">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                <i class="fas fa-user-graduate text-white text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-black text-gray-800">Información del Aspirante</h3>
+                <p class="text-xs text-gray-500 font-semibold">Revisa tu información registrada</p>
+              </div>
+            </div>
+            <div class="bg-green-100 text-green-700 px-4 py-2 rounded-full flex items-center gap-2">
+              <i class="fas fa-check-circle text-sm"></i>
+              <span class="text-xs font-bold">Pre-registrado</span>
+            </div>
+          </div>
+          
+          <!-- Info Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Nombre -->
+            <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-5 border border-gray-200 hover:shadow-md transition-all">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                  <i class="fas fa-user text-white"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Nombre Completo</p>
+                  <p class="text-base font-black text-gray-800 truncate">{{ getFullName() }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Escuela -->
+            <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-5 border border-gray-200 hover:shadow-md transition-all">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                  <i class="fas fa-school text-white"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Escuela de Procedencia</p>
+                  <p class="text-base font-black text-gray-800 truncate">{{ getOriginSchool() }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tecnológico -->
+            <div *ngIf="selectedIES()" class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-5 border border-gray-200 hover:shadow-md transition-all">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                  <i class="fas fa-university text-white"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Tecnológico de Interés</p>
+                  <p class="text-base font-black text-gray-800 truncate">{{ selectedIES()?.name }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Carreras -->
+            <div *ngIf="prospectData()?.careerInterests && prospectData()!.careerInterests!.length > 0" 
+                 class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-5 border border-gray-200 hover:shadow-md transition-all md:col-span-2">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 bg-pink-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                  <i class="fas fa-graduation-cap text-white"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-3">Carreras de Interés</p>
+                  <div class="space-y-2">
+                    <div *ngFor="let interest of prospectData()!.careerInterests; let i = index" 
+                         class="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm border border-gray-200">
+                      <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
+                        <span class="text-white font-black text-sm">{{ i + 1 }}°</span>
+                      </div>
+                      <span class="text-sm font-bold text-gray-800 flex-1">{{ interest.career }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Registration Form -->
+    <div *ngIf="!isLoadingProspect() && !showSuccess() && prospectData()" class="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden">
+      
+      <!-- Header -->
+      <div class="text-center p-8 border-b border-gray-100">
+        <h2 class="text-3xl font-extrabold text-gray-800 tracking-tight">Completa tu Registro</h2>
+        <p class="text-gray-500 mt-2 font-medium">Finaliza tu información para completar el proceso</p>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="p-6 md:p-10">
+        
+        <!-- Error Message -->
+        @if (errorMessage()) {
+          <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-4 flex items-start gap-3 animate-shake mb-6">
+            <i class="fas fa-exclamation-circle text-red-500 text-xl mt-0.5"></i>
+            <div class="flex-1">
+              <p class="text-sm font-bold text-red-800">{{ errorMessage() }}</p>
+            </div>
+            <button (click)="errorMessage.set(null)" class="text-red-400 hover:text-red-600">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        }
+
+        <!-- Datos Personales -->
+        <section class="space-y-6">
+          <div class="flex items-center gap-2 text-blue-900 font-extrabold text-[10px] uppercase tracking-[0.2em]">
+            <i class="fas fa-user text-sm"></i> Datos personales
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Nombre(s) <span class="text-red-500">*</span>
+              </label>
+              <div class="relative group">
+                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="text"
+                  formControlName="firstName"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  [class.border-red-300]="registrationForm.get('firstName')?.invalid && registrationForm.get('firstName')?.touched"
+                  placeholder="Ej: Juan"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Apellido Paterno <span class="text-red-500">*</span>
+              </label>
+              <div class="relative group">
+                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="text"
+                  formControlName="lastName"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  [class.border-red-300]="registrationForm.get('lastName')?.invalid && registrationForm.get('lastName')?.touched"
+                  placeholder="Ej: Pérez"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Apellido Materno
+              </label>
+              <div class="relative group">
+                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="text"
+                  formControlName="secondLastName"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  placeholder="Ej: García"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Fecha de Nacimiento <span class="text-red-500">*</span>
+              </label>
+              <div class="relative group">
+                <i class="fas fa-calendar absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="date"
+                  formControlName="birthDate"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  [class.border-red-300]="registrationForm.get('birthDate')?.invalid && registrationForm.get('birthDate')?.touched"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Género <span class="text-red-500">*</span>
+              </label>
+              <div class="relative group">
+                <i class="fas fa-venus-mars absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors z-10"></i>
+                <select
+                  formControlName="gender"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all font-medium appearance-none"
+                  [class.border-red-300]="registrationForm.get('gender')?.invalid && registrationForm.get('gender')?.touched"
+                >
+                  <option value="">Selecciona</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Femenino">Femenino</option>
+                  <option value="Otro">Otro</option>
+                  <option value="Prefiero no decir">Prefiero no decir</option>
+                </select>
+                <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                CURP <span class="text-red-500">*</span>
+              </label>
+              <div class="relative group">
+                <i class="fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="text"
+                  formControlName="curp"
+                  maxlength="18"
+                  class="w-full pl-12 pr-12 py-4 uppercase bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  [class.border-red-300]="registrationForm.get('curp')?.invalid && registrationForm.get('curp')?.touched"
+                  placeholder="ABCD001122HDFXYZ09"
+                />
+                <i *ngIf="registrationForm.get('curp')?.valid && registrationForm.get('curp')?.value" class="fas fa-check-circle absolute right-4 top-1/2 -translate-y-1/2 text-green-500"></i>
+              </div>
+              <p *ngIf="registrationForm.get('curp')?.hasError('curpInvalid') && registrationForm.get('curp')?.touched" class="text-red-500 text-xs mt-1 font-medium">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ registrationForm.get('curp')?.errors?.['curpInvalid']?.reason || 'CURP inválida' }}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Datos de Contacto -->
+        <section class="space-y-6 pt-6 border-t border-gray-50">
+          <div class="flex items-center gap-2 text-blue-900 font-extrabold text-[10px] uppercase tracking-[0.2em]">
+            <i class="fas fa-address-book text-sm"></i> Datos de Contacto
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Correo Electrónico <span class="text-red-500">*</span>
+              </label>
+              <div class="relative group">
+                <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="email"
+                  formControlName="email"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  [class.border-red-300]="registrationForm.get('email')?.invalid && registrationForm.get('email')?.touched"
+                  placeholder="tu@correo.com"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Teléfono Móvil <span class="text-red-500">*</span>
+              </label>
+              <div class="relative group">
+                <i class="fas fa-mobile-alt absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="tel"
+                  formControlName="mobile"
+                  placeholder="449 123 4567"
+                  maxlength="10"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  [class.border-red-300]="registrationForm.get('mobile')?.invalid && registrationForm.get('mobile')?.touched"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">
+              Teléfono Fijo <span class="text-gray-400 text-xs">(opcional)</span>
+            </label>
+            <div class="relative group">
+              <i class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+              <input
+                type="tel"
+                formControlName="landline"
+                placeholder="449 123 4567"
+                maxlength="10"
+                class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- Dirección -->
+        <section class="space-y-6 pt-6 border-t border-gray-50">
+          <div class="flex items-center gap-2 text-blue-900 font-extrabold text-[10px] uppercase tracking-[0.2em]">
+            <i class="fas fa-map-marker-alt text-sm"></i> Dirección
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="md:col-span-3">
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Calle <span class="text-red-500">*</span>
+              </label>
+              <div class="relative group">
+                <i class="fas fa-road absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="text"
+                  formControlName="street"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  [class.border-red-300]="registrationForm.get('street')?.invalid && registrationForm.get('street')?.touched"
+                  placeholder="Nombre de la calle"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Número <span class="text-red-500">*</span>
+              </label>
+              <div class="relative group">
+                <i class="fas fa-hashtag absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="text"
+                  formControlName="number"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  [class.border-red-300]="registrationForm.get('number')?.invalid && registrationForm.get('number')?.touched"
+                  placeholder="123"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Colonia
+              </label>
+              <div class="relative group">
+                <i class="fas fa-home absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="text"
+                  formControlName="neighborhood"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  placeholder="Nombre de la colonia"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Localidad
+              </label>
+              <div class="relative group">
+                <i class="fas fa-map-pin absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="text"
+                  formControlName="locality"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  placeholder="Nombre de la localidad"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Municipio <span class="text-red-500">*</span>
+              </label>
+              <div class="relative group">
+                <i class="fas fa-city absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="text"
+                  formControlName="municipality"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  [class.border-red-300]="registrationForm.get('municipality')?.invalid && registrationForm.get('municipality')?.touched"
+                  placeholder="Nombre del municipio"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Estado <span class="text-red-500">*</span>
+              </label>
+              <div class="relative group">
+                <i class="fas fa-flag absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="text"
+                  formControlName="state"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  [class.border-red-300]="registrationForm.get('state')?.invalid && registrationForm.get('state')?.touched"
+                  placeholder="Nombre del estado"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Código Postal <span class="text-red-500">*</span>
+              </label>
+              <div class="relative group">
+                <i class="fas fa-mail-bulk absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="text"
+                  formControlName="postalCode"
+                  placeholder="12345"
+                  maxlength="5"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  [class.border-red-300]="registrationForm.get('postalCode')?.invalid && registrationForm.get('postalCode')?.touched"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Información Académica de Procedencia -->
+        <section class="space-y-6 pt-6 border-t border-gray-50">
+          <div class="flex items-center gap-2 text-blue-900 font-extrabold text-[10px] uppercase tracking-[0.2em]">
+            <i class="fas fa-school text-sm"></i> Información Académica de Procedencia
+          </div>
+
+          <div class="bg-blue-50/50 rounded-[2rem] p-4 mb-4">
+            <div class="flex items-center gap-2 text-blue-700 text-xs font-bold">
+              <i class="fas fa-info-circle"></i>
+              <span>Verifica o corrige la información de tu escuela de procedencia</span>
+            </div>
+          </div>
+
+          <div class="space-y-6">
+            <!-- Escuela de Procedencia -->
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Escuela de Procedencia (IEMS) <span class="text-red-500">*</span>
+              </label>
+              <div class="relative group">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10"></i>
+                <input
+                  type="text"
+                  formControlName="originSchool"
+                  (focus)="onFocusIems()"
+                  (blur)="onBlurIems()"
+                  (input)="showIemsList = true"
+                  placeholder="Buscar tu escuela..."
+                  autocomplete="off"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all font-medium text-gray-600"
+                  [class.border-red-300]="registrationForm.get('originSchool')?.invalid && registrationForm.get('originSchool')?.touched"
+                />
+
+                <ul
+                  *ngIf="showIemsList"
+                  class="absolute z-20 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-y-auto"
+                  style="max-height: 250px"
+                >
+                  <ng-container *ngIf="filteredIems.length > 0">
+                    <li
+                      *ngFor="let school of filteredIems"
+                      (mousedown)="selectSchool(school.name)"
+                      class="px-5 py-3.5 cursor-pointer hover:bg-blue-50 transition-colors border-b border-gray-50 last:border-none"
+                    >
+                      <div class="flex items-center gap-3">
+                        <span class="bg-slate-100 text-slate-600 text-[9px] font-black px-2 py-0.5 rounded-md uppercase shrink-0">
+                          {{ school.state }}
+                        </span>
+                        <span class="text-sm font-semibold text-gray-700 truncate">{{ school.name }}</span>
+                      </div>
+                    </li>
+                  </ng-container>
+                  <li *ngIf="filteredIems.length === 0" class="px-4 py-10 text-center text-slate-700">
+                    <i class="fas fa-search-minus mb-2 text-2xl block opacity-20"></i>
+                    <span class="text-xs font-bold uppercase italic tracking-wider">Sin coincidencias</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Carrera Técnica -->
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                Carrera Técnica <span class="text-gray-400 text-xs">(si aplica)</span>
+              </label>
+              <div class="relative group">
+                <i class="fas fa-tools absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                <input
+                  type="text"
+                  formControlName="technicalMajor"
+                  class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                  placeholder="Ej: Técnico en Informática, Electricidad, etc."
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Discapacidad -->
+        <section class="space-y-6 pt-6 border-t border-gray-50">
+          <div class="flex items-center gap-2 text-blue-900 font-extrabold text-[10px] uppercase tracking-[0.2em]">
+            <i class="fas fa-universal-access text-sm"></i> Información sobre Discapacidad
+          </div>
+          
+          <div class="space-y-6">
+            <!-- Checkbox principal -->
+            <div class="flex items-start gap-4 p-5 bg-gray-50/50 rounded-3xl cursor-pointer hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-100">
+              <input
+                type="checkbox"
+                formControlName="hasDisability"
+                class="mt-1 w-5 h-5 rounded-lg border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                id="hasDisability"
+              />
+              <label for="hasDisability" class="text-sm font-bold text-gray-700 cursor-pointer flex-1">
+                ¿Tienes alguna discapacidad?
+              </label>
+            </div>
+
+            <!-- Campos condicionales si tiene discapacidad -->
+            <div *ngIf="registrationForm.get('hasDisability')?.value" class="space-y-6 pl-4 animate-zoom-in">
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  Tipo de Discapacidad <span class="text-red-500">*</span>
+                </label>
+                <div class="relative group">
+                  <i class="fas fa-wheelchair absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors z-10"></i>
+                  <select
+                    formControlName="disabilityType"
+                    class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all font-medium appearance-none"
+                    [class.border-red-300]="registrationForm.get('disabilityType')?.invalid && registrationForm.get('disabilityType')?.touched"
+                  >
+                    <option value="">Selecciona una opción</option>
+                    <option value="Motriz">Motriz</option>
+                    <option value="Visual">Visual</option>
+                    <option value="Auditiva">Auditiva</option>
+                    <option value="Intelectual">Intelectual</option>
+                    <option value="Psicosocial">Psicosocial</option>
+                    <option value="Múltiple">Múltiple</option>
+                    <option value="Otra">Otra</option>
+                  </select>
+                  <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  Detalles adicionales <span class="text-gray-400 text-xs">(opcional)</span>
+                </label>
+                <div class="relative group">
+                  <i class="fas fa-file-medical absolute left-4 top-5 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                  <textarea
+                    formControlName="disabilityDetails"
+                    rows="3"
+                    placeholder="Describe cualquier información adicional que sea relevante"
+                    class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all resize-none"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Lengua Indígena y Etnia -->
+        <section class="space-y-6 pt-6 border-t border-gray-50">
+          <div class="flex items-center gap-2 text-blue-900 font-extrabold text-[10px] uppercase tracking-[0.2em]">
+            <i class="fas fa-language text-sm"></i> Lengua Indígena y Pertenencia Étnica
+          </div>
+          
+          <div class="space-y-6">
+            <!-- Lengua Indígena -->
+            <div class="space-y-4">
+              <div class="flex items-start gap-4 p-5 bg-gray-50/50 rounded-3xl cursor-pointer hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-100">
+                <input
+                  type="checkbox"
+                  formControlName="speaksIndigenousLanguage"
+                  class="mt-1 w-5 h-5 rounded-lg border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  id="speaksIndigenousLanguage"
+                />
+                <label for="speaksIndigenousLanguage" class="text-sm font-bold text-gray-700 cursor-pointer flex-1">
+                  ¿Hablas alguna lengua indígena?
+                </label>
+              </div>
+
+              <!-- Campo condicional si habla lengua indígena -->
+              <div *ngIf="registrationForm.get('speaksIndigenousLanguage')?.value" class="pl-4 animate-zoom-in">
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  ¿Cuál lengua indígena hablas? <span class="text-red-500">*</span>
+                </label>
+                <div class="relative group">
+                  <i class="fas fa-comments absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                  <input
+                    type="text"
+                    formControlName="indigenousLanguage"
+                    class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                    [class.border-red-300]="registrationForm.get('indigenousLanguage')?.invalid && registrationForm.get('indigenousLanguage')?.touched"
+                    placeholder="Ej: Náhuatl, Maya, Zapoteco, etc."
+                  />
+                </div>
+                <p class="text-[11px] text-gray-400 mt-2 italic font-medium ml-1">
+                  Especifica el nombre de la lengua indígena
+                </p>
+              </div>
+            </div>
+
+            <!-- Etnia -->
+            <div class="space-y-4">
+              <div class="flex items-start gap-4 p-5 bg-gray-50/50 rounded-3xl cursor-pointer hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-100">
+                <input
+                  type="checkbox"
+                  formControlName="belongsToEthnicGroup"
+                  class="mt-1 w-5 h-5 rounded-lg border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  id="belongsToEthnicGroup"
+                />
+                <label for="belongsToEthnicGroup" class="text-sm font-bold text-gray-700 cursor-pointer flex-1">
+                  ¿Perteneces a algún grupo étnico o etnia?
+                </label>
+              </div>
+
+              <!-- Campo condicional si pertenece a una etnia -->
+              <div *ngIf="registrationForm.get('belongsToEthnicGroup')?.value" class="pl-4 animate-zoom-in">
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                  ¿A qué grupo étnico o etnia perteneces? <span class="text-red-500">*</span>
+                </label>
+                <div class="relative group">
+                  <i class="fas fa-users absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
+                  <input
+                    type="text"
+                    formControlName="ethnicGroup"
+                    class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                    [class.border-red-300]="registrationForm.get('ethnicGroup')?.invalid && registrationForm.get('ethnicGroup')?.touched"
+                    placeholder="Ej: Maya, Mixteco, Otomí, Purépecha, etc."
+                  />
+                </div>
+                <p class="text-[11px] text-gray-400 mt-2 italic font-medium ml-1">
+                  Especifica el nombre del grupo étnico o pueblo indígena al que perteneces
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Submit Button -->
+        <footer class="flex flex-col-reverse sm:flex-row justify-between items-center gap-4 pt-8 border-t border-gray-50">
+          <p class="text-[11px] text-gray-400 font-bold">
+            Los campos marcados con <span class="text-red-500">*</span> son obligatorios
+          </p>
+
+          <button
+            type="submit"
+            [disabled]="isLoading() || registrationForm.invalid"
+            class="w-full sm:w-auto min-w-[200px] px-8 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 hover:bg-blue-700 disabled:opacity-30 disabled:shadow-none transition-all flex items-center justify-center gap-3 uppercase text-[10px] tracking-widest"
+          >
+            <i *ngIf="isLoading()" class="fas fa-circle-notch animate-spin text-base"></i>
+            <i *ngIf="!isLoading()" class="fas fa-check-circle text-base"></i>
+            {{ isLoading() ? 'Procesando...' : 'Completar Registro' }}
+          </button>
+        </footer>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,5 +1,5 @@
 // 1. Component e Input vienen de @angular/core
-import { Component, Input, computed } from '@angular/core'; 
+import { Component, Input, computed, signal } from '@angular/core'; 
 
 // 2. CommonModule viene de @angular/common
 import { CommonModule } from '@angular/common';
@@ -21,6 +21,9 @@ export class Navbar {
 
   // Estado del Modal
   isModalOpen: boolean = false;
+  
+  // Imagen del QR personalizada con el nombre de la campaña
+  customQRImage = signal<string>('');
 
   // URL base para el QR
   private readonly baseUrl = 'https://anuies-front.vercel.app/register';
@@ -41,10 +44,13 @@ export class Navbar {
 
   verQR() {
     this.isModalOpen = true;
+    // Generar imagen personalizada del QR con el nombre de la campaña
+    this.generateCustomQRImage();
   }
 
   cerrarModal() {
     this.isModalOpen = false;
+    this.customQRImage.set('');
   }
 
   copyLink() {
@@ -98,49 +104,115 @@ export class Navbar {
   }
 
   /**
-   * Descargar imagen del QR
+   * Generar imagen personalizada del QR con el nombre de la campaña
    */
-  downloadQR() {
+  generateCustomQRImage(): void {
+    const campaignName = this.getCampaignName();
+
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    const fileName = this.getQRFileName();
     
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
+      const padding = 40;
+      const textHeight = 80;
+      
+      // Dimensiones del canvas: ancho del QR + padding, alto del QR + texto + padding
+      canvas.width = img.width + (padding * 2);
+      canvas.height = img.height + textHeight + (padding * 2);
       
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.drawImage(img, 0, 0);
+        // Fondo blanco
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+        // Configurar texto
+        ctx.fillStyle = '#1e293b'; // Color del texto (slate-800)
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Calcular el tamaño de fuente apropiado para el nombre de la campaña
+        const maxWidth = canvas.width - (padding * 2);
+        let fontSize = 24;
+        ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+        
+        // Ajustar tamaño de fuente si el texto es muy largo
+        while (ctx.measureText(campaignName).width > maxWidth && fontSize > 12) {
+          fontSize -= 2;
+          ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+        }
+        
+        // Dividir texto en líneas si es necesario
+        const words = campaignName.split(' ');
+        const lines: string[] = [];
+        let currentLine = words[0];
+        
+        for (let i = 1; i < words.length; i++) {
+          const testLine = currentLine + ' ' + words[i];
+          const metrics = ctx.measureText(testLine);
+          
+          if (metrics.width > maxWidth) {
+            lines.push(currentLine);
+            currentLine = words[i];
+          } else {
+            currentLine = testLine;
           }
-        }, 'image/png');
+        }
+        lines.push(currentLine);
+        
+        // Dibujar el nombre de la campaña (centrado en la parte superior)
+        const lineHeight = fontSize + 5;
+        const startY = padding + (textHeight / 2) - ((lines.length - 1) * lineHeight / 2);
+        
+        lines.forEach((line, index) => {
+          ctx.fillText(line, canvas.width / 2, startY + (index * lineHeight));
+        });
+        
+        // Dibujar el código QR debajo del texto
+        ctx.drawImage(img, padding, textHeight + padding);
+        
+        // Convertir canvas a data URL y guardarlo
+        this.customQRImage.set(canvas.toDataURL('image/png'));
       }
     };
     
     img.onerror = () => {
-      // Fallback: intentar descarga directa
-      const link = document.createElement('a');
-      link.href = this.qrImage();
-      link.download = fileName;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      console.error('Error al cargar la imagen del QR');
+      this.customQRImage.set(this.qrImage());
     };
     
     img.src = this.qrImage();
+  }
+
+  /**
+   * Descargar imagen del QR personalizada
+   */
+  downloadQR() {
+    const customImage = this.customQRImage();
+    if (!customImage) {
+      console.error('No hay imagen del QR disponible');
+      return;
+    }
+    
+    const fileName = this.getQRFileName();
+    
+    // Convertir data URL a blob y descargar
+    fetch(customImage)
+      .then(res => res.blob())
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      })
+      .catch(error => {
+        console.error('Error al descargar el QR:', error);
+      });
   }
 
   /**

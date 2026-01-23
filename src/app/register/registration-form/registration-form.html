@@ -36,8 +36,8 @@
             </div>
           </div>
 
-          <!-- Correo electrónico (una sola línea) -->
-          <div class="md:col-span-2">
+          <!-- Correo electrónico -->
+          <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">
               Correo electrónico <span class="text-red-500">*</span>
             </label>
@@ -54,9 +54,29 @@
             </div>
           </div>
 
+          <!-- Teléfono -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">
+              Teléfono celular <span class="text-red-500">*</span>
+            </label>
+            <div class="relative group">
+              <i
+                class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"
+              ></i>
+              <input
+                type="tel"
+                formControlName="phoneNumber"
+                class="w-full pl-12 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                placeholder="449 123 4567"
+              />
+            </div>
+          </div>
+
           <!-- CURP -->
           <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2"> CURP (opcional) </label>
+            <label class="block text-sm font-bold text-gray-700 mb-2">
+              CURP <span class="text-red-500">*</span>
+            </label>
             <div class="relative group">
               <i
                 class="fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"
@@ -91,21 +111,50 @@
             </p>
           </div>
 
-          <!-- Teléfono -->
+          <!-- Género -->
           <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">
-              Teléfono celular <span class="text-red-500">*</span>
+              Género <span class="text-red-500">*</span>
             </label>
             <div class="relative group">
               <i
-                class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"
+                class="fas fa-venus-mars absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors z-10"
               ></i>
               <input
-                type="tel"
-                formControlName="phoneNumber"
-                class="w-full pl-12 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                placeholder="449 123 4567"
+                type="text"
+                [value]="genderSearchQuery()"
+                (input)="filterGender($any($event.target).value)"
+                (focus)="showGenderDropdown.set(true)"
+                (blur)="onGenderBlur()"
+                placeholder="Seleccionar género..."
+                autocomplete="off"
+                class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
+                [class.border-red-300]="registrationForm.get('gender')?.invalid && registrationForm.get('gender')?.touched"
+                [class.border-blue-500]="registrationForm.get('gender')?.value"
               />
+
+              <!-- Dropdown de Género -->
+              @if (filteredGenderOptions().length > 0 && showGenderDropdown()) {
+                <ul class="absolute z-20 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+                  @for (option of filteredGenderOptions(); track option) {
+                    <li
+                      (mousedown)="selectGender(option)"
+                      class="px-5 py-3.5 cursor-pointer hover:bg-blue-50 text-sm font-semibold text-gray-700 flex items-center gap-3 border-b border-gray-50 last:border-none transition-colors"
+                      [class.bg-blue-50]="registrationForm.get('gender')?.value === option"
+                    >
+                      <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                           [class.border-blue-600]="registrationForm.get('gender')?.value === option"
+                           [class.bg-blue-600]="registrationForm.get('gender')?.value === option"
+                           [class.border-gray-300]="registrationForm.get('gender')?.value !== option">
+                        @if (registrationForm.get('gender')?.value === option) {
+                          <i class="fas fa-check text-white text-xs"></i>
+                        }
+                      </div>
+                      <span>{{ option }}</span>
+                    </li>
+                  }
+                </ul>
+              }
             </div>
           </div>
         </div>
@@ -316,7 +365,7 @@
           />
           <span class="text-[11px] leading-relaxed text-gray-500 font-bold">
             Acepto el <a href="#" class="text-blue-600 underline">Aviso de Privacidad</a> y autorizo
-            al Tecnológico Nacional de México a contactarme por correo, teléfono o WhatsApp para
+            a la Asociación Nacional de Universidades e Instituciones de Educación Superior a contactarme por correo o teléfono para
             información de admisión.
           </span>
         </label>
@@ -379,7 +428,7 @@
 
         <h2 class="text-2xl font-black text-gray-800 mb-2">¡Registro Exitoso!</h2>
         <p class="text-sm text-gray-500 font-medium mb-8 leading-relaxed">
-          El aspirante ha sido registrado correctamente. Recibirá un correo de bienvenida en breve.
+          El aspirante ha sido registrado correctamente. Para recibir un correo electrónico y completar tu registro haz clic en el botón de enviar correo.
         </p>
 
         <div class="bg-gray-50 rounded-[2rem] p-6 mb-8 space-y-3 border border-gray-100">
@@ -411,9 +460,17 @@
             <i class="fas fa-plus"></i> Nuevo
           </button>
           <button
-            class="flex items-center justify-center gap-2 px-6 py-4 bg-green-500 text-white font-black rounded-2xl shadow-lg shadow-green-200 hover:bg-green-600 transition-all text-[10px] uppercase tracking-widest"
+            (click)="sendEmailNotification()"
+            [disabled]="isSendingEmail()"
+            class="flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-[10px] uppercase tracking-widest"
           >
-            <i class="fab fa-whatsapp"></i> WhatsApp
+            @if (isSendingEmail()) {
+              <i class="fas fa-circle-notch animate-spin"></i> Enviando...
+            } @else if (emailSent()) {
+              <i class="fas fa-check-circle"></i> Enviado
+            } @else {
+              <i class="fas fa-envelope"></i> Enviar Correo
+            }
           </button>
         </div>
       </div>
