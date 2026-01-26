@@ -1,0 +1,28 @@
+<div
+  class="max-w-6xl mx-auto mt-8 mb-12 p-8 bg-white rounded-2xl shadow-2xl border border-slate-100"
+>
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Editor de Contenido</h1>
+      <p class="text-slate-500 mt-1 text-lg">
+        Crea, formatea y prepara tu contenido para publicar.
+      </p>
+    </div>
+
+    <button
+      (click)="saveContent()"
+      class="inline-flex items-center px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg active:scale-95"
+    >
+      Guardar Cambios
+    </button>
+  </div>
+
+  <div class="bg-slate-50 rounded-xl p-1 border border-slate-200 overflow-hidden">
+    <angular-editor [(ngModel)]="htmlContent" [config]="config"> </angular-editor>
+  </div>
+
+  <div class="mt-4 flex items-center text-sm text-slate-400">
+    <span class="flex h-2 w-2 rounded-full bg-green-500 mr-2"></span>
+    Sistema Listo - Caracteres: {{ htmlContent.length }}
+  </div>
+</div>

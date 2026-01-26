@@ -13,7 +13,7 @@ import { Home } from './pages/home/home';
 import { Cycles } from './pages/cycles/cycles';
 import { RoleManagementComponent } from './pages/role-management/role-management';
 import { StudentRegistrationComponent } from './pages/student-registration/student-registration';
-
+import { NextStep } from './pages/next-step/next-step';
 export const routes: Routes = [
   {
     path: 'login',
@@ -56,6 +56,7 @@ export const routes: Routes = [
     children: [
       { path: 'settings', component: IesProfileSettings },
       { path: 'iems', component: IemsGestion },
+      { path: 'siguiente-paso', component: NextStep},
       { path: '', redirectTo: 'settings', pathMatch: 'full' },
     ],
   },

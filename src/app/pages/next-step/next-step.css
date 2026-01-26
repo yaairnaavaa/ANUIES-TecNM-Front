@@ -1,0 +1,40 @@
+/* next-step.css */
+
+/* 1. Forzar que el icono tenga la fuente correcta */
+:host ::ng-deep .angular-editor-button i {
+  font-family: 'Font Awesome 6 Free' !important;
+  font-weight: 900 !important;
+  display: inline-block !important;
+  font-style: normal !important;
+  font-variant: normal !important;
+  text-rendering: auto !important;
+  -webkit-font-smoothing: antialiased !important;
+  color: #1e293b !important; /* Color slate-800 */
+}
+
+/* 2. Darle visibilidad al contenedor del botón */
+:host ::ng-deep .ae-button {
+  width: 35px !important;
+  height: 35px !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important; /* Border slate-200 */
+  margin: 2px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+}
+
+/* 3. Efecto hover para saber que son botones */
+:host ::ng-deep .ae-button:hover {
+  background-color: #f1f5f9 !important; /* slate-100 */
+}
+
+/* 4. Estilo para los selects (Fuente, Tamaño, etc) */
+:host ::ng-deep .ae-picker {
+  background-color: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 6px !important;
+  margin: 0 5px !important;
+}
