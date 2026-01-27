@@ -8,10 +8,10 @@
 
 <!-- OVERLAY -->
 @if (isOpen()) {
-<div
-  (click)="toggleSidebar()"
-  class="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm transition-opacity"
-></div>
+  <div
+    (click)="toggleSidebar()"
+    class="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+  ></div>
 }
 
 <!-- SIDEBAR -->
@@ -43,33 +43,33 @@
   <div class="border-t border-slate-700/50 mx-6 mb-4 shrink-0"></div>
 
   <!-- NAV -->
-  <nav class="flex-1 min-h-0 overflow-y-auto px-4 pr-2 custom-scrollbar">
+  <nav class="flex-1 min-h-0 overflow-y-auto px-4 pr-1 custom-scrollbar">
     @for (section of menuSections(); track section.title) {
-    <div class="mb-6">
-      <h3 class="px-4 text-[11px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">
-        {{ section.title }}
-      </h3>
+      <div class="mb-6">
+        <h3 class="px-4 text-[11px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">
+          {{ section.title }}
+        </h3>
 
-      <div class="space-y-1">
-        @for (item of section.items; track item.routerLink) {
-        <a
-          [routerLink]="item.routerLink"
-          [routerLinkActiveOptions]="{ exact: true }"
-          (click)="isOpen() ? toggleSidebar() : null"
-          routerLinkActive="bg-[#1e2f4d] text-white border-l-4 border-emerald-500 rounded-r-lg"
-          class="flex items-center justify-between px-4 py-3 hover:bg-[#1e2f4d] hover:text-white rounded-lg transition-all group"
-        >
-          <div class="flex items-center space-x-3">
-            <i
-              [class]="item.icon"
-              class="text-lg w-6 text-slate-400 group-hover:text-emerald-400 transition-colors"
-            ></i>
-            <span class="text-sm font-medium">{{ item.label }}</span>
-          </div>
-        </a>
-        }
+        <div class="space-y-1">
+          @for (item of section.items; track item.routerLink) {
+            <a
+              [routerLink]="item.routerLink"
+              [routerLinkActiveOptions]="{ exact: true }"
+              (click)="isOpen() ? toggleSidebar() : null"
+              routerLinkActive="bg-[#1e2f4d] text-white border-l-4 border-emerald-500 rounded-r-lg"
+              class="flex items-center justify-between px-4 py-3 hover:bg-[#1e2f4d] hover:text-white rounded-lg transition-all group"
+            >
+              <div class="flex items-center space-x-3">
+                <i
+                  [class]="item.icon"
+                  class="text-lg w-6 text-slate-400 group-hover:text-emerald-400 transition-colors"
+                ></i>
+                <span class="text-sm font-medium">{{ item.label }}</span>
+              </div>
+            </a>
+          }
+        </div>
       </div>
-    </div>
     }
   </nav>
 

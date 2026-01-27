@@ -38,3 +38,27 @@
   border-radius: 6px !important;
   margin: 0 5px !important;
 }
+
+/* Esto obliga a que el contenido del editor use todo el ancho disponible */
+.preview-container div[innerHTML] p,
+.preview-container div[innerHTML] font,
+.preview-container div[innerHTML] span {
+  display: block !important;
+  width: 100% !important;
+  text-align: inherit !important;
+}
+
+/* Fuerza el reconocimiento de la propiedad text-align */
+.preview-container [style*='text-align: center'] {
+  text-align: center !important;
+}
+
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+.text-left {
+  text-align: left;
+}
