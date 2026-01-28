@@ -44,7 +44,7 @@ export const routes: Routes = [
       { path: 'campaigns', component: IesCampaignManagementComponent },
       { path: 'iems', component: IemsGestion },
       { path: 'aspirant', component: Aspirant },
-      { path: 'ciclos', component: Cycles},
+      { path: 'ciclos', component: Cycles },
       { path: 'roles', component: RoleManagementComponent },
       { path: '', redirectTo: 'ies-gestion', pathMatch: 'full' },
     ],
@@ -52,11 +52,12 @@ export const routes: Routes = [
   // Rutas para usuarios operativos de una universidad
   {
     path: 'ies',
+    canActivate: [authGuard],
     component: AdminLayout,
     children: [
       { path: 'settings', component: IesProfileSettings },
       { path: 'iems', component: IemsGestion },
-      { path: 'siguiente-paso', component: NextStep},
+      { path: 'siguiente-paso', component: NextStep },
       { path: '', redirectTo: 'settings', pathMatch: 'full' },
     ],
   },

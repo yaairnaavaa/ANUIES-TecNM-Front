@@ -7,12 +7,19 @@ export interface User {
   password?: string;
   role: string | Role | 'Admin Nacional' | 'Admin IES' | 'Operativo IES' | 'Interesado';
   phone?: string;
-  ies?: string | IES;
+  ies?: string | IES | IESAuth;
   iems?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export interface IESAuth {
+  id: string;
+  name: string;
+  code: string;
+}
+
 
 export interface IES {
   _id?: string;
@@ -289,7 +296,7 @@ export interface UserAuth {
   email: string;
   role: RoleAuth;
   menu: MenuItem[];
-  ies?: string | IES;
+  ies?: IES | string;
   active: boolean;
   createdAt: string;
 }
@@ -300,6 +307,11 @@ export interface AuthResponse {
   user?: User;
   data?: UserAuth;
   message?: string;
+  ies?: {
+    id: string;
+    name: string;
+    code: string;
+  };
 }
 
 export interface ApiResponse<T> {

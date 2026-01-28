@@ -20,6 +20,8 @@ export class AuthService {
   private readonly MENU_KEY = 'anuies_menu';
   private readonly ROLE_KEY = 'anuies_role';
   private readonly USER_INFO_KEY = 'anuies_user_info';
+  private readonly IES_ID_KEY = 'anuies_ies_id'; // Nueva constante
+
   menu = computed(() => this.currentUser()?.menu ?? []);
 
   constructor() {
@@ -74,6 +76,9 @@ export class AuthService {
    * ============================ */
 
   private startSession(user: UserAuth): void {
+    // Extraemos el ID de la IES (usando tu lógica de computed)
+    const iesId = (user.ies as any)?.id ?? (user.ies as any)?._id ?? null;
+
     // Guardar rol e info básica del usuario en localStorage
     localStorage.setItem(this.ROLE_KEY, JSON.stringify(user.role));
     localStorage.setItem(
@@ -84,8 +89,14 @@ export class AuthService {
         lastName: user.lastName,
         secondLastName: user.secondLastName,
         email: user.email,
+        ies: user.ies,
       }),
     );
+
+    // Guardar iesId si existe
+    if (iesId) {
+      localStorage.setItem(this.IES_ID_KEY, iesId.toString());
+    }
 
     this.currentUser.set(user);
     this.isAuthenticated.set(true);
@@ -125,6 +136,13 @@ export class AuthService {
             if (response.success && response.data) {
               // Actualizar con datos completos del backend
               this.currentUser.set(response.data);
+
+              // Lógica para extraer y guardar el IES ID fresco
+              const newIesId =
+                (response.data.ies as any)?.id ?? (response.data.ies as any)?._id ?? null;
+              if (newIesId) {
+                localStorage.setItem(this.IES_ID_KEY, newIesId.toString());
+              }
               // Actualizar localStorage con datos frescos
               localStorage.setItem(this.ROLE_KEY, JSON.stringify(response.data.role));
               localStorage.setItem(
@@ -159,6 +177,7 @@ export class AuthService {
     localStorage.removeItem(this.MENU_KEY);
     localStorage.removeItem(this.ROLE_KEY);
     localStorage.removeItem(this.USER_INFO_KEY);
+    localStorage.removeItem(this.IES_ID_KEY);
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
   }
@@ -177,6 +196,10 @@ export class AuthService {
 
   getMenu() {
     return this.currentUser()?.menu ?? [];
+  }
+
+  getStoredIesId(): string {
+    return localStorage.getItem('anuies_ies_id') || '';
   }
 
   hasRole(role: string | string[]): boolean {
