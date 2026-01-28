@@ -129,23 +129,29 @@
                 placeholder="Seleccionar género..."
                 autocomplete="off"
                 class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
-                [class.border-red-300]="registrationForm.get('gender')?.invalid && registrationForm.get('gender')?.touched"
+                [class.border-red-300]="
+                  registrationForm.get('gender')?.invalid && registrationForm.get('gender')?.touched
+                "
                 [class.border-blue-500]="registrationForm.get('gender')?.value"
               />
 
               <!-- Dropdown de Género -->
               @if (filteredGenderOptions().length > 0 && showGenderDropdown()) {
-                <ul class="absolute z-20 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+                <ul
+                  class="absolute z-20 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden"
+                >
                   @for (option of filteredGenderOptions(); track option) {
                     <li
                       (mousedown)="selectGender(option)"
                       class="px-5 py-3.5 cursor-pointer hover:bg-blue-50 text-sm font-semibold text-gray-700 flex items-center gap-3 border-b border-gray-50 last:border-none transition-colors"
                       [class.bg-blue-50]="registrationForm.get('gender')?.value === option"
                     >
-                      <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
-                           [class.border-blue-600]="registrationForm.get('gender')?.value === option"
-                           [class.bg-blue-600]="registrationForm.get('gender')?.value === option"
-                           [class.border-gray-300]="registrationForm.get('gender')?.value !== option">
+                      <div
+                        class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                        [class.border-blue-600]="registrationForm.get('gender')?.value === option"
+                        [class.bg-blue-600]="registrationForm.get('gender')?.value === option"
+                        [class.border-gray-300]="registrationForm.get('gender')?.value !== option"
+                      >
                         @if (registrationForm.get('gender')?.value === option) {
                           <i class="fas fa-check text-white text-xs"></i>
                         }
@@ -240,10 +246,13 @@
               type="text"
               placeholder="Buscar Tecnológico..."
               [value]="selectedIES() ? selectedIES()?.name : ''"
-              (focus)="onFocusIes()"
-              (input)="filterIes($event)"
-              (blur)="onBlurIes()"
-              class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-gray-600"
+              (focus)="!isIESLocked() && onFocusIes()"
+              (input)="!isIESLocked() && filterIes($event)"
+              (blur)="!isIESLocked() && onBlurIes()"
+              [readonly]="isIESLocked()"
+              class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-gray-600 disabled:cursor-not-allowed"
+              [class.bg-gray-100]="isIESLocked()"
+              [class.cursor-not-allowed]="isIESLocked()"
               autocomplete="off"
             />
 
@@ -290,7 +299,9 @@
 
           <!-- Mensaje de carga de carreras -->
           @if (isLoadingCareers()) {
-            <div class="bg-blue-50/50 text-blue-700 p-6 rounded-2xl flex items-center gap-3 text-sm font-bold justify-center">
+            <div
+              class="bg-blue-50/50 text-blue-700 p-6 rounded-2xl flex items-center gap-3 text-sm font-bold justify-center"
+            >
               <i class="fas fa-spinner fa-spin text-lg text-blue-500"></i>
               <span>Cargando carreras disponibles...</span>
             </div>
@@ -346,7 +357,9 @@
 
           <!-- Mensaje cuando no hay carreras -->
           @if (!isLoadingCareers() && majorsList().length === 0) {
-            <div class="bg-amber-50/50 text-amber-700 p-6 rounded-2xl flex items-center gap-3 text-sm font-bold justify-center">
+            <div
+              class="bg-amber-50/50 text-amber-700 p-6 rounded-2xl flex items-center gap-3 text-sm font-bold justify-center"
+            >
               <i class="fas fa-exclamation-triangle text-lg text-amber-500"></i>
               <span>No hay carreras disponibles para este Tecnológico</span>
             </div>
@@ -365,8 +378,8 @@
           />
           <span class="text-[11px] leading-relaxed text-gray-500 font-bold">
             Acepto el <a href="#" class="text-blue-600 underline">Aviso de Privacidad</a> y autorizo
-            a la Asociación Nacional de Universidades e Instituciones de Educación Superior a contactarme por correo o teléfono para
-            información de admisión.
+            a la Asociación Nacional de Universidades e Instituciones de Educación Superior a
+            contactarme por correo o teléfono para información de admisión.
           </span>
         </label>
       </section>
@@ -428,7 +441,8 @@
 
         <h2 class="text-2xl font-black text-gray-800 mb-2">¡Registro Exitoso!</h2>
         <p class="text-sm text-gray-500 font-medium mb-8 leading-relaxed">
-          El aspirante ha sido registrado correctamente. Para recibir un correo electrónico y completar tu registro haz clic en el botón de enviar correo.
+          El aspirante ha sido registrado correctamente. Para recibir un correo electrónico y
+          completar tu registro haz clic en el botón de enviar correo.
         </p>
 
         <div class="bg-gray-50 rounded-[2rem] p-6 mb-8 space-y-3 border border-gray-100">

@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Navbar } from '../../navbar/navbar';
 import { RegistrationForm } from '../../registration-form/registration-form';
 import { CampaignService } from '../../../services/campaign.service';
-
+import { IES } from '../../../models/api.models';
 @Component({
   selector: 'app-register',
   imports: [Navbar, RegistrationForm],
@@ -13,15 +13,16 @@ import { CampaignService } from '../../../services/campaign.service';
 export class Register implements OnInit {
   private route = inject(ActivatedRoute);
   private campaignService = inject(CampaignService);
-  
+
   campaignId = signal<string | null>(null);
   currentCampaign = signal<any>(null);
+  iesLoaded = signal<IES | null>(null);
   isLoadingCampaign = signal<boolean>(false);
   campaignError = signal<string | null>(null);
 
   ngOnInit() {
     // Capturar el parámetro de campaña de la ruta
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params) => {
       const id = params.get('campaignId');
       if (id) {
         this.campaignId.set(id);
@@ -29,7 +30,9 @@ export class Register implements OnInit {
         this.loadCampaign(id);
       } else {
         // Si no hay identificador en la ruta, mostrar error
-        this.campaignError.set('Campaña no encontrada. El enlace de registro debe incluir un identificador de campaña válido.');
+        this.campaignError.set(
+          'Campaña no encontrada. El enlace de registro debe incluir un identificador de campaña válido.',
+        );
         this.isLoadingCampaign.set(false);
         console.warn('⚠️ No se proporcionó un identificador de campaña en la ruta');
       }
@@ -41,20 +44,21 @@ export class Register implements OnInit {
    */
   loadCampaign(campaignId: string): void {
     console.log('🔍 Cargando información de la campaña:', campaignId);
-    
+
     this.isLoadingCampaign.set(true);
     this.campaignError.set(null);
-    
+
     this.campaignService.getCampaignById(campaignId).subscribe({
       next: (response: any) => {
         console.log('✅ Respuesta de la campaña:', response);
-        
+
         // Manejar diferentes estructuras de respuesta
         const isSuccess = response.success === true || response.status === 'success';
         const campaignData = response.data;
-        
+
         if (isSuccess && campaignData) {
           this.currentCampaign.set(campaignData);
+          this.iesLoaded.set(response.data.ies);
           this.isLoadingCampaign.set(false);
           console.log('📋 Campaña cargada:', campaignData);
         } else {
@@ -66,16 +70,18 @@ export class Register implements OnInit {
       error: (error) => {
         console.error('❌ Error al cargar la campaña:', error);
         this.isLoadingCampaign.set(false);
-        
+
         // Mensaje de error específico según el código de estado
         if (error.status === 404) {
           this.campaignError.set('La campaña solicitada no existe o ha sido eliminada');
         } else if (error.status === 0) {
-          this.campaignError.set('No se pudo conectar con el servidor. Verifica tu conexión a internet');
+          this.campaignError.set(
+            'No se pudo conectar con el servidor. Verifica tu conexión a internet',
+          );
         } else {
           this.campaignError.set('Ocurrió un error al cargar la información de la campaña');
         }
-      }
+      },
     });
   }
 }

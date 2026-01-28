@@ -50,17 +50,20 @@ export class RegistrationForm implements OnInit {
 
   @Input() campaignId: string | null = null;
   @Output() onRegistrationSuccess = new EventEmitter<void>();
+  @Input() campaign: any = null; // Información de la campaña
 
   // --- UI State (IEMS / Escuelas) ---
   showIemsList = false;
   isSelectingIems = false;
   iemsData: IemsBasicInfo[] = [];
   filteredIems: IemsBasicInfo[] = [];
+  isIESLocked = signal(false);
+
 
   // --- UI State (IES / Tecnológicos) ---
   showIesList = false;
   filteredIes = signal<IES[]>([]);
-  selectedIES = signal<IES | null>(null);
+  selectedIES = signal<Partial<IES> | null>(null);
 
   // --- UI State (Género) ---
   genderOptions = ['Masculino', 'Femenino', 'Otro', 'Prefiero no decir'];
@@ -74,7 +77,7 @@ export class RegistrationForm implements OnInit {
   showSuccess = signal(false);
   errorMessage = signal<string | null>(null);
   successData: any = null;
-  
+
   // --- Email State ---
   isSendingEmail = signal(false);
   emailSent = signal(false);
@@ -130,14 +133,14 @@ export class RegistrationForm implements OnInit {
     this.loadIEMS();
     this.loadIES();
     this.listenSchoolInput();
-    
+
     // Sincronizar el valor del género con el input de búsqueda
-    this.registrationForm.get('gender')?.valueChanges.subscribe(value => {
+    this.registrationForm.get('gender')?.valueChanges.subscribe((value) => {
       if (value) {
         this.genderSearchQuery.set(value);
       }
     });
-    
+
     // Cargar campaña si se proporciona un ID
     if (this.campaignId) {
       this.loadCampaign(this.campaignId);
@@ -148,32 +151,38 @@ export class RegistrationForm implements OnInit {
    * Cargar información de la campaña específica
    */
   loadCampaign(campaignId: string): void {
-    console.log('🔍 Cargando información de la campaña:', campaignId);
-    
     this.campaignService.getCampaignById(campaignId).subscribe({
       next: (response: any) => {
-        console.log('✅ Respuesta de la campaña:', response);
-        
-        // Manejar diferentes estructuras de respuesta
         const isSuccess = response.success === true || response.status === 'success';
         const campaignData = response.data;
-        
+
         if (isSuccess && campaignData) {
           this.currentCampaign.set(campaignData);
-          console.log('📋 Campaña cargada:', campaignData);
-          
-          // Pre-llenar el campo de campaña en el formulario
+
+          // ✅ SI LA CAMPAÑA TRAE IES, SELECCIONARLA
+          if (campaignData.ies) {
+            const iesFromCampaign: IES = campaignData.ies;
+
+            console.log(iesFromCampaign);
+
+            this.selectedIES.set({
+              _id: campaignData.ies.iesId,
+              name: campaignData.ies.iesName,
+            });
+
+            this.loadIESCareers(this.selectedIES()?._id!);
+            this.isIESLocked.set(true);
+          }
+
+          // setear campaña en el form
           this.registrationForm.patchValue({
-            campaign: campaignData._id || campaignId
+            campaign: campaignData._id || campaignId,
           });
-        } else {
-          console.warn('⚠️ No se pudo cargar la campaña');
         }
       },
-      error: (error) => {
-        console.error('❌ Error al cargar la campaña:', error);
+      error: () => {
         this.errorMessage.set('No se pudo cargar la información de la campaña');
-      }
+      },
     });
   }
 
@@ -182,37 +191,37 @@ export class RegistrationForm implements OnInit {
    */
   loadIESCareers(iesId: string): void {
     this.isLoadingCareers.set(true);
-    
+
     this.iesService.getCareersIES(iesId).subscribe({
       next: (response: any) => {
         console.log('✅ Respuesta de carreras de la IES:', response);
-        
+
         // Manejar diferentes estructuras de respuesta
         const isSuccess = response.success === true || response.status === 'success';
         const careersData = response.data?.careers || response.data || [];
-        
+
         if (isSuccess && careersData.length > 0) {
           // Mapear las carreras al formato que espera el componente
           const mappedCareers = careersData.map((c: any) => ({
             id: c.carreraId || c._id || c.code || c.name,
             name: c.carreraName || c.name,
-            meta: c.modality || 'Programa Académico'
+            meta: c.modality || 'Programa Académico',
           }));
-          
+
           console.log('📚 Carreras cargadas:', mappedCareers.length);
           this.iesLoadedCareers.set(mappedCareers);
         } else {
           console.warn('⚠️ No se encontraron carreras para esta IES');
           this.iesLoadedCareers.set([]);
         }
-        
+
         this.isLoadingCareers.set(false);
       },
       error: (error) => {
         console.error('❌ Error al cargar carreras de la IES:', error);
         this.iesLoadedCareers.set([]);
         this.isLoadingCareers.set(false);
-      }
+      },
     });
   }
 
@@ -222,7 +231,7 @@ export class RegistrationForm implements OnInit {
   getIESName(): string | null {
     const campaign = this.currentCampaign();
     if (!campaign?.ies) return null;
-    
+
     const ies: any = campaign.ies;
     return ies.iesName || ies.name || null;
   }
@@ -268,7 +277,6 @@ export class RegistrationForm implements OnInit {
     this.showIemsList = false;
   }
 
-
   // --- Lógica IES (Tecnológicos) ---
   loadIES(): void {
     this.iesService.getAllIES({ active: true }).subscribe({
@@ -308,11 +316,11 @@ export class RegistrationForm implements OnInit {
     this.showIesList = false;
     // Reseteamos el filtro para la próxima vez que abra
     this.filteredIes.set(this.iesList());
-    
+
     // Limpiar carreras previas y selección
     this.iesLoadedCareers.set([]);
     this.selectedMajors = [];
-    
+
     // Cargar carreras de la IES seleccionada
     if (ies._id) {
       console.log('🎓 Cargando carreras de la IES seleccionada:', ies._id);
@@ -438,21 +446,21 @@ export class RegistrationForm implements OnInit {
   }
 
   // --- Lógica de Género ---
-  
+
   /**
    * Filtrar opciones de género
    */
   filterGender(query: string): void {
     this.genderSearchQuery.set(query);
     this.showGenderDropdown.set(true);
-    
+
     if (!query.trim()) {
       this.filteredGenderOptions.set(this.genderOptions);
       return;
     }
-    
-    const filtered = this.genderOptions.filter(option => 
-      option.toLowerCase().includes(query.toLowerCase())
+
+    const filtered = this.genderOptions.filter((option) =>
+      option.toLowerCase().includes(query.toLowerCase()),
     );
     this.filteredGenderOptions.set(filtered);
   }
@@ -476,7 +484,7 @@ export class RegistrationForm implements OnInit {
   }
 
   // --- Email Notification ---
-  
+
   /**
    * Enviar notificación por correo electrónico al prospecto
    */
@@ -498,18 +506,19 @@ export class RegistrationForm implements OnInit {
       campaignName: this.currentCampaign()?.name || 'Registro ANUIES',
       iesName: this.selectedIES()?.name || 'N/A',
       firstChoice: this.successData.firstChoice || 'N/A',
-      folio: this.successData.folio
+      folio: this.successData.folio,
     };
 
     console.log('📧 Enviando correo con datos:', emailData);
 
-    this.http.post(`${environment.apiUrl}/notifications/emailCampaign`, emailData)
+    this.http
+      .post(`${environment.apiUrl}/notifications/emailCampaign`, emailData)
       .pipe(finalize(() => this.isSendingEmail.set(false)))
       .subscribe({
         next: (response: any) => {
           console.log('✅ Correo enviado exitosamente:', response);
           this.emailSent.set(true);
-          
+
           // Resetear el estado después de 3 segundos
           setTimeout(() => {
             this.emailSent.set(false);
@@ -517,8 +526,10 @@ export class RegistrationForm implements OnInit {
         },
         error: (error) => {
           console.error('❌ Error al enviar correo:', error);
-          this.errorMessage.set('Error al enviar el correo electrónico. Por favor intenta de nuevo.');
-        }
+          this.errorMessage.set(
+            'Error al enviar el correo electrónico. Por favor intenta de nuevo.',
+          );
+        },
       });
   }
 }

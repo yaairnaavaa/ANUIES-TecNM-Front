@@ -19,7 +19,7 @@ export class NextStep implements OnInit {
   htmlContent: string = '';
   // Esta variable guardará el HTML que Angular ya NO va a limpiar
   htmlSeguro: SafeHtml = '';
-  isLoading: boolean = false;
+  isLoading = signal(false);
   // Agrega | null para que TypeScript permita resetearlas con null
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
@@ -65,33 +65,26 @@ export class NextStep implements OnInit {
     ],
   };
 
-  // Al recibir el HTML de la base de datos, lo procesamos
-  htmlPrueba: string = `
-  <p class=\"text-center\"><font face=\"Comic Sans MS\" size=\"6\" color=\"#ff0000\"><b><i>Hola</i></b></font></p><p class=\"text-center\"><font face=\"Comic Sans MS\" size=\"6\" color=\"#ff0000\"><b><i><br /></i></b></font></p><p class=\"text-center\"><font size=\"6\" color=\"#ff0000\" face=\"Arial\"><b><i>ssdsdsdsd</i></b></font></p>
-`;
-
   cargarDatos() {
     // 1. Intentar obtener el ID de la forma más rápida posible (Sincrona)
     const iesId = localStorage.getItem('anuies_ies_id');
 
     if (!iesId) {
       console.error('No hay IES ID disponible');
-      this.actualizarVistaPrevia(this.htmlPrueba);
       return;
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     this.iesService.getIESHtml(iesId).subscribe({
-      next: (res) => {
-        const contenido = res.data?.html || this.htmlPrueba;
-        this.actualizarVistaPrevia(this.htmlPrueba);
-        this.isLoading = false;
+      next: (res: any) => {
+        const contenido = res.page;
+        this.actualizarVistaPrevia(contenido);
+        this.isLoading.set(false);
       },
       error: (err) => {
         console.error('Error cargando HTML:', err);
-        this.actualizarVistaPrevia(this.htmlPrueba);
-        this.isLoading = false;
+        this.isLoading.set(false);
       },
     });
   }
@@ -105,7 +98,6 @@ export class NextStep implements OnInit {
 
     this.htmlContent = normalizado;
     this.htmlSeguro = this.sanitiezer.bypassSecurityTrustHtml(normalizado);
-    console.log(this.htmlContent);
   }
 
   // Opcional: Para que al cargar también funcione

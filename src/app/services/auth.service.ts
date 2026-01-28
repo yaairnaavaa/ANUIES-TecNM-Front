@@ -64,6 +64,7 @@ export class AuthService {
   private clearSession(): void {
     localStorage.removeItem(this.ROLE_KEY);
     localStorage.removeItem(this.USER_INFO_KEY);
+    localStorage.removeItem(this.IES_ID_KEY);
 
     this.currentUser.set(null);
     this.isAuthenticated.set(false);

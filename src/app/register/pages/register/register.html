@@ -8,7 +8,9 @@
   @if (isLoadingCampaign()) {
     <div class="flex-1 flex items-center justify-center p-8">
       <div class="bg-white rounded-3xl shadow-2xl p-12 max-w-md w-full text-center">
-        <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-6"></div>
+        <div
+          class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-6"
+        ></div>
         <h3 class="text-xl font-bold text-gray-800 mb-2">Cargando información</h3>
         <p class="text-gray-500">Obteniendo datos de la campaña...</p>
       </div>
@@ -19,7 +21,9 @@
   @if (campaignError() && !isLoadingCampaign()) {
     <div class="flex-1 flex items-center justify-center p-8">
       <div class="bg-white rounded-3xl shadow-2xl p-12 max-w-md w-full">
-        <div class="bg-red-100 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-6">
+        <div
+          class="bg-red-100 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-6"
+        >
           <i class="fas fa-exclamation-triangle text-red-600 text-3xl"></i>
         </div>
         <h3 class="text-2xl font-bold text-gray-800 mb-3 text-center">Campaña no disponible</h3>
@@ -38,6 +42,7 @@
 
   <!-- Formulario de registro -->
   @if (!campaignError() && !isLoadingCampaign()) {
-    <app-registration-form [campaignId]="campaignId()"></app-registration-form>
+    <app-registration-form [campaignId]="campaignId()" [campaign]="iesLoaded()">
+    </app-registration-form>
   }
 </div>

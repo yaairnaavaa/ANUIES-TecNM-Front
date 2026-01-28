@@ -62,9 +62,9 @@ export class IesService {
   /**
    * Obtener el contenido HTML guardado de una IES
    */
-  getIESHtml(iesId: string): Observable<ApiResponse<{ html: string }>> {
+  getIESHtml(iesId: string): Observable<ApiResponse<{ page: string }>> {
     const url = `${this.baseUrl}/${iesId}/htmlPage`;
-    return this.http.get<ApiResponse<{ html: string }>>(url);
+    return this.http.get<ApiResponse<{ page: string }>>(url);
   }
 
   updateCareerIES(careerId: string, career: Partial<Career>) {
