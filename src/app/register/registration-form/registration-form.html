@@ -224,12 +224,12 @@
         <div
           class="flex items-center gap-2 text-blue-900 font-extrabold text-[10px] uppercase tracking-[0.2em]"
         >
-          <i class="fas fa-university text-sm"></i> Tecnológico de Interés
+          <i class="fas fa-university text-sm"></i> Escuela de Interés
         </div>
 
         <div class="md:col-span-2">
           <label class="block text-sm font-bold text-gray-700 mb-2">
-            Selecciona el Tecnológico donde deseas estudiar <span class="text-red-500">*</span>
+            Selecciona la Institución donde deseas estudiar <span class="text-red-500">*</span>
           </label>
 
           <div class="relative group">
@@ -238,7 +238,7 @@
             ></i>
             <input
               type="text"
-              placeholder="Buscar Tecnológico..."
+              placeholder="Buscar Escuela..."
               [value]="selectedIES() ? selectedIES()?.name : ''"
               (focus)="onFocusIes()"
               (input)="filterIes($event)"
@@ -348,7 +348,7 @@
           @if (!isLoadingCareers() && majorsList().length === 0) {
             <div class="bg-amber-50/50 text-amber-700 p-6 rounded-2xl flex items-center gap-3 text-sm font-bold justify-center">
               <i class="fas fa-exclamation-triangle text-lg text-amber-500"></i>
-              <span>No hay carreras disponibles para este Tecnológico</span>
+              <span>No hay carreras disponibles</span>
             </div>
           }
         </section>
