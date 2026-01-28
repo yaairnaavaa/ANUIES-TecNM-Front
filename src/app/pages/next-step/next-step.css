@@ -38,3 +38,73 @@
   border-radius: 6px !important;
   margin: 0 5px !important;
 }
+
+/* Esto obliga a que el contenido del editor use todo el ancho disponible */
+.preview-container div[innerHTML] p,
+.preview-container div[innerHTML] font,
+.preview-container div[innerHTML] span {
+  display: block !important;
+  width: 100% !important;
+  text-align: inherit !important;
+}
+
+/* Fuerza el reconocimiento de la propiedad text-align */
+.preview-container [style*='text-align: center'] {
+  text-align: center !important;
+}
+
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+.text-left {
+  text-align: left;
+}
+
+::ng-deep .angular-editor-toolbar .color-picker {
+  position: absolute !important;
+  top: 40px; /* Ajusta según el alto de tu barra de herramientas */
+  left: 0;
+  z-index: 9999;
+}
+
+/* next-step.css */
+
+/* 1. Aseguramos que la barra de herramientas sea el punto de referencia */
+.angular-editor-toolbar {
+  position: relative !important;
+}
+
+/* 2. Reposicionamos el contenedor del color picker */
+/* La clase suele ser .ae-color-picker o similar según la versión */
+.ae-color-picker,
+.angular-editor-toolbar .color-picker-container {
+  position: absolute !important;
+  top: 100% !important; /* Aparece justo debajo de la barra */
+  left: 10px !important;
+  z-index: 9999 !important;
+  transform: none !important;
+}
+
+
+/* CONTENEDOR DE PREVIEW */
+.preview-container ul,
+.preview-container ol {
+  list-style-position: inside;
+  padding-left: 0;
+  margin: 0.5rem 0;
+}
+
+/* LISTAS CENTRADAS */
+.preview-container .text-center ul,
+.preview-container .text-center ol {
+  display: inline-block;
+  text-align: left;
+}
+
+/* TEXTO CENTRADO */
+.preview-container .text-center {
+  text-align: center;
+}

@@ -62,8 +62,12 @@ export class Login {
 
         const roleName = user.role.name;
 
-        if (['Admin Nacional', 'Admin IES', 'Operativo IES'].includes(roleName)) {
+        if (roleName === 'Admin Nacional') {
+          // El Admin Nacional sí va a la gestión global
           this.router.navigate(['/admin']);
+        } else if (roleName === 'Admin IES' || roleName === 'Operativo IES') {
+          // Los de la universidad van a su sección específica
+          this.router.navigate(['/ies']);
         } else {
           this.router.navigate(['/register']);
         }
@@ -71,7 +75,7 @@ export class Login {
       error: (err) => {
         this.isLoading.set(false);
         this.errorMessage.set(
-          err.error?.message || 'Error al iniciar sesión. Verifica tus credenciales.'
+          err.error?.message || 'Error al iniciar sesión. Verifica tus credenciales.',
         );
       },
     });

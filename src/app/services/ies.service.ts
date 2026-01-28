@@ -53,6 +53,20 @@ export class IesService {
     return this.http.post<ApiResponse<Career>>(`${this.baseUrl}/${iesId}/carreras`, career);
   }
 
+  // Guardar el contenido del HTML de una IES
+  saveIESHtml(iesId: string, htmlContent: string): Observable<ApiResponse<any>> {
+    const url = `${this.baseUrl}/${iesId}/htmlPage`;
+    return this.http.post<ApiResponse<any>>(url, { html: htmlContent });
+  }
+
+  /**
+   * Obtener el contenido HTML guardado de una IES
+   */
+  getIESHtml(iesId: string): Observable<ApiResponse<{ html: string }>> {
+    const url = `${this.baseUrl}/${iesId}/htmlPage`;
+    return this.http.get<ApiResponse<{ html: string }>>(url);
+  }
+
   updateCareerIES(careerId: string, career: Partial<Career>) {
     return this.http.patch(`${environment.apiUrl}/careers/${careerId}`, career);
   }
