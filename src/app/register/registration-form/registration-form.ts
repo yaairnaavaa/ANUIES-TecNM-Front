@@ -59,7 +59,6 @@ export class RegistrationForm implements OnInit {
   filteredIems: IemsBasicInfo[] = [];
   isIESLocked = signal(false);
 
-
   // --- UI State (IES / Tecnológicos) ---
   showIesList = false;
   filteredIes = signal<IES[]>([]);
@@ -117,7 +116,9 @@ export class RegistrationForm implements OnInit {
   });
 
   registrationForm = new FormGroup({
-    fullName: new FormControl('', Validators.required),
+    names: new FormControl('', Validators.required),
+    fatherLastName: new FormControl('', Validators.required),
+    motherLastName: new FormControl(''),
     email: new FormControl('', [Validators.required, Validators.email]),
     phoneNumber: new FormControl('', [Validators.required, Validators.pattern('^[0-9]{10}$')]),
     curp: new FormControl('', [Validators.required, curpValidator()]),
@@ -368,7 +369,11 @@ export class RegistrationForm implements OnInit {
     const firstCareer = this.majorsList().find((c) => c.id === this.selectedMajors[0]);
 
     const prospectData: any = {
-      fullName: formValue.fullName!,
+      fullName:
+        formValue.names! + ' ' + formValue.fatherLastName! + ' ' + formValue.motherLastName!,
+      name: formValue.names!,
+      fatherLastName: formValue.fatherLastName!,
+      motherLastName: formValue.motherLastName!,
       email: formValue.email!,
       phone: { mobile: formValue.phoneNumber! },
       curp: formValue.curp?.trim().toUpperCase() || undefined,

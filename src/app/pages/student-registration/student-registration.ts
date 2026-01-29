@@ -1,10 +1,4 @@
-import {
-  Component,
-  inject,
-  OnInit,
-  signal,
-  computed,
-} from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -20,7 +14,7 @@ import { ProspectService } from '../../services/prospect.service';
 import { IesService } from '../../services/ies.service';
 import { IemsService } from '../../services/iems.service';
 import { Prospect, IES } from '../../models/api.models';
-
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 @Component({
   selector: 'app-student-registration',
   standalone: true,
@@ -35,22 +29,27 @@ export class StudentRegistrationComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
+  showPreview = false;
+  htmlSeguro: SafeHtml = '';
+
   // UI State
   isLoading = signal(false);
   isLoadingProspect = signal(true);
   showSuccess = signal(false);
   errorMessage = signal<string | null>(null);
-  
+
   // Data
   prospectId = signal<string | null>(null);
   prospectData = signal<Prospect | null>(null);
   selectedIES = signal<IES | null>(null);
-  
+
   // IEMS State
   showIemsList = false;
   isSelectingIems = false;
   iemsData: Array<{ name: string; state: string }> = [];
   filteredIems: Array<{ name: string; state: string }> = [];
+
+  constructor(private sanitizer: DomSanitizer) {}
 
   registrationForm = new FormGroup({
     // Datos personales
@@ -60,12 +59,12 @@ export class StudentRegistrationComponent implements OnInit {
     birthDate: new FormControl('', Validators.required),
     gender: new FormControl('', Validators.required),
     curp: new FormControl('', [Validators.required, curpValidator()]),
-    
+
     // Datos de contacto
     email: new FormControl('', [Validators.required, Validators.email]),
     mobile: new FormControl('', [Validators.required, Validators.pattern('^[0-9]{10}$')]),
     landline: new FormControl(''),
-    
+
     // Dirección
     street: new FormControl('', Validators.required),
     number: new FormControl('', Validators.required),
@@ -74,20 +73,20 @@ export class StudentRegistrationComponent implements OnInit {
     municipality: new FormControl('', Validators.required),
     state: new FormControl('', Validators.required),
     postalCode: new FormControl('', [Validators.required, Validators.pattern('^[0-9]{5}$')]),
-    
+
     // Información académica de procedencia
     originSchool: new FormControl('', Validators.required),
     technicalMajor: new FormControl(''),
-    
+
     // Discapacidad
     hasDisability: new FormControl(false),
     disabilityType: new FormControl(''),
     disabilityDetails: new FormControl(''),
-    
+
     // Lengua indígena
     speaksIndigenousLanguage: new FormControl(false),
     indigenousLanguage: new FormControl(''),
-    
+
     // Etnia
     belongsToEthnicGroup: new FormControl(false),
     ethnicGroup: new FormControl(''),
@@ -97,7 +96,7 @@ export class StudentRegistrationComponent implements OnInit {
     // Cargar IEMS
     this.loadIEMS();
     this.listenSchoolInput();
-    
+
     // Obtener el ID del prospecto de la ruta
     this.route.params.subscribe((params) => {
       const id = params['prospectId'];
@@ -113,7 +112,7 @@ export class StudentRegistrationComponent implements OnInit {
     // Validaciones condicionales para discapacidad
     this.registrationForm.get('hasDisability')?.valueChanges.subscribe((hasDisability) => {
       const disabilityTypeControl = this.registrationForm.get('disabilityType');
-      
+
       if (hasDisability) {
         disabilityTypeControl?.setValidators([Validators.required]);
       } else {
@@ -127,7 +126,7 @@ export class StudentRegistrationComponent implements OnInit {
     // Validaciones condicionales para lengua indígena
     this.registrationForm.get('speaksIndigenousLanguage')?.valueChanges.subscribe((speaks) => {
       const languageControl = this.registrationForm.get('indigenousLanguage');
-      
+
       if (speaks) {
         languageControl?.setValidators([Validators.required]);
       } else {
@@ -140,7 +139,7 @@ export class StudentRegistrationComponent implements OnInit {
     // Validaciones condicionales para etnia
     this.registrationForm.get('belongsToEthnicGroup')?.valueChanges.subscribe((belongs) => {
       const ethnicControl = this.registrationForm.get('ethnicGroup');
-      
+
       if (belongs) {
         ethnicControl?.setValidators([Validators.required]);
       } else {
@@ -163,14 +162,9 @@ export class StudentRegistrationComponent implements OnInit {
         if (response.success && response.data) {
           const prospect = response.data;
           this.prospectData.set(prospect);
-          
+
           // Pre-llenar el formulario con los datos existentes
           this.populateForm(prospect);
-          
-          // Cargar información de la IES si existe
-          if (prospect.firstChoiceIES) {
-            this.loadIESData(prospect.firstChoiceIES);
-          }
         } else {
           this.errorMessage.set('No se pudo cargar la información del prospecto');
         }
@@ -179,7 +173,8 @@ export class StudentRegistrationComponent implements OnInit {
       error: (error) => {
         console.error('Error al cargar prospecto:', error);
         this.errorMessage.set(
-          error.error?.message || 'Error al cargar la información del prospecto. Verifica que el enlace sea correcto.'
+          error.error?.message ||
+            'Error al cargar la información del prospecto. Verifica que el enlace sea correcto.',
         );
         this.isLoadingProspect.set(false);
       },
@@ -205,21 +200,21 @@ export class StudentRegistrationComponent implements OnInit {
   /**
    * Pre-llenar el formulario con los datos del prospecto
    */
-  populateForm(prospect: Prospect): void {
+  populateForm(prospect: any): void {
     // Separar el nombre completo si existe
-    let firstName = prospect.firstName || '';
-    let lastName = prospect.lastName || '';
-    let secondLastName = prospect.secondLastName || '';
+    let firstName = prospect.name || '';
+    let lastName = prospect.fatherLastName || '';
+    let secondLastName = prospect.motherLastName || '';
 
     // Si viene fullName en lugar de nombres separados, intentar separarlo
-    if (prospect.fullName && !firstName && !lastName) {
-      const nameParts = prospect.fullName.split(' ');
-      if (nameParts.length >= 2) {
-        firstName = nameParts[0];
-        lastName = nameParts[1];
-        secondLastName = nameParts.slice(2).join(' ');
-      }
-    }
+    // if (prospect.fullName && !firstName && !lastName) {
+    //   const nameParts = prospect.fullName.split(' ');
+    //   if (nameParts.length >= 2) {
+    //     firstName = nameParts[0];
+    //     lastName = nameParts[1];
+    //     secondLastName = nameParts.slice(2).join(' ');
+    //   }
+    // }
 
     // Marcar que estamos seleccionando para evitar abrir el dropdown
     this.isSelectingIems = true;
@@ -290,10 +285,10 @@ export class StudentRegistrationComponent implements OnInit {
     const formValue = this.registrationForm.value;
 
     // Preparar datos para actualizar
-    const updateData: Partial<Prospect> = {
-      firstName: formValue.firstName!,
-      lastName: formValue.lastName!,
-      secondLastName: formValue.secondLastName || undefined,
+    const updateData: any = {
+      names: formValue.firstName!,
+      fatherLastName: formValue.lastName!,
+      motherLastName: formValue.secondLastName || undefined,
       birthDate: formValue.birthDate || undefined,
       gender: formValue.gender as any,
       curp: formValue.curp?.trim().toUpperCase() || undefined,
@@ -328,6 +323,7 @@ export class StudentRegistrationComponent implements OnInit {
       .subscribe({
         next: (response) => {
           if (response.success) {
+            console.log(response.data?.page);
             this.showSuccess.set(true);
             // Scroll al inicio
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -338,7 +334,7 @@ export class StudentRegistrationComponent implements OnInit {
         error: (error) => {
           console.error('Error al actualizar:', error);
           this.errorMessage.set(
-            error.error?.message || 'Error al completar el registro. Por favor intenta de nuevo.'
+            error.error?.message || 'Error al completar el registro. Por favor intenta de nuevo.',
           );
         },
       });
@@ -366,13 +362,11 @@ export class StudentRegistrationComponent implements OnInit {
     if (prospect?.fullName) {
       return prospect.fullName;
     }
-    
-    const parts = [
-      prospect?.firstName,
-      prospect?.lastName,
-      prospect?.secondLastName,
-    ].filter(Boolean);
-    
+
+    const parts = [prospect?.firstName, prospect?.lastName, prospect?.secondLastName].filter(
+      Boolean,
+    );
+
     return parts.length > 0 ? parts.join(' ') : 'Estudiante';
   }
 
@@ -391,7 +385,7 @@ export class StudentRegistrationComponent implements OnInit {
     if (!interests || interests.length === 0) {
       return 'No especificadas';
     }
-    
+
     return interests
       .sort((a, b) => a.priority - b.priority)
       .map((ci, idx) => `${idx + 1}. ${ci.career}`)
@@ -460,7 +454,7 @@ export class StudentRegistrationComponent implements OnInit {
       const search = value.toLowerCase();
       this.filteredIems = this.iemsData.filter(
         (school) =>
-          school.name.toLowerCase().includes(search) || school.state.toLowerCase().includes(search)
+          school.name.toLowerCase().includes(search) || school.state.toLowerCase().includes(search),
       );
       // Solo abrir el dropdown si el usuario está escribiendo activamente
       // No abrir cuando se carga un valor inicial
@@ -490,5 +484,14 @@ export class StudentRegistrationComponent implements OnInit {
     setTimeout(() => {
       this.showIemsList = false;
     }, 150);
+  }
+
+  togglePreview(status: boolean) {
+    if (status) {
+      // Aquí generas o asignas el contenido que quieres mostrar
+      const contenidoRaw = `<p class=\"text-center\"><font face=\"Comic Sans MS\" size=\"6\" color=\"#ff0000\"><b><i>Hola</i></b></font></p><p class=\"text-center\"><font face=\"Comic Sans MS\" size=\"6\" color=\"#ff0000\"><b><i><br /></i></b></font></p><p class=\"text-center\"><font size=\"6\" color=\"#ff0000\" face=\"Arial\"><b><i>ssdsdsdsd</i></b></font></p><p class=\"text-center\"><font size=\"6\" color=\"#ff0000\" face=\"Arial\"><b><i><br /></i></b></font></p><p class=\"text-left\"><font size=\"5\"><i>Jorge Ismael<font face=\"Arial\"> Betancourt</font></i></font></p>`;
+      this.htmlSeguro = this.sanitizer.bypassSecurityTrustHtml(contenidoRaw);
+    }
+    this.showPreview = status;
   }
 }

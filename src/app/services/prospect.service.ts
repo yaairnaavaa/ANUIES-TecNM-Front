@@ -11,6 +11,10 @@ export interface ProspectFilters {
   interestedCareer?: string;
 }
 
+export interface PageResponse {
+  page: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ProspectService {
   private http = inject(HttpClient);
@@ -63,8 +67,8 @@ export class ProspectService {
   /**
    * Actualizar prospecto
    */
-  updateProspect(id: string, prospect: Partial<Prospect>): Observable<ApiResponse<Prospect>> {
-    return this.http.put<ApiResponse<Prospect>>(`${this.baseUrl}/${id}`, prospect);
+  updateProspect(id: string, prospect: Partial<Prospect>): Observable<ApiResponse<PageResponse>> {
+    return this.http.patch<ApiResponse<PageResponse>>(`${this.baseUrl}/${id}`, prospect);
   }
 
   /**
