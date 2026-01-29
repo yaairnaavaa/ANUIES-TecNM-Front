@@ -167,10 +167,6 @@ export class StudentRegistrationComponent implements OnInit {
           // Pre-llenar el formulario con los datos existentes
           this.populateForm(prospect);
           
-          // Cargar información de la IES si existe
-          if (prospect.firstChoiceIES) {
-            this.loadIESData(prospect.firstChoiceIES);
-          }
         } else {
           this.errorMessage.set('No se pudo cargar la información del prospecto');
         }
