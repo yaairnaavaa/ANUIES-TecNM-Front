@@ -8,6 +8,7 @@ import { IesService } from '../../services/ies.service';
 import { IemsService } from '../../services/iems.service';
 import { UserService } from '../../services/user.service';
 import { CycleService } from '../../services/cycle.service';
+import { environment } from '../../../environments/environment';
 
 interface CampaignDisplay {
   id: string;
@@ -1417,7 +1418,7 @@ export class IesCampaignManagementComponent implements OnInit {
   /**
    * URL base para el QR de registro
    */
-  private readonly baseQRUrl = 'https://anuies-front.vercel.app/register';
+  private readonly baseQRUrl = `${environment.ANUIES_FRONT_URL}/register`;;
 
   /**
    * Generar URL del QR basada en el ID de la campaña
