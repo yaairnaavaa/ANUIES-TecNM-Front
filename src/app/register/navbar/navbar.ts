@@ -3,6 +3,7 @@ import { Component, Input, computed, signal } from '@angular/core';
 
 // 2. CommonModule viene de @angular/common
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
@@ -26,7 +27,8 @@ export class Navbar {
   customQRImage = signal<string>('');
 
   // URL base para el QR
-  private readonly baseUrl = 'https://anuies-front.vercel.app/register';
+  private readonly baseUrl = `${environment.ANUIES_FRONT_URL}/register`;;
+
 
   // Generar URL del QR basada en el campaignId
   qrUrl = computed(() => {
