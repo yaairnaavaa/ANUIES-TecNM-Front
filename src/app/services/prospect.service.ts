@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Prospect, ApiResponse } from '../models/api.models';
 
@@ -14,6 +14,7 @@ export interface ProspectFilters {
 export interface PageResponse {
   page: string;
 }
+
 
 @Injectable({ providedIn: 'root' })
 export class ProspectService {
@@ -67,6 +68,9 @@ export class ProspectService {
   /**
    * Actualizar prospecto
    */
+  /**
+   * Actualizar prospecto y recibir respuesta completa
+   */
   updateProspect(id: string, prospect: Partial<Prospect>): Observable<ApiResponse<PageResponse>> {
     return this.http.patch<ApiResponse<PageResponse>>(`${this.baseUrl}/${id}`, prospect);
   }
@@ -91,7 +95,7 @@ export class ProspectService {
   validateDocuments(
     id: string,
     validated: boolean,
-    validationNotes?: string
+    validationNotes?: string,
   ): Observable<ApiResponse<Prospect>> {
     return this.http.put<ApiResponse<Prospect>>(`${this.baseUrl}/${id}/validate`, {
       validated,

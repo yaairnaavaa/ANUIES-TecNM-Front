@@ -324,6 +324,8 @@ export class StudentRegistrationComponent implements OnInit {
         next: (response) => {
           if (response.success) {
             console.log(response.data?.page);
+            const contenidoRaw = response.data?.page;
+            this.htmlSeguro = this.sanitizer.bypassSecurityTrustHtml(contenidoRaw ?? '');
             this.showSuccess.set(true);
             // Scroll al inicio
             window.scrollTo({ top: 0, behavior: 'smooth' });
