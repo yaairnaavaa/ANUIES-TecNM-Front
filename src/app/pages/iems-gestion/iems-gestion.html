@@ -50,9 +50,9 @@
     <div class="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm">
       <!-- FILTROS -->
       <div
-        class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4"
+        class="p-6 border-b border-slate-100 bg-slate-50/50 grid grid-cols-1 md:grid-cols-[1fr_auto_auto] md:items-center gap-4"
       >
-        <div class="relative flex-grow min-w-[300px] lg:max-w-md">
+        <div class="relative min-w-0 w-full md:max-w-md">
           <i
             class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"
           ></i>
@@ -61,13 +61,13 @@
             [ngModel]="searchQuery()"
             (ngModelChange)="searchQuery.set($event); currentPage.set(1)"
             placeholder="Buscar por nombre, clave o municipio..."
-            class="w-full pl-14 pr-6 py-4 bg-slate-50/50 border-none rounded-2xl font-medium text-slate-600 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white transition-all outline-none"
+            class="w-full h-12 pl-14 pr-6 bg-slate-50/50 border border-slate-200 rounded-2xl font-medium text-slate-600 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white transition-all outline-none"
           />
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 flex-shrink-0">
           <!-- Combo de Tipo -->
-          <div class="relative group w-64">
+          <div class="relative group w-52 shrink-0">
             <i class="fas fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
             <input
               type="text"
@@ -77,7 +77,7 @@
               (blur)="onTypeDropdownBlur()"
               placeholder="Buscar tipo..."
               autocomplete="off"
-              class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+              class="w-full h-12 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
               [class.border-blue-500]="selectedType()"
             />
 
@@ -106,7 +106,7 @@
           </div>
 
           <!-- Combo de Estado -->
-          <div class="relative group w-64">
+          <div class="relative group w-52 shrink-0">
             <i class="fas fa-flag absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
             <input
               type="text"
@@ -116,7 +116,7 @@
               (blur)="onStateDropdownBlur()"
               placeholder="Buscar estado..."
               autocomplete="off"
-              class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+              class="w-full h-12 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
               [class.border-blue-500]="selectedState() && selectedState() !== 'all'"
             />
 
@@ -145,12 +145,12 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Mostrar:</span>
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <span class="text-xs font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Mostrar:</span>
           <select
             [ngModel]="itemsPerPage()"
             (ngModelChange)="onItemsPerPageChange($event)"
-            class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-all"
+            class="h-12 bg-white border border-slate-200 rounded-xl px-4 py-0 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-all"
           >
             @for (option of pageSizeOptions; track option) {
               <option [value]="option">{{ option }} filas</option>
@@ -168,7 +168,6 @@
             <th class="px-8 py-5">Clave</th>
             <th class="px-8 py-5">Tipo</th>
             <th class="px-8 py-5">Ubicación</th>
-            <th class="px-8 py-5">Contacto</th>
             <th class="px-8 py-5">Estatus</th>
             <th class="px-8 py-5 text-center">Acciones</th>
           </tr>
@@ -200,15 +199,6 @@
                 <div class="text-sm font-bold text-slate-700">
                   {{ iems.address.municipality }}, {{ iems.address.state }}
                 </div>
-              </td>
-
-              <td class="px-8 py-5">
-                <div class="text-sm font-bold text-slate-700">
-                  {{ iems.contact?.email || 'N/A' }}
-                </div>
-                @if (iems.contact?.generalPhone) {
-                  <div class="text-xs text-slate-400 italic">{{ iems.contact?.generalPhone }}</div>
-                }
               </td>
 
               <td class="px-8 py-5">
@@ -293,7 +283,7 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="7" class="px-8 py-20 text-center">
+              <td colspan="6" class="px-8 py-20 text-center">
                 <div class="flex flex-col items-center gap-3">
                   <i class="fas fa-inbox text-slate-200 text-4xl"></i>
                   <p class="text-slate-400 font-medium italic">No se encontraron IEMS</p>
@@ -442,11 +432,11 @@
             </div>
           </div>
 
-          <!-- DIRECCIÓN -->
+          <!-- DIRECCIÓN (solo municipio y estado) -->
           <div class="space-y-4">
-            <h3 class="text-lg font-black text-slate-800 uppercase tracking-wide">Dirección</h3>
+            <h3 class="text-lg font-black text-slate-800 uppercase tracking-wide">Localización</h3>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label class="block text-xs font-black uppercase text-slate-500 mb-2">
                   Municipio <span class="text-red-500">*</span>
@@ -503,93 +493,6 @@
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div>
-                <label class="block text-xs font-black uppercase text-slate-500 mb-2">
-                  Código Postal
-                </label>
-                <input
-                  type="text"
-                  [ngModel]="iemsForm().address!.postalCode"
-                  (ngModelChange)="updatePostalCode($event)"
-                  name="postalCode"
-                  class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
-                />
-              </div>
-
-              <div class="md:col-span-2">
-                <label class="block text-xs font-black uppercase text-slate-500 mb-2">
-                  Calle
-                </label>
-                <input
-                  type="text"
-                  [ngModel]="iemsForm().address!.street"
-                  (ngModelChange)="updateStreet($event)"
-                  name="street"
-                  class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
-                />
-              </div>
-
-              <div>
-                <label class="block text-xs font-black uppercase text-slate-500 mb-2">
-                  Número
-                </label>
-                <input
-                  type="text"
-                  [ngModel]="iemsForm().address!.number"
-                  (ngModelChange)="updateNumber($event)"
-                  name="number"
-                  class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
-                />
-              </div>
-            </div>
-          </div>
-
-          <!-- CONTACTO -->
-          <div class="space-y-4">
-            <h3 class="text-lg font-black text-slate-800 uppercase tracking-wide">
-              Información de Contacto
-            </h3>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-xs font-black uppercase text-slate-500 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  [ngModel]="iemsForm().contact!.email"
-                  (ngModelChange)="updateEmail($event)"
-                  name="email"
-                  class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
-                />
-              </div>
-
-              <div>
-                <label class="block text-xs font-black uppercase text-slate-500 mb-2">
-                  Teléfono
-                </label>
-                <input
-                  type="tel"
-                  [ngModel]="iemsForm().contact!.generalPhone"
-                  (ngModelChange)="updatePhone($event)"
-                  name="phone"
-                  class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
-                />
-              </div>
-
-              <div class="md:col-span-2">
-                <label class="block text-xs font-black uppercase text-slate-500 mb-2">
-                  Nombre del Director
-                </label>
-                <input
-                  type="text"
-                  [ngModel]="iemsForm().contact!.directorName"
-                  (ngModelChange)="updateDirectorName($event)"
-                  name="directorName"
-                  class="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold outline-none"
-                />
               </div>
             </div>
           </div>
