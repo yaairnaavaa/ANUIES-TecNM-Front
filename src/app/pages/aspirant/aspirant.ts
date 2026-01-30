@@ -20,16 +20,27 @@ export class Aspirant implements OnInit {
   isLoading = signal<boolean>(false);
   showDetailsModal = signal<boolean>(false);
   viewingAspirant = signal<Prospect | null>(null);
+  detailsModalTab = signal<'general' | 'complete'>('general');
 
-  // Signals para Búsqueda y Paginación
+  // Signals para Búsqueda, Filtro por Estatus y Paginación
   searchTerm = signal<string>('');
+  statusFilter = signal<'all' | 'interesados' | 'prospectos'>('all');
   currentPage = signal<number>(1);
-  itemsPerPage = signal<number>(5); // Ahora es un signal
+  itemsPerPage = signal<number>(5);
   pageSizeOptions = [5, 10, 20, 50];
 
   filteredAspirants = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
-    const data = this.aspirants();
+    const status = this.statusFilter();
+    let data = this.aspirants();
+
+    // Filtro por estatus: Interesados = perfil no completo, Prospectos = perfil completo
+    if (status === 'interesados') {
+      data = data.filter((a) => a.processStatus?.registrationComplete !== true);
+    } else if (status === 'prospectos') {
+      data = data.filter((a) => a.processStatus?.registrationComplete === true);
+    }
+
     if (!term) return data;
     return data.filter(
       (a) =>
@@ -134,6 +145,11 @@ export class Aspirant implements OnInit {
     this.currentPage.set(1);
   }
 
+  setStatusFilter(filter: 'all' | 'interesados' | 'prospectos'): void {
+    this.statusFilter.set(filter);
+    this.currentPage.set(1);
+  }
+
   // Manejador para el combo de cantidad (5, 10, 20, 50)
   onItemsPerPageChange(value: number): void {
     this.itemsPerPage.set(value);
@@ -171,6 +187,7 @@ export class Aspirant implements OnInit {
   // Abrir modal de detalles
   openDetailsModal(aspirant: Prospect): void {
     this.viewingAspirant.set(aspirant);
+    this.detailsModalTab.set('general');
     this.showDetailsModal.set(true);
   }
 
@@ -178,6 +195,14 @@ export class Aspirant implements OnInit {
   closeDetailsModal(): void {
     this.showDetailsModal.set(false);
     this.viewingAspirant.set(null);
+  }
+
+  setDetailsModalTab(tab: 'general' | 'complete'): void {
+    this.detailsModalTab.set(tab);
+  }
+
+  isProfileComplete(aspirant: Prospect | null): boolean {
+    return aspirant?.processStatus?.registrationComplete === true;
   }
 
   /**

@@ -390,6 +390,10 @@ export class RegistrationForm implements OnInit {
         };
       }),
       originCampaign: formValue.campaign || undefined,
+      originCampaignName: this.currentCampaign()?.name || 'N/A',
+      // Ciclo tomado de la campaña a la que se registra el interesado
+      cycleId: (this.currentCampaign() as any)?.cycle?.cycleId || undefined,
+      cycleName: (this.currentCampaign() as any)?.cycle?.cycleName || undefined,
     };
 
     this.prospectService

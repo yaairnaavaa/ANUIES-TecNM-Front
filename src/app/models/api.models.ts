@@ -167,6 +167,15 @@ export interface Prospect {
   originIEMS?: string;
   originIEMSName?: string;
   technicalMajor?: string;
+
+  // Discapacidad, lengua indígena y etnia
+  hasDisability?: boolean;
+  disabilityType?: string;
+  disabilityDetails?: string;
+  speaksIndigenousLanguage?: boolean;
+  indigenousLanguage?: string;
+  belongsToEthnicGroup?: boolean;
+  ethnicGroup?: string;
   iemsCareer?: string;
   iemsAverage?: number;
   averageGrade?: number;
@@ -179,6 +188,10 @@ export interface Prospect {
     career: string;
     priority: number;
   }>;
+
+  // Ciclo escolar
+  cycleId?: string;
+  cycleName?: string;
 
   // Canal de captación
   contactChannel?:

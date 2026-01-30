@@ -240,15 +240,15 @@ export class StudentRegistrationComponent implements OnInit {
       technicalMajor: prospect.technicalMajor || '',
     });
 
-    // Valores por defecto para campos nuevos
+    // Discapacidad, lengua indígena y etnia (desde prospecto o por defecto)
     this.registrationForm.patchValue({
-      hasDisability: false,
-      disabilityType: '',
-      disabilityDetails: '',
-      speaksIndigenousLanguage: false,
-      indigenousLanguage: '',
-      belongsToEthnicGroup: false,
-      ethnicGroup: '',
+      hasDisability: prospect.hasDisability ?? false,
+      disabilityType: prospect.disabilityType ?? '',
+      disabilityDetails: prospect.disabilityDetails ?? '',
+      speaksIndigenousLanguage: prospect.speaksIndigenousLanguage ?? false,
+      indigenousLanguage: prospect.indigenousLanguage ?? '',
+      belongsToEthnicGroup: prospect.belongsToEthnicGroup ?? false,
+      ethnicGroup: prospect.ethnicGroup ?? '',
     });
   }
 
@@ -309,7 +309,17 @@ export class StudentRegistrationComponent implements OnInit {
       // Información académica
       originIEMSName: formValue.originSchool || undefined,
       technicalMajor: formValue.technicalMajor || undefined,
-      // Observaciones con información adicional
+      // Discapacidad
+      hasDisability: formValue.hasDisability ?? false,
+      disabilityType: formValue.hasDisability ? formValue.disabilityType || undefined : undefined,
+      disabilityDetails: formValue.hasDisability ? formValue.disabilityDetails || undefined : undefined,
+      // Lengua indígena
+      speaksIndigenousLanguage: formValue.speaksIndigenousLanguage ?? false,
+      indigenousLanguage: formValue.speaksIndigenousLanguage ? formValue.indigenousLanguage || undefined : undefined,
+      // Etnia
+      belongsToEthnicGroup: formValue.belongsToEthnicGroup ?? false,
+      ethnicGroup: formValue.belongsToEthnicGroup ? formValue.ethnicGroup || undefined : undefined,
+      // Observaciones con información adicional (resumen legible)
       observations: this.buildObservations(formValue),
       processStatus: {
         registrationComplete: true,
