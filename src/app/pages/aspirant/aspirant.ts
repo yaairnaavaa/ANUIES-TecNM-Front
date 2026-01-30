@@ -21,6 +21,8 @@ export class Aspirant implements OnInit {
   showDetailsModal = signal<boolean>(false);
   viewingAspirant = signal<Prospect | null>(null);
   detailsModalTab = signal<'general' | 'complete'>('general');
+  /** Sección expandida en el acordeón del Perfil completo (null = ninguna) */
+  expandedSection = signal<string | null>(null);
 
   // Signals para Búsqueda, Filtro por Estatus y Paginación
   searchTerm = signal<string>('');
@@ -188,6 +190,7 @@ export class Aspirant implements OnInit {
   openDetailsModal(aspirant: Prospect): void {
     this.viewingAspirant.set(aspirant);
     this.detailsModalTab.set('general');
+    this.expandedSection.set(null);
     this.showDetailsModal.set(true);
   }
 
@@ -199,10 +202,32 @@ export class Aspirant implements OnInit {
 
   setDetailsModalTab(tab: 'general' | 'complete'): void {
     this.detailsModalTab.set(tab);
+    if (tab === 'general') this.expandedSection.set(null);
+  }
+
+  toggleSection(sectionId: string): void {
+    this.expandedSection.update((current) => (current === sectionId ? null : sectionId));
+  }
+
+  isSectionExpanded(sectionId: string): boolean {
+    return this.expandedSection() === sectionId;
   }
 
   isProfileComplete(aspirant: Prospect | null): boolean {
     return aspirant?.processStatus?.registrationComplete === true;
+  }
+
+  /**
+   * Mostrar nombre de la campaña de origen (evita mostrar [object Object] cuando viene poblada)
+   */
+  getOriginCampaignDisplay(aspirant: Prospect | null): string {
+    if (!aspirant) return 'No especificada';
+    const name = (aspirant as any).originCampaignName;
+    if (name && typeof name === 'string') return name;
+    const oc = (aspirant as any).originCampaign;
+    if (oc && typeof oc === 'object' && oc.name) return oc.name;
+    if (typeof oc === 'string') return oc;
+    return 'No especificada';
   }
 
   /**

@@ -207,7 +207,7 @@
                   <div
                     *ngIf="$any(a).showMenu"
                     (clickOutside)="$any(a).showMenu = false"
-                    class="absolute right-0 z-[9999] mt-2 w-52 rounded-2xl bg-white shadow-xl border border-slate-100 overflow-visible"
+                    class="absolute right-0 bottom-full mb-2 z-[9999] w-52 rounded-2xl bg-white shadow-xl border border-slate-100"
                   >
                     <div class="py-1">
                       <button
@@ -438,77 +438,6 @@
               </div>
             </div>
 
-            <!-- DIRECCIÓN -->
-            @if (aspirant.address) {
-              <div class="space-y-4">
-                <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
-                  <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-map-marker-alt text-purple-600"></i>
-                  </div>
-                  <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
-                    Dirección
-                  </h3>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  @if (aspirant.address.street) {
-                    <div class="space-y-2 md:col-span-2">
-                      <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                        Calle
-                      </label>
-                      <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                        {{ aspirant.address.street }} {{ aspirant.address.number || '' }}
-                      </div>
-                    </div>
-                  }
-
-                  @if (aspirant.address.neighborhood) {
-                    <div class="space-y-2">
-                      <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                        Colonia
-                      </label>
-                      <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                        {{ aspirant.address.neighborhood }}
-                      </div>
-                    </div>
-                  }
-
-                  @if (aspirant.address.municipality) {
-                    <div class="space-y-2">
-                      <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                        Municipio
-                      </label>
-                      <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                        {{ aspirant.address.municipality }}
-                      </div>
-                    </div>
-                  }
-
-                  @if (aspirant.address.state) {
-                    <div class="space-y-2">
-                      <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                        Estado
-                      </label>
-                      <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                        {{ aspirant.address.state }}
-                      </div>
-                    </div>
-                  }
-
-                  @if (aspirant.address.postalCode) {
-                    <div class="space-y-2">
-                      <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                        Código Postal
-                      </label>
-                      <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                        {{ aspirant.address.postalCode }}
-                      </div>
-                    </div>
-                  }
-                </div>
-              </div>
-            }
-
             <!-- PROCEDENCIA ACADÉMICA -->
             <div class="space-y-4">
               <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
@@ -611,18 +540,27 @@
                 </p>
               </div>
             } @else {
-              <!-- Contenido completo: mismos bloques + datos adicionales -->
-              <!-- Datos personales -->
-              <div class="space-y-4">
-                <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
-                  <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-user text-blue-600"></i>
-                  </div>
-                  <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
-                    Datos Personales
-                  </h3>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Perfil completo: secciones colapsables (acordeón) -->
+              <div class="space-y-2">
+                <!-- Datos personales -->
+                <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                  <button
+                    type="button"
+                    (click)="toggleSection('personal')"
+                    class="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-slate-50/80 transition-colors"
+                  >
+                    <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
+                      <i class="fas fa-user text-blue-600"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight flex-1">Datos Personales</h3>
+                    <i
+                      class="fas fa-chevron-down text-slate-400 transition-transform duration-200 shrink-0"
+                      [class.rotate-180]="isSectionExpanded('personal')"
+                    ></i>
+                  </button>
+                  @if (isSectionExpanded('personal')) {
+                    <div class="px-6 pb-6 pt-0 border-t border-slate-100">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div class="space-y-2">
                     <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Nombre Completo</label>
                     <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
@@ -653,18 +591,30 @@
                       {{ aspirant.gender || 'No especificado' }}
                     </div>
                   </div>
+                      </div>
+                    </div>
+                  }
                 </div>
-              </div>
 
-              <!-- Contacto -->
-              <div class="space-y-4">
-                <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
-                  <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-address-book text-emerald-600"></i>
-                  </div>
-                  <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Datos de Contacto</h3>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Contacto -->
+                <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                  <button
+                    type="button"
+                    (click)="toggleSection('contact')"
+                    class="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-slate-50/80 transition-colors"
+                  >
+                    <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0">
+                      <i class="fas fa-address-book text-emerald-600"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight flex-1">Datos de Contacto</h3>
+                    <i
+                      class="fas fa-chevron-down text-slate-400 transition-transform duration-200 shrink-0"
+                      [class.rotate-180]="isSectionExpanded('contact')"
+                    ></i>
+                  </button>
+                  @if (isSectionExpanded('contact')) {
+                    <div class="px-6 pb-6 pt-0 border-t border-slate-100">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div class="space-y-2">
                     <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Email</label>
                     <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">{{ aspirant.email }}</div>
@@ -679,19 +629,31 @@
                       <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">{{ aspirant.phone.landline }}</div>
                     </div>
                   }
+                      </div>
+                    </div>
+                  }
                 </div>
-              </div>
 
-              <!-- Dirección -->
-              @if (aspirant.address) {
-                <div class="space-y-4">
-                  <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
-                    <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+                <!-- Dirección -->
+                <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                  <button
+                    type="button"
+                    (click)="toggleSection('address')"
+                    class="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-slate-50/80 transition-colors"
+                  >
+                    <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center shrink-0">
                       <i class="fas fa-map-marker-alt text-purple-600"></i>
                     </div>
-                    <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Dirección</h3>
-                  </div>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight flex-1">Dirección</h3>
+                    <i
+                      class="fas fa-chevron-down text-slate-400 transition-transform duration-200 shrink-0"
+                      [class.rotate-180]="isSectionExpanded('address')"
+                    ></i>
+                  </button>
+                  @if (isSectionExpanded('address')) {
+                    <div class="px-6 pb-6 pt-0 border-t border-slate-100">
+                      @if (aspirant.address) {
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @if (aspirant.address.street) {
                       <div class="space-y-2 md:col-span-2">
                         <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Calle</label>
@@ -724,19 +686,33 @@
                         <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">{{ aspirant.address.postalCode }}</div>
                       </div>
                     }
-                  </div>
+                      </div>
+                      } @else {
+                        <p class="text-slate-500 font-medium italic py-2">No registrada</p>
+                      }
+                    </div>
+                  }
                 </div>
-              }
 
-              <!-- Procedencia académica -->
-              <div class="space-y-4">
-                <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
-                  <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-school text-amber-600"></i>
-                  </div>
-                  <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Procedencia Académica</h3>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Procedencia académica -->
+                <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                  <button
+                    type="button"
+                    (click)="toggleSection('academic')"
+                    class="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-slate-50/80 transition-colors"
+                  >
+                    <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center shrink-0">
+                      <i class="fas fa-school text-amber-600"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight flex-1">Procedencia Académica</h3>
+                    <i
+                      class="fas fa-chevron-down text-slate-400 transition-transform duration-200 shrink-0"
+                      [class.rotate-180]="isSectionExpanded('academic')"
+                    ></i>
+                  </button>
+                  @if (isSectionExpanded('academic')) {
+                    <div class="px-6 pb-6 pt-0 border-t border-slate-100">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div class="space-y-2">
                     <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Escuela de Origen</label>
                     <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
@@ -781,19 +757,85 @@
                       </div>
                     </div>
                   }
-                </div>
-              </div>
-
-              <!-- Canal y clasificación (solo en perfil completo) -->
-              @if (aspirant.contactChannel || aspirant.classification || aspirant.originCampaign) {
-                <div class="space-y-4">
-                  <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
-                    <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
-                      <i class="fas fa-bullhorn text-slate-600"></i>
+                      </div>
                     </div>
-                    <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Canal y Clasificación</h3>
+                  }
+                </div>
+
+                <!-- Discapacidad, lengua indígena y etnia -->
+                <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                  <button
+                    type="button"
+                    (click)="toggleSection('disability')"
+                    class="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-slate-50/80 transition-colors"
+                  >
+                    <div class="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center shrink-0">
+                      <i class="fas fa-universal-access text-teal-600"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight flex-1">Discapacidad, lengua indígena y etnia</h3>
+                    <i
+                      class="fas fa-chevron-down text-slate-400 transition-transform duration-200 shrink-0"
+                      [class.rotate-180]="isSectionExpanded('disability')"
+                    ></i>
+                  </button>
+                  @if (isSectionExpanded('disability')) {
+                    <div class="px-6 pb-6 pt-0 border-t border-slate-100">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">¿Tiene discapacidad?</label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ aspirant.hasDisability ? 'Sí' : 'No' }}
+                      @if (aspirant.hasDisability && aspirant.disabilityType) {
+                        <span class="block text-sm mt-1 text-slate-600">— {{ aspirant.disabilityType }}</span>
+                        @if (aspirant.disabilityDetails) {
+                          <span class="block text-xs mt-0.5 text-slate-500">{{ aspirant.disabilityDetails }}</span>
+                        }
+                      }
+                    </div>
                   </div>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">¿Habla lengua indígena?</label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ aspirant.speaksIndigenousLanguage ? 'Sí' : 'No' }}
+                      @if (aspirant.speaksIndigenousLanguage && aspirant.indigenousLanguage) {
+                        <span class="block text-sm mt-1 text-slate-600">— {{ aspirant.indigenousLanguage }}</span>
+                      }
+                    </div>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">¿Pertenece a algún grupo étnico?</label>
+                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                      {{ aspirant.belongsToEthnicGroup ? 'Sí' : 'No' }}
+                      @if (aspirant.belongsToEthnicGroup && aspirant.ethnicGroup) {
+                        <span class="block text-sm mt-1 text-slate-600">— {{ aspirant.ethnicGroup }}</span>
+                      }
+                    </div>
+                  </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- Canal y clasificación -->
+                @if (aspirant.contactChannel || aspirant.classification || getOriginCampaignDisplay(aspirant) !== 'No especificada') {
+                  <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                    <button
+                      type="button"
+                      (click)="toggleSection('channel')"
+                      class="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-slate-50/80 transition-colors"
+                    >
+                      <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
+                        <i class="fas fa-bullhorn text-slate-600"></i>
+                      </div>
+                      <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight flex-1">Canal y Clasificación</h3>
+                      <i
+                        class="fas fa-chevron-down text-slate-400 transition-transform duration-200 shrink-0"
+                        [class.rotate-180]="isSectionExpanded('channel')"
+                      ></i>
+                    </button>
+                    @if (isSectionExpanded('channel')) {
+                      <div class="px-6 pb-6 pt-0 border-t border-slate-100">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @if (aspirant.contactChannel) {
                       <div class="space-y-2">
                         <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Canal de contacto</label>
@@ -806,41 +848,38 @@
                         <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">{{ aspirant.classification }}</div>
                       </div>
                     }
-                    @if (aspirant.originCampaign) {
+                    @if (getOriginCampaignDisplay(aspirant) !== 'No especificada') {
                       <div class="space-y-2 md:col-span-2">
                         <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Campaña de origen</label>
-                        <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">{{ aspirant.originCampaign }}</div>
+                        <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">{{ getOriginCampaignDisplay(aspirant) }}</div>
+                      </div>
+                    }
+                        </div>
                       </div>
                     }
                   </div>
-                </div>
-              }
+                }
 
-              <!-- Observaciones -->
-              @if (aspirant.observations) {
-                <div class="space-y-4">
-                  <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
-                    <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
-                      <i class="fas fa-sticky-note text-slate-600"></i>
-                    </div>
-                    <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Observaciones</h3>
-                  </div>
-                  <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-medium text-slate-700 whitespace-pre-wrap">
-                    {{ aspirant.observations }}
-                  </div>
-                </div>
-              }
-
-              <!-- Intereses en carreras -->
-              @if (aspirant.careerInterests && aspirant.careerInterests.length > 0) {
-                <div class="space-y-4">
-                  <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
-                    <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                      <i class="fas fa-graduation-cap text-blue-600"></i>
-                    </div>
-                    <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Intereses en Carreras</h3>
-                  </div>
-                  <div class="space-y-3">
+                <!-- Intereses en carreras -->
+                @if (aspirant.careerInterests && aspirant.careerInterests.length > 0) {
+                  <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                    <button
+                      type="button"
+                      (click)="toggleSection('careers')"
+                      class="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-slate-50/80 transition-colors"
+                    >
+                      <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
+                        <i class="fas fa-graduation-cap text-blue-600"></i>
+                      </div>
+                      <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight flex-1">Intereses en Carreras</h3>
+                      <i
+                        class="fas fa-chevron-down text-slate-400 transition-transform duration-200 shrink-0"
+                        [class.rotate-180]="isSectionExpanded('careers')"
+                      ></i>
+                    </button>
+                    @if (isSectionExpanded('careers')) {
+                      <div class="px-6 pb-6 pt-0 border-t border-slate-100">
+                        <div class="space-y-3">
                     @for (interest of aspirant.careerInterests; track $index) {
                       <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] flex items-center justify-between">
                         <div>
@@ -850,12 +889,15 @@
                         <div class="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-xs font-black">#{{ interest.priority }}</div>
                       </div>
                     }
+                        </div>
+                      </div>
+                    }
                   </div>
-                </div>
-              }
+                }
+              </div>
             }
           }
-          }
+        }
         </div>
       </div>
     </div>
