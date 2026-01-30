@@ -36,6 +36,8 @@ export class StudentRegistrationComponent implements OnInit {
   isLoading = signal(false);
   isLoadingProspect = signal(true);
   showSuccess = signal(false);
+  /** true cuando se detecta que el registro ya estaba completado (vuelve a entrar al enlace) */
+  alreadyHadRegistration = signal(false);
   errorMessage = signal<string | null>(null);
 
   // Data
@@ -163,8 +165,18 @@ export class StudentRegistrationComponent implements OnInit {
           const prospect = response.data;
           this.prospectData.set(prospect);
 
-          // Pre-llenar el formulario con los datos existentes
-          this.populateForm(prospect);
+          // Si el registro ya estaba completado, mostrar pantalla de éxito y plantilla
+          if (prospect.processStatus?.registrationComplete === true) {
+            this.alreadyHadRegistration.set(true);
+            this.showSuccess.set(true);
+            const iesId =
+              (prospect.firstChoiceIES as any)?._id ?? (prospect.firstChoiceIES as any);
+            if (iesId) {
+              this.loadSuccessPage(iesId);
+            }
+          } else {
+            this.populateForm(prospect);
+          }
         } else {
           this.errorMessage.set('No se pudo cargar la información del prospecto');
         }
@@ -177,6 +189,23 @@ export class StudentRegistrationComponent implements OnInit {
             'Error al cargar la información del prospecto. Verifica que el enlace sea correcto.',
         );
         this.isLoadingProspect.set(false);
+      },
+    });
+  }
+
+  /**
+   * Cargar la plantilla HTML de éxito (siguientes pasos) desde la IES
+   */
+  private loadSuccessPage(iesId: string): void {
+    this.iesService.getIESHtml(iesId).subscribe({
+      next: (res: any) => {
+        const html = res?.page ?? res?.data?.page ?? '';
+        this.htmlSeguro = this.sanitizer.bypassSecurityTrustHtml(html || '');
+      },
+      error: () => {
+        this.htmlSeguro = this.sanitizer.bypassSecurityTrustHtml(
+          '<p class="text-slate-500 text-center">No hay contenido adicional disponible.</p>',
+        );
       },
     });
   }

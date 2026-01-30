@@ -32,7 +32,7 @@
       </div>
     </div>
 
-    <!-- Success State -->
+    <!-- Success State (recién completado o ya estaba completado) -->
     <div *ngIf="showSuccess()" class="bg-white rounded-[2.5rem] shadow-2xl p-12 animate-zoom-in">
       <div class="text-center">
         <div
@@ -40,10 +40,17 @@
         >
           <i class="fas fa-check text-4xl"></i>
         </div>
-        <h3 class="text-3xl font-black text-gray-800 mb-3">¡Registro completado!</h3>
-        <p class="text-gray-500 font-medium mb-8 leading-relaxed">
-          Gracias por completar tu información. La Institución se pondrá en contacto contigo pronto.
-        </p>
+        @if (alreadyHadRegistration()) {
+          <h3 class="text-3xl font-black text-gray-800 mb-3">Registro ya realizado</h3>
+          <p class="text-gray-500 font-medium mb-8 leading-relaxed">
+            Este registro ya había sido completado con anterioridad. A continuación puedes ver la información de los siguientes pasos.
+          </p>
+        } @else {
+          <h3 class="text-3xl font-black text-gray-800 mb-3">¡Registro completado!</h3>
+          <p class="text-gray-500 font-medium mb-8 leading-relaxed">
+            Gracias por completar tu información. La Institución se pondrá en contacto contigo pronto.
+          </p>
+        }
         <div class="bg-blue-50/50 rounded-[2rem] p-6 mb-8 border border-blue-100">
           <div class="flex items-start gap-3">
             <i class="fas fa-info-circle text-blue-600 text-xl mt-0.5"></i>
