@@ -158,7 +158,6 @@
             class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-widest font-black"
           >
             <th class="px-8 py-5">Ciclo</th>
-            <th class="px-8 py-5">Código</th>
             <th class="px-8 py-5">Inicio</th>
             <th class="px-8 py-5">Fin</th>
             <th class="px-8 py-5">Estatus</th>
@@ -177,13 +176,6 @@
                 }
               </td>
               <td class="px-8 py-5">
-                <span
-                  class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-mono text-xs font-bold border border-slate-200"
-                >
-                  {{ cycle.code }}
-                </span>
-              </td>
-              <td class="px-8 py-5">
                 <div class="text-sm font-bold text-slate-700">
                   {{ cycle.period.startDate | date: 'dd MMM, yyyy' : '' : 'es' }}
                 </div>
@@ -198,16 +190,16 @@
                   <span
                     class="w-2 h-2 rounded-full animate-pulse"
                     [ngClass]="
-                      cycle.status === 'Activo'
+                      cycle.active
                         ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
                         : 'bg-slate-400'
                     "
                   ></span>
 
                   <span
-                    [ngClass]="cycle.status === 'Activo' ? 'text-emerald-600' : 'text-slate-500'"
+                    [ngClass]="cycle.active ? 'text-emerald-600' : 'text-slate-500'"
                   >
-                    {{ cycle.status || 'Finalizado' }}
+                    {{ cycle.active ? 'Activo' : 'Finalizado' }}
                   </span>
                 </span>
               </td>
@@ -264,7 +256,7 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="6" class="px-8 py-20 text-center">
+              <td colspan="5" class="px-8 py-20 text-center">
                 <div class="flex flex-col items-center gap-3">
                   <i class="fas fa-inbox text-slate-200 text-4xl"></i>
                   <p class="text-slate-400 font-medium italic">No se encontraron ciclos</p>
@@ -354,9 +346,24 @@
     class="relative w-full max-w-3xl bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300 max-h-[90vh] overflow-y-auto"
   >
     <div class="p-8">
-      <h2 class="text-xl font-black text-slate-900 mb-6 uppercase tracking-tight">
-        {{ isEditing() ? 'Editar Ciclo Académico' : 'Registrar Nuevo Ciclo' }}
-      </h2>
+      <form [formGroup]="cycleForm" (ngSubmit)="saveCycle()" class="space-y-6">
+        <!-- Header: título + switch Activo/Inactivo -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <h2 class="text-xl font-black text-slate-900 uppercase tracking-tight">
+            {{ isEditing() ? 'Editar Ciclo Académico' : 'Registrar Nuevo Ciclo' }}
+          </h2>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              {{ cycleForm.get('active')?.value ? 'Activo' : 'Inactivo' }}
+            </span>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input formControlName="active" type="checkbox" class="sr-only peer" />
+              <div
+                class="w-14 h-7 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"
+              ></div>
+            </label>
+          </div>
+        </div>
 
       <!-- Success/Error Messages -->
       <!-- <div
@@ -376,7 +383,6 @@
         </div>
       </div>
 
-      <form [formGroup]="cycleForm" (ngSubmit)="saveCycle()" class="space-y-6">
         <!-- Información Básica -->
         <div class="space-y-4">
           <h3 class="text-sm font-black text-slate-700 uppercase tracking-wider">
@@ -397,27 +403,6 @@
                   cycleForm.get('name')?.invalid && cycleForm.get('name')?.touched
                 "
               />
-            </div>
-
-            <div>
-              <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">
-                Estado *
-              </label>
-              <div
-                class="flex items-center gap-4 px-5 py-3 bg-slate-50 rounded-xl border border-slate-200"
-              >
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input formControlName="active" type="checkbox" class="sr-only peer" />
-                  <div
-                    class="w-14 h-7 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"
-                  ></div>
-                </label>
-                <div>
-                  <p class="text-xs font-bold text-slate-800">
-                    {{ cycleForm.get('active')?.value ? 'Activo' : 'Inactivo' }}
-                  </p>
-                </div>
-              </div>
             </div>
 
             <div>

@@ -28,10 +28,7 @@ interface CycleApiResponse {
 }
 
 // Interfaz adaptada para uso interno
-interface Cycle extends CycleApiResponse {
-  status?: string; // Calculado desde 'active'
-  isCurrent?: boolean; // Calculado
-}
+interface Cycle extends CycleApiResponse {}
 
 @Component({
   selector: 'app-cycles',
@@ -93,8 +90,6 @@ export class Cycles implements OnInit {
             // Adaptar los datos del API al formato interno
             const adaptedCycles: Cycle[] = response.data.map((cycle: CycleApiResponse) => ({
               ...cycle,
-              status: cycle.active ? 'Activo' : 'Finalizado',
-              isCurrent: cycle.active,
             }));
             this.cyclesList.set(adaptedCycles);
           } else {
@@ -202,16 +197,15 @@ export class Cycles implements OnInit {
     const term = this.searchTerm().toLowerCase();
     const allCycles = this.cyclesList();
 
-    // Filtrar por término de búsqueda y excluir ciclos activos
+    // Filtrar por término de búsqueda y excluir el ciclo activo (se muestra en la tarjeta superior)
     return allCycles.filter((c) => {
       const matchesSearch = c.name.toLowerCase().includes(term);
-      const isNotActive = c.status !== 'Activo' && !c.isCurrent;
-      return matchesSearch && isNotActive;
+      return matchesSearch && !c.active;
     });
   });
 
   // Active Cycle Helper
-  activeCycle = computed(() => this.cyclesList().find((c) => c.status === 'Activo' || c.isCurrent));
+  activeCycle = computed(() => this.cyclesList().find((c) => c.active));
 
   // Paginated cycles
   pagedCycles = computed(() => {
