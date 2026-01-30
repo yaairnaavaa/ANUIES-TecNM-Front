@@ -19,6 +19,7 @@ export class Login {
   mode = signal<'login' | 'forgot'>('login');
   isLoading = signal(false);
   errorMessage = signal<string>('');
+  hidePassword = signal(true);
 
   loginForm: FormGroup;
   forgotForm: FormGroup;
@@ -92,4 +93,8 @@ export class Login {
   changeMode(newMode: 'login' | 'forgot') {
     this.mode.set(newMode);
   }
+
+  togglePasswordVisibility() {
+  this.hidePassword.update(v => !v);
+}
 }

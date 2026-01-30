@@ -1,30 +1,56 @@
-<div class="min-h-screen flex items-center justify-center bg-[#0f172a] px-4">
+<div
+  class="min-h-screen flex items-center justify-center bg-[#05070a] relative overflow-hidden px-4 py-8 font-sans"
+>
   <div
-    class="max-w-4xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
-  >
-    <div class="hidden md:flex md:w-1/2 bg-blue-50 items-center justify-center p-12 relative">
-      <div class="absolute inset-0 bg-gradient-to-br from-blue-900/10 to-transparent"></div>
+    class="absolute top-[-5%] left-[-5%] md:top-[-10%] md:left-[-10%] w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-blue-600/20 rounded-full blur-[80px] md:blur-[120px] animate-pulse"
+  ></div>
+  <div
+    class="absolute bottom-[-5%] right-[-5%] md:bottom-[-10%] md:right-[-10%] w-[250px] h-[250px] md:w-[500px] md:h-[500px] bg-indigo-600/20 rounded-full blur-[70px] md:blur-[100px]"
+  ></div>
 
-      <div class="relative z-10 text-center">
-        <img
-          src="assets/images/ANUIES.jpg"
-          alt="Ilustración de acceso"
-          class="w-full h-auto max-h-[300px] object-contain drop-shadow-2xl mb-8 transform hover:scale-105 transition-transform duration-500"
-        />
-        <h3 class="text-2xl font-bold text-blue-900">Asociación Nacional de Universidades e Instituciones de Educación Superior
-</h3>
-        <p class="text-blue-700/70 mt-2">
-          Desarrollada por TecNM
-        </p>
+  <div
+    class="max-w-5xl w-full grid md:grid-cols-2 bg-white/[0.02] backdrop-blur-2xl border border-white/10 rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden z-10 relative"
+  >
+    <div
+      class="relative flex flex-col justify-center items-center p-8 md:p-16 bg-gradient-to-br from-blue-600/20 via-transparent to-transparent border-b md:border-b-0 md:border-r border-white/10"
+    >
+      <div
+        class="absolute top-6 left-6 hidden md:inline-flex items-center px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold tracking-[0.2em] uppercase"
+      >
+        Plataforma Oficial de ANUIES
+      </div>
+
+      <div class="relative z-10 text-center space-y-6">
+        <div class="relative inline-block group">
+          <div
+            class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000"
+          ></div>
+          <div class="relative bg-[#0a0f1e] rounded-2xl p-4 border border-white/10">
+            <img
+              src="assets/images/ANUIES.jpg"
+              alt="ANUIES"
+              class="w-full h-auto max-h-[180px] md:max-h-[300px] object-contain transform hover:scale-105 transition-transform duration-500"
+            />
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <h3 class="text-lg md:text-2xl font-bold text-white leading-tight px-4 md:px-0">
+            Asociación Nacional de Universidades e Instituciones de Educación Superior
+          </h3>
+          <p class="text-blue-400/80 text-xs md:text-sm font-medium tracking-wide">
+            Desarrollada por TecNM
+          </p>
+        </div>
       </div>
     </div>
 
-    <div class="w-full md:w-1/2 p-8 md:p-12">
-      <div class="text-center mb-10">
-        <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
-          {{ mode() === 'login' ? 'Bienvenido' : 'Recuperar contraseña' }}
+    <div class="bg-white p-8 md:p-16 flex flex-col justify-center relative">
+      <div class="text-center md:text-left mb-8 md:mb-12">
+        <h2 class="text-3xl md:text-4xl font-[900] text-slate-900 tracking-tight">
+          {{ mode() === 'login' ? 'Hola de nuevo' : 'Recuperar contraseña' }}
         </h2>
-        <p class="text-sm text-gray-500 mt-2">
+        <p class="text-sm md:text-base text-slate-500 mt-3 font-medium">
           {{
             mode() === 'login'
               ? 'Ingresa tus credenciales para continuar'
@@ -33,155 +59,214 @@
         </p>
       </div>
 
-      @if (mode() === 'login'){
-      <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="space-y-5">
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 ml-1">Email</label>
-          <div class="relative mt-1">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg
-                class="h-5 w-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+      @if (mode() === 'login') {
+        <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="space-y-6">
+          <div class="space-y-1.5">
+            <label
+              class="block text-xs md:text-sm font-bold text-slate-700 ml-1 uppercase tracking-wider"
+              >Email</label
+            >
+            <div class="relative group">
+              <div
+                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-600"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
-                />
-              </svg>
+                <svg
+                  class="h-5 w-5 text-slate-400 group-focus-within:text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                  />
+                </svg>
+              </div>
+              <input
+                type="email"
+                formControlName="email"
+                [attr.disabled]="isLoading() ? true : null"
+                class="pl-12 block w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white outline-none transition-all disabled:bg-slate-100 text-slate-900 shadow-sm"
+                placeholder="correo@ejemplo.com"
+              />
             </div>
-            <input
-              type="email"
-              formControlName="email"
-              [attr.disabled]="isLoading() ? true : null"
-              class="pl-10 block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-900 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
-              placeholder="correo@ejemplo.com"
-            />
           </div>
-        </div>
 
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 ml-1">Contraseña</label>
-          <div class="relative mt-1">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg
-                class="h-5 w-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <div class="space-y-1.5">
+            <label
+              class="block text-xs md:text-sm font-bold text-slate-700 ml-1 uppercase tracking-wider"
+            >
+              Contraseña
+            </label>
+            <div class="relative group">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg
+                  class="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
+                </svg>
+              </div>
+
+              <input
+                [type]="hidePassword() ? 'password' : 'text'"
+                formControlName="password"
+                [attr.disabled]="isLoading() ? true : null"
+                class="pl-12 pr-12 block w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white outline-none transition-all disabled:bg-slate-100 text-slate-900 shadow-sm"
+                placeholder="••••••••"
+              />
+
+              <button
+                type="button"
+                (click)="togglePasswordVisibility()"
+                class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-blue-600 transition-colors focus:outline-none"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
+                @if (hidePassword()) {
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                } @else {
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"
+                    />
+                  </svg>
+                }
+              </button>
             </div>
-            <input
-              type="password"
-              formControlName="password"
-              [attr.disabled]="isLoading() ? true : null"
-              class="pl-10 block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-900 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
-              placeholder="••••••••"
-            />
           </div>
-        </div>
 
-      @if(errorMessage()) {
-      <div class="p-3 bg-red-50 border border-red-200 rounded-xl">
-        <p class="text-sm text-red-600 font-medium">{{ errorMessage() }}</p>
-      </div>
-      }
+          @if (errorMessage()) {
+            <div
+              class="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl animate-in fade-in slide-in-from-left-2 duration-300"
+            >
+              <p class="text-sm text-red-700 font-bold flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                {{ errorMessage() }}
+              </p>
+            </div>
+          }
 
-        <div class="flex items-center justify-end">
+          <div class="flex items-center justify-end">
+            <button
+              type="button"
+              (click)="changeMode('forgot')"
+              [disabled]="isLoading()"
+              class="text-sm font-bold text-blue-600 hover:text-indigo-700 transition-colors disabled:text-slate-400"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="loginForm.invalid || isLoading()"
+            class="w-full py-4 px-6 bg-slate-900 hover:bg-blue-600 text-white font-[800] rounded-2xl shadow-xl shadow-slate-900/20 hover:shadow-blue-600/30 transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex justify-center items-center gap-3"
+          >
+            @if (isLoading()) {
+              <div
+                class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
+              ></div>
+              <span>Validando datos...</span>
+            } @else {
+              <span>Acceder a la plataforma</span>
+            }
+          </button>
+        </form>
+      } @else {
+        <form
+          [formGroup]="forgotForm"
+          (ngSubmit)="onForgot()"
+          class="space-y-6 animate-in fade-in duration-500"
+        >
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700 ml-1 uppercase tracking-wider"
+              >Email registrado</label
+            >
+            <div class="relative group">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg
+                  class="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+              <input
+                type="email"
+                formControlName="email"
+                [attr.disabled]="isLoading() ? true : null"
+                class="pl-12 block w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 outline-none transition-all"
+                placeholder="ejemplo@correo.com"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="forgotForm.invalid || isLoading()"
+            class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-600/20 transition-all flex justify-center items-center gap-3 disabled:opacity-50"
+          >
+            @if (isLoading()) {
+              <span>Enviando código...</span>
+            } @else {
+              <span>Enviar código</span>
+            }
+          </button>
+
           <button
             type="button"
-            (click)="changeMode('forgot')"
+            (click)="changeMode('login')"
             [disabled]="isLoading()"
-            class="text-sm font-medium text-blue-900 hover:text-blue-700 hover:underline disabled:text-gray-400 disabled:no-underline transition-colors"
+            class="w-full text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors flex items-center justify-center gap-2"
           >
-            ¿Olvidaste tu contraseña?
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
+            Volver al inicio
           </button>
-        </div>
-
-        <button
-          type="submit"
-          [disabled]="loginForm.invalid || isLoading()"
-          class="w-full py-3.5 px-4 bg-blue-900 hover:bg-blue-800 text-white font-bold rounded-xl shadow-lg transition-all flex justify-center items-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.98]"
-        >
-          @if (isLoading()) {
-          <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-          <span>Validando...</span>
-          } @else {
-          <span>Iniciar Sesión</span>
-          }
-        </button>
-      </form>
-      } @else {
-      <form [formGroup]="forgotForm" (ngSubmit)="onForgot()" class="space-y-5">
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 ml-1">Email registrado</label>
-          <div class="relative mt-1">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg
-                class="h-5 w-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
-            <input
-              type="email"
-              formControlName="email"
-              [attr.disabled]="isLoading() ? true : null"
-              class="pl-10 block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-900 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
-              placeholder="ejemplo@correo.com"
-            />
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          [disabled]="forgotForm.invalid || isLoading()"
-          class="w-full py-3.5 px-4 bg-blue-900 hover:bg-blue-800 text-white font-bold rounded-xl shadow-lg transition-all flex justify-center items-center gap-3 disabled:opacity-60"
-        >
-          @if (isLoading()) { <span>Enviando...</span> } @else { <span>Enviar código</span> }
-        </button>
-
-        <button
-          type="button"
-          (click)="changeMode('login')"
-          [disabled]="isLoading()"
-          class="w-full text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors disabled:opacity-30"
-        >
-          &larr; Volver al inicio
-        </button>
-      </form>
+        </form>
       }
     </div>
   </div>
