@@ -71,7 +71,6 @@ export class Cycles implements OnInit {
   initializeForm() {
     this.cycleForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
-      code: ['', Validators.required],
       description: [''],
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
@@ -138,7 +137,6 @@ export class Cycles implements OnInit {
     // 2. Estructurar la data según el modelo del API
     const cycleData = {
       name: this.cycleForm.value.name,
-      code: this.cycleForm.value.code,
       description: this.cycleForm.value.description || '',
       period: {
         startDate: this.cycleForm.value.startDate,
@@ -403,7 +401,6 @@ export class Cycles implements OnInit {
 
     this.cycleForm.patchValue({
       name: cycle.name,
-      code: cycle.code,
       active: cycle.active,
       description: cycle.description,
       startDate: this.formatDate(cycle.period.startDate),
