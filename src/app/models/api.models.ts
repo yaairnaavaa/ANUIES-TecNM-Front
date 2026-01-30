@@ -57,13 +57,21 @@ export interface IES {
     logoPublicId?: string;
     banner?: string;
     bannerPublicId?: string;
-    gallery?: string[];
+    gallery?: Array<{
+      url: string;
+      publicId?: string;
+      description?: string;
+    }>;
   };
   branding?: {
     primaryColor?: string;
     secondaryColor?: string;
     accentColor?: string;
     fontFamily?: string;
+  };
+  ofertaEducativa?: {
+    descripcion?: string;
+    totalCarreras?: number;
   };
   socialMedia?: {
     facebook?: string;

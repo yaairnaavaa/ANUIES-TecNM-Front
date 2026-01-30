@@ -53,6 +53,14 @@ export class IesService {
     return this.http.post<ApiResponse<Career>>(`${this.baseUrl}/${iesId}/carreras`, career);
   }
 
+  updateCareer(careerId: string, career: Partial<Career>): Observable<ApiResponse<Career>> {
+    return this.http.patch<ApiResponse<Career>>(`${environment.apiUrl}/careers/${careerId}`, career);
+  }
+
+  deleteCareerIES(iesId: string, carreraId: string): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(`${this.baseUrl}/${iesId}/carreras/${carreraId}`);
+  }
+
   // Guardar el contenido del HTML de una IES
   saveIESHtml(iesId: string, htmlContent: string): Observable<ApiResponse<any>> {
     const url = `${this.baseUrl}/${iesId}/htmlPage`;
@@ -90,5 +98,81 @@ export class IesService {
    */
   getIESStatistics(id: string): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(`${this.baseUrl}/${id}/statistics`);
+  }
+
+  /**
+   * Actualizar filosofía institucional (misión y visión)
+   */
+  updateFilosofia(id: string, data: { mision?: string; vision?: string }): Observable<ApiResponse<IES>> {
+    return this.http.patch<ApiResponse<IES>>(`${this.baseUrl}/${id}/filosofia`, data);
+  }
+
+  /**
+   * Actualizar identidad visual (branding e imágenes)
+   */
+  updateIdentidadVisual(id: string, data: {
+    branding?: {
+      primaryColor?: string;
+      secondaryColor?: string;
+      accentColor?: string;
+      fontFamily?: string;
+    };
+    institutionalImage?: {
+      logo?: string;
+      logoPublicId?: string;
+      banner?: string;
+      bannerPublicId?: string;
+    };
+  }): Observable<ApiResponse<IES>> {
+    return this.http.patch<ApiResponse<IES>>(`${this.baseUrl}/${id}/identidad-visual`, data);
+  }
+
+  /**
+   * Actualizar canales digitales (redes sociales y contacto)
+   */
+  updateCanalesDigitales(id: string, data: {
+    contact?: {
+      website?: string;
+      socialMedia?: {
+        facebook?: string;
+        instagram?: string;
+        twitter?: string;
+        youtube?: string;
+        tiktok?: string;
+      };
+    };
+  }): Observable<ApiResponse<IES>> {
+    return this.http.patch<ApiResponse<IES>>(`${this.baseUrl}/${id}/canales-digitales`, data);
+  }
+
+  /**
+   * Subir logo institucional
+   * TODO: Configurar cuando Cloudinary esté listo
+   */
+  uploadLogo(id: string, file: File): Observable<ApiResponse<any>> {
+    const formData = new FormData();
+    formData.append('logo', file);
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/${id}/upload-logo`, formData);
+  }
+
+  /**
+   * Subir banner institucional
+   * TODO: Configurar cuando Cloudinary esté listo
+   */
+  uploadBanner(id: string, file: File): Observable<ApiResponse<any>> {
+    const formData = new FormData();
+    formData.append('banner', file);
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/${id}/upload-banner`, formData);
+  }
+
+  /**
+   * Agregar imagen a galería
+   * TODO: Configurar cuando Cloudinary esté listo
+   */
+  uploadGalleryImage(id: string, file: File, description?: string): Observable<ApiResponse<any>> {
+    const formData = new FormData();
+    formData.append('image', file);
+    if (description) formData.append('description', description);
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/${id}/upload-gallery`, formData);
   }
 }

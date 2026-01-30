@@ -1,0 +1,502 @@
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+  FormArray,
+} from '@angular/forms';
+
+import { IesService } from '../../../services/ies.service';
+import { AuthService } from '../../../services/auth.service';
+
+/**
+ * Secciones editables del perfil
+ */
+type EditSection = 'general' | 'social' | 'visual';
+
+@Component({
+  selector: 'app-ies-profile-settings',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './ies-profile-settings.html',
+})
+export class IesProfileSettings implements OnInit {
+  private fb = inject(FormBuilder);
+  private iesService = inject(IesService);
+  private authService = inject(AuthService);
+
+  isSaving = false;
+  showCareerModal = false;
+  uploadingLogo = false;
+  uploadingBanner = false;
+  loadingCareers = false;
+  savingCareer = false;
+
+  editModes: Record<EditSection, boolean> = {
+    general: false,
+    social: false,
+    visual: false,
+  };
+
+  iesForm!: FormGroup;
+  newCareerForm!: FormGroup;
+  currentIesId?: string;
+
+  // ================================
+  // Lifecycle
+  // ================================
+  ngOnInit(): void {
+    this.buildForm();
+    this.buildNewCareerForm();
+    this.loadData();
+  }
+
+  // ================================
+  // Form setup
+  // ================================
+  private buildForm(): void {
+    this.iesForm = this.fb.group({
+      mision: ['', Validators.required],
+      vision: ['', Validators.required],
+
+      branding: this.fb.group({
+        primaryColor: ['#4f46e5', Validators.required],
+        secondaryColor: ['#0f172a', Validators.required],
+        accentColor: ['#10b981'],
+      }),
+
+      institutionalImage: this.fb.group({
+        logo: [''],
+        logoPublicId: [''],
+        banner: [''],
+        bannerPublicId: [''],
+      }),
+
+      socialMedia: this.fb.group({
+        website: [''],
+        facebook: [''],
+        instagram: [''],
+        tiktok: [''],
+      }),
+
+      careers: this.fb.array([]),
+    });
+  }
+
+  private buildNewCareerForm(): void {
+    this.newCareerForm = this.fb.group({
+      name: ['', Validators.required],
+      code: ['', Validators.required],
+      modality: ['Presencial', Validators.required],
+      shortName: [''],
+      careerLink: [''],
+    });
+  }
+
+  // ================================
+  // Getters
+  // ================================
+  get careers(): FormArray<FormGroup> {
+    return this.iesForm.get('careers') as FormArray<FormGroup>;
+  }
+
+  // ================================
+  // Helpers
+  // ================================
+  private getIesId(): string | undefined {
+    const user = this.authService.currentUser();
+    
+    if (typeof user?.ies === 'string') {
+      return user.ies;
+    } else if (user?.ies && typeof user.ies === 'object') {
+      return (user.ies as any)._id || (user.ies as any).id;
+    }
+    
+    return undefined;
+  }
+
+  // ================================
+  // Data loading
+  // ================================
+  loadData(): void {
+    const user = this.authService.currentUser();
+    console.log('Usuario actual:', user);
+
+    // Extraer el ID de la IES - puede ser string, objeto con _id, o objeto con id
+    let iesId: string | undefined;
+    
+    if (typeof user?.ies === 'string') {
+      iesId = user.ies;
+    this.currentIesId = iesId;
+    console.log('Cargando datos de IES:', iesId);
+
+    this.iesService.getIESById(iesId).subscribe({
+      next: (res) => {
+        console.log('Respuesta de getIESById:', res);
+        const data = res?.data;
+        if (!data) {
+          console.error('No hay datos en la respuesta');
+          return;
+        }
+
+        this.iesForm.patchValue({
+          mision: data.mision ?? '',
+          vision: data.vision ?? '',
+          branding: {
+            primaryColor: data.branding?.primaryColor ?? '#4f46e5',
+            secondaryColor: data.branding?.secondaryColor ?? '#0f172a',
+            accentColor: data.branding?.accentColor ?? '#10b981',
+          },
+          institutionalImage: {
+            logo: data.institutionalImage?.logo ?? '',
+            logoPublicId: data.institutionalImage?.logoPublicId ?? '',
+            banner: data.institutionalImage?.banner ?? '',
+            bannerPublicId: data.institutionalImage?.bannerPublicId ?? '',
+          },
+          socialMedia: data.contact?.socialMedia ?? {},
+        });
+
+        console.log('Formulario actualizado con datos de IES');
+
+        // Cargar carreras por separado
+        this.loadCareers(iesId);
+      },
+      error: (err) => {
+        console.error('Error al cargar datos de IES:', err);
+      }
+    });
+  }
+
+  loadCareers(iesId: string): void {
+    this.loadingCareers = true;
+    
+    this.iesService.getCareersIES(iesId).subscribe({
+      next: (res) => {
+        console.log('Carreras cargadas:', res);
+        this.careers.clear();
+
+        (res.data ?? []).forEach((career: any) => {
+          this.careers.push(
+            this.fb.group({
+              _id: [career._id],
+              name: [career.name ?? '', Validators.required],
+              code: [career.code ?? ''],
+              modality: [career.modality ?? 'Presencial', Validators.required],
+              shortName: [career.shortName ?? ''],
+            }),
+          );
+        });
+
+        this.loadingCareers = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar carreras:', err);
+        this.loadingCareers = false
+        (data.careers ?? []).forEach((career: any) => {
+          this.careers.push(
+            this.fb.group({
+              name: [career.name ?? '', Validators.required],
+              modality: [career.modality ?? '', Validators.required],
+            }),
+          );
+        });
+      },
+      error: (err) => {
+        console.error('Error al cargar datos de IES:', err);
+      }
+    });
+  }
+
+  // ================================
+  // UI actions
+  // ================================
+  toggleEdit(section: EditSection): void {
+    this.editModes[section] = !this.editModes[section];
+  }
+
+  // ================================
+  // Save actions
+  // ================================
+  saveGeneral(): void {
+    if (this.iesForm.get('mision')?.invalid || this.iesForm.get('vision')?.invalid) {
+      alert('Por favor completa la misión y visión');
+      return;
+    }
+
+    const iesId = this.getIesId();
+    
+    if (!iesId) {
+      console.error('No se pudo obtener el ID de la IES del usuario');
+      alert('Error: No se pudo identificar tu institución');
+      return;
+    }
+
+    console.log('Guardando filosofía para IES:', iesId);
+    this.isSaving = true;
+
+    this.iesService.updateFilosofia(iesId, {
+      mision: this.iesForm.value.mision,
+      vision: this.iesForm.value.vision,
+    }).subscribe({
+      next: (response) => {
+        console.log('Filosofía actualizada:', response);
+        this.editModes.general = false;
+        this.isSaving = false;
+        alert('Filosofía institucional actualizada correctamente');
+      },
+      error: (err) => {
+        console.error('Error al actualizar filosofía:', err);
+        this.isSaving = false;
+        alert('Error al actualizar: ' + (err.error?.message || err.message || 'Error desconocido'));
+      },
+    });
+  }
+
+  saveBranding(): void {
+    const iesId = this.getIesId();
+    
+    if (!iesId) {
+      console.error('No se pudo obtener el ID de la IES del usuario:', user);
+      alert('Error: No se pudo identificar tu institución');
+      return;
+    }
+
+    console.log('Guardando identidad visual para IES:', iesId);
+    this.isSaving = true;
+
+    this.iesService.updateIdentidadVisual(iesId, {
+      branding: this.iesForm.value.branding,
+      institutionalImage: this.iesForm.value.institutionalImage,
+    }).subscribe({
+      next: (response) => {
+        console.log('Identidad visual actualizada:', response);
+        this.editModes.visual = false;
+        this.isSaving = false;
+        alert('Identidad visual actualizada correctamente');
+      },
+      error: (err) => {
+        console.error('Error al actualizar identidad visual:', err);
+        this.isSaving = false;
+        alert('Error al actualizar: ' + (err.error?.message || err.message || 'Error desconocido'));
+      },
+    });
+  }
+
+  saveSocial(): void {
+    const iesId = this.getIesId();
+    
+    if (!iesId) {
+      console.error('No se pudo obtener el ID de la IES del usuario:', user);
+      alert('Error: No se pudo identificar tu institución');
+      return;
+    }
+
+    console.log('Guardando canales digitales para IES:', iesId);
+    this.isSaving = true;
+
+    this.iesService.updateCanalesDigitales(iesId, {
+      contact: {
+        socialMedia: this.iesForm.value.socialMedia,
+      }
+    }).subscribe({
+      next: (response) => {
+        console.log('Canales digitales actualizados:', response);
+        this.editModes.social = false;
+        this.isSaving = false;
+        alert('Canales digitales actualizados correctamente');
+      },
+      error: (err) => {
+        console.error('Error al actualizar canales digitales:', err);
+        this.isSaving = false;
+        alert('Error al actualizar: ' + (err.error?.message || err.message || 'Error desconocido'));
+      },
+    });
+  }
+
+  // ================================
+  // Image uploads (preparado para Cloudinary)
+  // ================================
+  onLogoSelected(event: any): void {
+    const file = event.target?.files?.[0];
+    if (!file) return;
+
+    // Validar tamaño y tipo
+    if (file.size > 2 * 1024 * 1024) {
+      alert('El archivo debe ser menor a 2MB');
+      return;
+    }
+
+    if (!['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'].includes(file.type)) {
+      alert('Solo se permiten archivos PNG, JPG o SVG');
+      return;
+    }
+
+    const iesId = this.getIesId();
+    
+    if (!iesId) return;
+
+    this.uploadingLogo = true;
+
+    // Placeholder: mostrar preview local
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.iesForm.patchValue({
+        institutionalImage: {
+          ...this.iesForm.value.institutionalImage,
+          logo: e.target.result, // Preview temporal
+        }
+      });
+      this.uploadingLogo = false;
+      alert('Preview cargado. Configuración de Cloudinary pendiente para guardar permanentemente.');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  onBannerSelected(event: any): void {
+    const file = event.target?.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('El archivo debe ser menor a 2MB');
+      return;
+    }
+
+    if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+      alert('Solo se permiten archivos PNG o JPG');
+      return;
+    }
+
+    const iesId = this.getIesId();
+    
+    if (!iesId) return;
+
+    this.uploadingBanner = true;
+
+    // Placeholder: mostrar preview local
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.iesForm.patchValue({
+        institutionalImage: {
+          ...this.iesForm.value.institutionalImage,
+          banner: e.target.result,
+        }
+      });
+      this.uploadingBanner = false;
+      alert('Preview cargado. Configuración de Cloudinary pendiente.');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ================================
+  // Gestión de Carreras
+  // ================================
+  openCareerModal(): void {
+    this.newCareerForm.reset({
+      modality: 'Presencial'
+    });
+    this.showCareerModal = true;
+  }
+
+  closeCareerModal(): void {
+    this.showCareerModal = false;
+    this.newCareerForm.reset();
+  }
+
+  addCareer(): void {
+    if (this.newCareerForm.invalid) {
+      alert('Por favor completa todos los campos requeridos');
+      return;
+    }
+
+    if (!this.currentIesId) {
+      alert('Error: No se pudo identificar la institución');
+      return;
+    }
+
+    this.savingCareer = true;
+
+    const careerData = {
+      name: this.newCareerForm.value.name,
+      code: this.newCareerForm.value.code,
+      modality: this.newCareerForm.value.modality,
+      shortName: this.newCareerForm.value.shortName || '',
+      careerLink: this.newCareerForm.value.careerLink || '',
+    };
+
+    console.log('Agregando carrera:', careerData);
+
+    this.iesService.createCareerIES(this.currentIesId, careerData).subscribe({
+      next: (response) => {
+        console.log('Carrera agregada:', response);
+        this.savingCareer = false;
+        this.closeCareerModal();
+        alert('Carrera agregada correctamente');
+        // Recargar carreras
+        this.loadCareers(this.currentIesId!);
+      },
+      error: (err) => {
+        console.error('Error al agregar carrera:', err);
+        this.savingCareer = false;
+        alert('Error al agregar carrera: ' + (err.error?.message || err.message || 'Error desconocido'));
+      }
+    });
+  }
+
+  deleteCareer(index: number): void {
+    const career = this.careers.at(index).value;
+    
+    if (!career._id) {
+      console.log('Carrera sin ID, removiendo solo del formulario');
+      this.careers.removeAt(index);
+      return;
+    }
+
+    if (!confirm(`¿Estás seguro de eliminar la carrera "${career.name}"?`)) {
+      return;
+    }
+
+    if (!this.currentIesId) {
+      console.error('No hay IES ID disponible');
+      return;
+    }
+
+    console.log('Eliminando carrera:', career._id);
+
+    this.iesService.deleteCareerIES(this.currentIesId, career._id).subscribe({
+      next: (response) => {
+        console.log('Carrera eliminada exitosamente:', response);
+        this.careers.removeAt(index);
+        alert('Carrera eliminada correctamente');
+      },
+      error: (error) => {
+        console.error('Error al eliminar carrera:', error);
+        alert('Error al eliminar la carrera: ' + (error.error?.message || 'Error desconocido'));
+      }
+    });
+  }
+
+  // ================================
+  // Deprecated - Mantener por compatibilidad
+  // ================================
+  private update(payload: any, section?: EditSection): void {
+    const iesId = this.getIesId();
+
+    if (!iesId) return;
+
+    this.isSaving = true;
+
+    this.iesService.updateIES(iesId, payload).subscribe({
+      next: () => {
+        if (section) {
+          this.editModes[section] = false;
+        }
+        this.isSaving = false;
+      },
+      error: () => {
+        this.isSaving = false;
+      },
+    });
+  }
+}

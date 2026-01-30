@@ -74,7 +74,7 @@
         </p>
       </header>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div formGroupName="institutionalImage">
         <div class="space-y-4">
           <label class="text-sm font-semibold text-slate-700 block">Logotipo institucional</label>
           <div class="flex items-center gap-6">
@@ -82,31 +82,41 @@
               class="relative w-32 h-32 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden group hover:border-indigo-400 transition-colors"
             >
               <img
-                *ngIf="iesForm.value.branding?.logoUrl"
-                [src]="iesForm.value.branding.logoUrl"
+                *ngIf="iesForm.value.institutionalImage?.logo"
+                [src]="iesForm.value.institutionalImage.logo"
                 class="object-contain w-full h-full p-4"
               />
-              <div *ngIf="!iesForm.value.branding?.logoUrl" class="text-center p-4">
+              <div *ngIf="!iesForm.value.institutionalImage?.logo" class="text-center p-4">
                 <span class="text-slate-400 text-xs font-medium">Sin logo</span>
               </div>
             </div>
 
             <div class="flex flex-col gap-2">
+              <input
+                #logoInput
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/svg+xml"
+                (change)="onLogoSelected($event)"
+                class="hidden"
+              />
               <button
                 type="button"
+                (click)="logoInput.click()"
                 class="px-4 py-2 text-sm rounded-lg font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm"
               >
                 Cambiar logo
               </button>
-              <p class="text-[11px] text-slate-400">PNG, JPG o SVG. Máx. 2MB</p>
+              <p class="text-[11px] text-slate-400">PNG, JPG o SVG. Máx. 2MB (Solo preview)</p>
             </div>
           </div>
         </div>
+      </div>
 
-        <div formGroupName="branding" class="space-y-6">
-          <label class="text-sm font-semibold text-slate-700 block">Paleta de colores</label>
+      <!-- Personalización de colores -->
+      <div formGroupName="branding" class="space-y-6 mt-8">
+        <label class="text-sm font-semibold text-slate-700 block">Paleta de colores</label>
 
-          <div class="grid grid-cols-1 gap-4">
+        <div class="grid grid-cols-1 gap-4">
             <div
               class="flex items-center gap-4 p-3 rounded-xl border border-slate-100 bg-slate-50/50"
             >
@@ -138,9 +148,28 @@
                 </span>
               </div>
             </div>
+
+            <div
+              class="flex items-center gap-4 p-3 rounded-xl border border-slate-100 bg-slate-50/50"
+            >
+              <input
+                type="color"
+                formControlName="accentColor"
+                class="w-10 h-10 rounded-lg border-0 cursor-pointer bg-transparent"
+              />
+              <div>
+                <p class="text-xs font-bold text-slate-700">Color de acento</p>
+                <span class="font-mono text-[10px] uppercase text-slate-500">
+                  {{ iesForm.value.branding?.accentColor || '#000000' }}
+                </span>
+              </div>
+            </div>
           </div>
+
+          <p class="text-xs text-slate-500 italic">
+            Nota: Los colores se guardarán pero aún no se aplicarán a la interfaz. Esa funcionalidad se implementará próximamente.
+          </p>
         </div>
-      </div>
 
       <footer class="mt-10 pt-6 border-t border-slate-100 flex justify-end">
         <button
@@ -162,7 +191,7 @@
         </div>
         <button
           type="button"
-          (click)="showCareerModal = true"
+          (click)="openCareerModal()"
           class="px-5 py-2.5 bg-indigo-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-indigo-100 flex items-center gap-2"
         >
           <svg
@@ -183,65 +212,102 @@
         </button>
       </div>
 
-      <div class="overflow-hidden border border-slate-100 rounded-2xl">
-        <table class="w-full text-left border-collapse">
+      <div class="border border-slate-100 rounded-2xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
           <thead class="bg-slate-50/50 border-b border-slate-100">
             <tr>
-              <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                Nombre de la Carrera
+              <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-left">
+                Programa Académico
               </th>
-              <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">
                 Modalidad
               </th>
-              <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">
+                Estatus
+              </th>
+              <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">
                 Acciones
               </th>
             </tr>
           </thead>
           <tbody formArrayName="careers">
-            <tr
-              *ngFor="let _ of careers.controls; let i = index"
-              [formGroupName]="i"
-              class="hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
-            >
-              <td class="px-6 py-4">
-                <span class="font-semibold text-slate-700">{{ careers.at(i).value.name }}</span>
-              </td>
-              <td class="px-6 py-4 text-center">
-                <span class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold">
-                  {{ careers.at(i).value.modality }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-right">
-                <button
-                  type="button"
-                  (click)="deleteCareer(i)"
-                  class="p-2 text-slate-400 hover:text-rose-600 transition-colors"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <polyline points="3 6 5 6 21 6" />
-                    <path
-                      d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                    />
-                    <line x1="10" y1="11" x2="10" y2="17" />
-                    <line x1="14" y1="11" x2="14" y2="17" />
-                  </svg>
-                </button>
+            <!-- Mensaje de carga -->
+            <tr *ngIf="loadingCareers">
+              <td colspan="4" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center">
+                  <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-3"></div>
+                  <p class="text-slate-500 text-sm">Cargando carreras...</p>
+                </div>
               </td>
             </tr>
 
-            <tr *ngIf="careers.length === 0">
-              <td colspan="3" class="px-6 py-12 text-center">
+            <!-- Carreras - Solo mostrar cuando NO está cargando -->
+            <ng-container *ngIf="!loadingCareers">
+              <tr
+                *ngFor="let _ of careers.controls; let i = index"
+                [formGroupName]="i"
+                class="hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
+              >
+                <td class="px-6 py-4">
+                  <div class="flex flex-col">
+                    <span class="font-semibold text-slate-700">{{ careers.at(i).value.name }}</span>
+                    <span class="text-xs text-slate-400 mt-0.5">{{ careers.at(i).value.code }}</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <span class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold">
+                    {{ careers.at(i).value.modality }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <span 
+                    *ngIf="careers.at(i).value.active !== false"
+                    class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold inline-flex items-center gap-1.5"
+                  >
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                    ACTIVA
+                  </span>
+                  <span 
+                    *ngIf="careers.at(i).value.active === false"
+                    class="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-bold inline-flex items-center gap-1.5"
+                  >
+                    <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                    INACTIVA
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <div class="flex justify-end">
+                    <!-- Botón de menú (3 puntos) -->
+                    <button
+                      type="button"
+                      (click)="toggleCareerMenu(i, $event)"
+                      class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <circle cx="12" cy="12" r="1" />
+                        <circle cx="12" cy="5" r="1" />
+                        <circle cx="12" cy="19" r="1" />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+
+            <!-- Mensaje cuando no hay carreras -->
+            <tr *ngIf="!loadingCareers && careers.length === 0">
+              <td colspan="4" class="px-6 py-12 text-center">
                 <div class="flex flex-col items-center opacity-40">
                   <svg
                     class="mb-3 text-slate-300"
@@ -264,6 +330,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </section>
 
@@ -449,77 +516,310 @@
   </div>
 </form>
 
+<!-- MENÚ DESPLEGABLE DE CARRERAS (posición fixed) -->
+<div
+  *ngIf="openCareerMenuIndex !== null"
+  class="fixed bg-white rounded-xl shadow-2xl border border-slate-200 py-2 z-50 min-w-[180px]"
+  [style.top.px]="menuPosition.top"
+  [style.left.px]="menuPosition.left"
+  (click)="$event.stopPropagation()"
+>
+  <!-- Opción Editar -->
+  <button
+    type="button"
+    (click)="openEditCareerModal(openCareerMenuIndex)"
+    class="w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3 transition-colors"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="text-slate-400"
+    >
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+    <span class="font-medium">Editar</span>
+  </button>
+
+  <!-- Separador -->
+  <div class="h-px bg-slate-100 my-1"></div>
+
+  <!-- Opción Cambiar Estatus -->
+  <button
+    type="button"
+    (click)="toggleCareerStatus(openCareerMenuIndex)"
+    class="group w-full px-4 py-2.5 text-left text-sm font-semibold transition-all flex items-center gap-3"
+    [ngClass]="
+      careers.at(openCareerMenuIndex).value.active
+        ? 'text-slate-600 hover:bg-amber-50 hover:text-amber-700'
+        : 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'
+    "
+  >
+    <div
+      class="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
+      [ngClass]="
+        careers.at(openCareerMenuIndex).value.active
+          ? 'bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white'
+          : 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white'
+      "
+    >
+      <i
+        class="fas"
+        [ngClass]="careers.at(openCareerMenuIndex).value.active ? 'fa-toggle-on' : 'fa-toggle-off'"
+      ></i>
+    </div>
+    <span class="font-medium">
+      {{ careers.at(openCareerMenuIndex).value.active ? 'Desactivar' : 'Activar' }}
+    </span>
+  </button>
+
+  <!-- Separador -->
+  <div class="h-px bg-slate-100 my-1"></div>
+
+  <!-- Opción Eliminar -->
+  <button
+    type="button"
+    (click)="deleteCareer(openCareerMenuIndex)"
+    class="w-full px-4 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-3 transition-colors"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="text-rose-500"
+    >
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      <line x1="10" y1="11" x2="10" y2="17" />
+      <line x1="14" y1="11" x2="14" y2="17" />
+    </svg>
+    <span class="font-medium">Eliminar</span>
+  </button>
+</div>
+
 <!-- MODAL NUEVA CARRERA -->
 <div *ngIf="showCareerModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="closeCareerModal()"></div>
 
   <div
-    class="relative bg-white w-full max-w-lg rounded-[2rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
+    class="relative bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
   >
-    <div class="p-8">
-      <div class="flex justify-between items-start mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-slate-800">Agregar Carrera</h2>
-          <p class="text-slate-500 text-sm">Ingresa los detalles del nuevo programa educativo.</p>
+    <!-- Header con icono -->
+    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6 text-white">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+            <i class="fas fa-graduation-cap text-2xl"></i>
+          </div>
+          <div>
+            <h2 class="text-2xl font-black">
+              {{ isEditMode ? 'EDITAR CARRERA' : 'NUEVA CARRERA' }}
+            </h2>
+            <p class="text-indigo-100 text-sm mt-1">
+              {{ isEditMode ? 'Actualiza la información del programa educativo.' : 'Oferta Educativa' }}
+            </p>
+          </div>
         </div>
         <button
-          (click)="showCareerModal = false"
-          class="text-slate-400 hover:text-slate-600 transition-colors"
+          (click)="closeCareerModal()"
+          class="text-white/80 hover:text-white transition-colors"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
+          <i class="fas fa-times text-xl"></i>
         </button>
       </div>
+    </div>
 
-      <form class="space-y-5">
+    <!-- Formulario -->
+    <form [formGroup]="newCareerForm" (ngSubmit)="addCareer()" class="p-8 space-y-6">
+      <!-- Nombre del Programa -->
+      <div>
+        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
+          Nombre del Programa Académico *
+        </label>
+        <input
+          type="text"
+          formControlName="name"
+          placeholder="Ej. Ingeniería Civil"
+          class="w-full px-4 py-3.5 rounded-xl bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white outline-none transition-all text-slate-800 font-medium"
+          [class.border-red-300]="newCareerForm.get('name')?.invalid && newCareerForm.get('name')?.touched"
+        />
+        <p *ngIf="newCareerForm.get('name')?.invalid && newCareerForm.get('name')?.touched" class="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+          <i class="fas fa-exclamation-circle"></i>
+          El nombre es requerido
+        </p>
+      </div>
+
+      <!-- Nombre Corto -->
+      <div>
+        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
+          Nombre Corto
+        </label>
+        <input
+          type="text"
+          formControlName="shortName"
+          placeholder="Ej. IC"
+          class="w-full px-4 py-3.5 rounded-xl bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white outline-none transition-all text-slate-800 font-medium"
+        />
+        <p class="text-slate-400 text-xs mt-1.5 flex items-center gap-1">
+          <i class="fas fa-info-circle"></i>
+          Versión abreviada del nombre para visualización rápida
+        </p>
+      </div>
+
+      <!-- Clave DGP y Modalidad en dos columnas -->
+      <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-bold text-slate-700 mb-2">Nombre de la carrera</label>
+          <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
+            Clave DGP *
+          </label>
           <input
             type="text"
-            placeholder="Ej. Ingeniería en Sistemas"
-            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all"
+            formControlName="code"
+            placeholder="IC-30"
+            class="w-full px-4 py-3.5 rounded-xl bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white outline-none transition-all text-slate-800 font-medium"
+            [class.border-red-300]="newCareerForm.get('code')?.invalid && newCareerForm.get('code')?.touched"
           />
+          <p *ngIf="newCareerForm.get('code')?.invalid && newCareerForm.get('code')?.touched" class="text-red-500 text-xs mt-1.5">
+            Requerido
+          </p>
         </div>
 
         <div>
-          <label class="block text-sm font-bold text-slate-700 mb-2">Modalidad</label>
-          <select
-            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all appearance-none bg-white"
-          >
-            <option>Presencial</option>
-            <option>Virtual</option>
-            <option>Semipresencial</option>
-          </select>
+          <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
+            Modalidad *
+          </label>
+          <div class="relative">
+            <select
+              formControlName="modality"
+              class="w-full px-4 py-3.5 rounded-xl bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white outline-none transition-all appearance-none text-slate-800 font-medium cursor-pointer"
+              [class.border-red-300]="newCareerForm.get('modality')?.invalid && newCareerForm.get('modality')?.touched"
+            >
+              <option value="">Seleccionar</option>
+              <option value="Presencial">Presencial</option>
+              <option value="Mixta">Mixta</option>
+              <option value="Virtual">Virtual</option>
+            </select>
+            <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+          </div>
         </div>
+      </div>
 
-        <div class="pt-4 flex gap-3">
-          <button
-            type="button"
-            (click)="showCareerModal = false"
-            class="flex-1 px-6 py-3.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            class="flex-1 px-6 py-3.5 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
-          >
-            Agregar Carrera
-          </button>
+      <!-- Enlace a Plan de Estudios -->
+      <div>
+        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
+          Enlace a Plan de Estudios
+        </label>
+        <div class="relative">
+          <i class="fas fa-link absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input
+            type="url"
+            formControlName="careerLink"
+            placeholder="https://ejemplo.com/plan-estudios.pdf"
+            class="w-full pl-11 pr-4 py-3.5 rounded-xl bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white outline-none transition-all text-slate-800 font-medium"
+          />
         </div>
-      </form>
-    </div>
+        <p class="text-slate-400 text-xs mt-1.5 flex items-center gap-1">
+          <i class="fas fa-info-circle"></i>
+          URL del documento PDF o página web con el plan de estudios
+        </p>
+      </div>
+
+      <!-- Estado de la Carrera (solo en edición) -->
+      <div *ngIf="isEditMode" class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-5 border-2 border-slate-200">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div 
+              class="w-12 h-12 flex items-center justify-center rounded-xl transition-all"
+              [ngClass]="newCareerForm.value.active ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'"
+            >
+              <i class="fas text-xl" [ngClass]="newCareerForm.value.active ? 'fa-check-circle' : 'fa-times-circle'"></i>
+            </div>
+            <div>
+              <label class="text-xs font-black text-slate-500 uppercase tracking-wider block">
+                Estado de la Carrera
+              </label>
+              <p class="text-sm font-semibold mt-0.5" [ngClass]="newCareerForm.value.active ? 'text-emerald-600' : 'text-red-600'">
+                {{ newCareerForm.value.active ? 'Carrera activa y disponible para inscripción' : 'Carrera suspendida o no disponible' }}
+              </p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input 
+              type="checkbox" 
+              formControlName="active"
+              class="sr-only peer"
+            >
+            <div class="w-16 h-8 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border-2 after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="flex gap-3 pt-4">
+        <button
+          type="button"
+          (click)="closeCareerModal()"
+          class="flex-1 px-6 py-4 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all"
+          [disabled]="savingCareer"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="flex-1 px-6 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          [disabled]="newCareerForm.invalid || savingCareer"
+        >
+          <i class="fas" [ngClass]="savingCareer ? 'fa-spinner fa-spin' : (isEditMode ? 'fa-save' : 'fa-plus-circle')"></i>
+          <span *ngIf="!isEditMode">{{ savingCareer ? 'Guardando...' : 'Guardar Carrera' }}</span>
+          <span *ngIf="isEditMode">{{ savingCareer ? 'Actualizando...' : 'Actualizar Carrera' }}</span>
+        </button>
+      </div>
+    </form>
   </div>
+</div>
+
+<!-- Toast notifications -->
+<div class="fixed top-6 right-6 z-[210] flex flex-col gap-3 w-full max-w-sm pointer-events-none">
+  @if (errorMessage()) {
+    <div class="pointer-events-auto flex items-center gap-4 p-4 bg-white border-l-4 border-red-500 shadow-2xl rounded-2xl animate-slide-in-right">
+      <div class="w-10 h-10 bg-red-50 text-red-500 rounded-full flex items-center justify-center shrink-0">
+        <i class="fas fa-exclamation-circle text-lg"></i>
+      </div>
+      <div class="flex-1">
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Error</p>
+        <p class="text-sm font-bold text-slate-700 leading-tight">{{ errorMessage() }}</p>
+      </div>
+      <button (click)="errorMessage.set(null)" class="text-slate-300 hover:text-slate-500 transition-colors">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="pointer-events-auto flex items-center gap-4 p-4 bg-white border-l-4 border-emerald-500 shadow-2xl rounded-2xl animate-slide-in-right">
+      <div class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center shrink-0">
+        <i class="fas fa-check-circle text-lg"></i>
+      </div>
+      <div class="flex-1">
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Éxito</p>
+        <p class="text-sm font-bold text-slate-700 leading-tight">{{ successMessage() }}</p>
+      </div>
+      <button (click)="successMessage.set(null)" class="text-slate-300 hover:text-slate-500 transition-colors">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  }
 </div>
