@@ -30,7 +30,10 @@ export class StudentRegistrationComponent implements OnInit {
   private router = inject(Router);
 
   showPreview = false;
-  htmlSeguro: SafeHtml = '';
+  /** Contenido HTML sanitizado de la plantilla "siguientes pasos" (signal para reactividad) */
+  htmlSeguro = signal<SafeHtml>('' as SafeHtml);
+  /** true mientras se carga la plantilla HTML desde la IES (registro ya completado) */
+  isLoadingSuccessHtml = signal(false);
 
   // UI State
   isLoading = signal(false);
@@ -169,10 +172,20 @@ export class StudentRegistrationComponent implements OnInit {
           if (prospect.processStatus?.registrationComplete === true) {
             this.alreadyHadRegistration.set(true);
             this.showSuccess.set(true);
+            const raw = prospect.firstChoiceIES;
             const iesId =
-              (prospect.firstChoiceIES as any)?._id ?? (prospect.firstChoiceIES as any);
+              typeof raw === 'string'
+                ? raw
+                : (raw && ((raw as any)._id ?? (raw as any).id));
             if (iesId) {
+              this.isLoadingSuccessHtml.set(true);
               this.loadSuccessPage(iesId);
+            } else {
+              this.htmlSeguro.set(
+                this.sanitizer.bypassSecurityTrustHtml(
+                  '<p class="text-slate-500 text-center">No hay plantilla configurada para la institución seleccionada.</p>',
+                ),
+              );
             }
           } else {
             this.populateForm(prospect);
@@ -200,13 +213,16 @@ export class StudentRegistrationComponent implements OnInit {
     this.iesService.getIESHtml(iesId).subscribe({
       next: (res: any) => {
         const html = res?.page ?? res?.data?.page ?? '';
-        this.htmlSeguro = this.sanitizer.bypassSecurityTrustHtml(html || '');
+        this.htmlSeguro.set(this.sanitizer.bypassSecurityTrustHtml(html || ''));
       },
       error: () => {
-        this.htmlSeguro = this.sanitizer.bypassSecurityTrustHtml(
-          '<p class="text-slate-500 text-center">No hay contenido adicional disponible.</p>',
+        this.htmlSeguro.set(
+          this.sanitizer.bypassSecurityTrustHtml(
+            '<p class="text-slate-500 text-center">No hay contenido adicional disponible.</p>',
+          ),
         );
       },
+      complete: () => this.isLoadingSuccessHtml.set(false),
     });
   }
 
@@ -362,9 +378,10 @@ export class StudentRegistrationComponent implements OnInit {
       .subscribe({
         next: (response) => {
           if (response.success) {
-            console.log(response.data?.page);
             const contenidoRaw = response.data?.page;
-            this.htmlSeguro = this.sanitizer.bypassSecurityTrustHtml(contenidoRaw ?? '');
+            this.htmlSeguro.set(
+              this.sanitizer.bypassSecurityTrustHtml(contenidoRaw ?? ''),
+            );
             this.showSuccess.set(true);
             // Scroll al inicio
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -531,7 +548,7 @@ export class StudentRegistrationComponent implements OnInit {
     if (status) {
       // Aquí generas o asignas el contenido que quieres mostrar
       const contenidoRaw = `<p class=\"text-center\"><font face=\"Comic Sans MS\" size=\"6\" color=\"#ff0000\"><b><i>Hola</i></b></font></p><p class=\"text-center\"><font face=\"Comic Sans MS\" size=\"6\" color=\"#ff0000\"><b><i><br /></i></b></font></p><p class=\"text-center\"><font size=\"6\" color=\"#ff0000\" face=\"Arial\"><b><i>ssdsdsdsd</i></b></font></p><p class=\"text-center\"><font size=\"6\" color=\"#ff0000\" face=\"Arial\"><b><i><br /></i></b></font></p><p class=\"text-left\"><font size=\"5\"><i>Jorge Ismael<font face=\"Arial\"> Betancourt</font></i></font></p>`;
-      this.htmlSeguro = this.sanitizer.bypassSecurityTrustHtml(contenidoRaw);
+      this.htmlSeguro.set(this.sanitizer.bypassSecurityTrustHtml(contenidoRaw));
     }
     this.showPreview = status;
   }

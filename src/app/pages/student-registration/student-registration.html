@@ -69,10 +69,16 @@
             <p class="text-sm text-slate-500 text-center">¿Cuáles son los siguientes pasos?</p>
           </header>
 
-          <div
-            class="preview-content flex-1 p-6 prose prose-slate max-w-none"
-            [innerHTML]="htmlSeguro"
-          ></div>
+          <div class="preview-content flex-1 p-6 prose prose-slate max-w-none">
+            @if (isLoadingSuccessHtml()) {
+              <div class="flex flex-col items-center justify-center py-16 text-slate-500">
+                <i class="fas fa-circle-notch fa-spin text-4xl mb-4"></i>
+                <p class="font-medium">Cargando plantilla...</p>
+              </div>
+            } @else {
+              <div [innerHTML]="htmlSeguro()"></div>
+            }
+          </div>
 
           <footer class="border-t border-slate-200 px-6 py-3 bg-slate-50 text-center">
             <p class="text-xs text-slate-500">© 2026 · ANUIES</p>
