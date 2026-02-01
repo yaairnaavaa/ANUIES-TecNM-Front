@@ -48,6 +48,26 @@ export class AuthService {
       );
   }
 
+  /**
+   * Solicitar restablecimiento de contraseña. Envía un correo con enlace si el email existe.
+   */
+  requestPasswordReset(email: string): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${environment.apiUrl}/auth/forgot-password`,
+      { email: email.trim().toLowerCase() }
+    );
+  }
+
+  /**
+   * Restablecer contraseña con el token recibido por correo.
+   */
+  resetPassword(token: string, newPassword: string): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${environment.apiUrl}/auth/reset-password`,
+      { token: token.trim(), newPassword }
+    );
+  }
+
   logout(): void {
     // Llamar al backend para limpiar la cookie
     this.http.post(`${environment.apiUrl}/auth/logout`, {}).subscribe({

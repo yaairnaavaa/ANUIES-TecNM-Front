@@ -14,11 +14,17 @@ import { Cycles } from './pages/cycles/cycles';
 import { RoleManagementComponent } from './pages/role-management/role-management';
 import { StudentRegistrationComponent } from './pages/student-registration/student-registration';
 import { NextStep } from './pages/next-step/next-step';
+import { ResetPasswordComponent } from './pages/reset-password/reset-password';
+
 export const routes: Routes = [
   {
     path: 'login',
     component: Login,
     canActivate: [loginGuard],
+  },
+  {
+    path: 'reset-password/:token',
+    component: ResetPasswordComponent,
   },
   {
     path: 'register/:campaignId',

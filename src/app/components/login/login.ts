@@ -1,6 +1,6 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 
@@ -10,15 +10,17 @@ import { CommonModule } from '@angular/common';
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class Login {
+export class Login implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
 
   // 'login' muestra el acceso, 'forgot' muestra recuperar contraseña
   mode = signal<'login' | 'forgot'>('login');
   isLoading = signal(false);
   errorMessage = signal<string>('');
+  successMessage = signal<string>('');
   hidePassword = signal(true);
 
   loginForm: FormGroup;
@@ -32,6 +34,15 @@ export class Login {
     this.forgotForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
     });
+  }
+
+  ngOnInit() {
+    const reset = this.route.snapshot.queryParamMap.get('reset');
+    if (reset === 'success') {
+      this.successMessage.set('Contraseña actualizada correctamente. Ya puedes iniciar sesión.');
+      this.router.navigate([], { queryParams: {}, queryParamsHandling: '' });
+      setTimeout(() => this.successMessage.set(''), 6000);
+    }
   }
 
   onLogin() {
@@ -83,11 +94,28 @@ export class Login {
   }
 
   onForgot() {
-    if (this.forgotForm.valid) {
-      this.isLoading.set(true);
-      console.log('Enviando recuperación a: ', this.forgotForm.get('email')?.value);
-      setTimeout(() => this.isLoading.set(false), 2000);
-    }
+    if (this.forgotForm.invalid) return;
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    const email = this.forgotForm.get('email')?.value?.trim() ?? '';
+    this.authService.requestPasswordReset(email).subscribe({
+      next: (res) => {
+        this.isLoading.set(false);
+        if (res.success) {
+          this.errorMessage.set('');
+          alert(res.message || 'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada y spam.');
+          this.changeMode('login');
+        } else {
+          this.errorMessage.set(res.message || 'No se pudo enviar el correo.');
+        }
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.errorMessage.set(
+          err.error?.message || 'No se pudo enviar el correo. Intenta de nuevo más tarde.'
+        );
+      },
+    });
   }
 
   changeMode(newMode: 'login' | 'forgot') {
