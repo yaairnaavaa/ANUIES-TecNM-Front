@@ -13,7 +13,7 @@ import { environment } from '../../../environments/environment';
   styleUrl: './navbar.css',
 })
 export class Navbar {
-  @Input() titulo: string = 'Articulación EMS-TecNM';
+  @Input() titulo: string = 'Articulación EMS';
   @Input() subtitulo: string = 'Instituto Tecnológico de Aguascalientes';
   @Input() evento: string = 'Feria Universitaria 2024';
   @Input() registros: number = 0;

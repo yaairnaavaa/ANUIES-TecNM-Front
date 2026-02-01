@@ -175,7 +175,7 @@ export class AuthService {
               if (newIesId) {
                 localStorage.setItem(this.IES_ID_KEY, newIesId.toString());
               }
-              // Actualizar localStorage con datos frescos
+              // Actualizar localStorage con datos frescos (incl. ies para nombre en sidebar)
               localStorage.setItem(this.ROLE_KEY, JSON.stringify(response.data.role));
               localStorage.setItem(
                 this.USER_INFO_KEY,
@@ -185,6 +185,7 @@ export class AuthService {
                   lastName: response.data.lastName,
                   secondLastName: response.data.secondLastName,
                   email: response.data.email,
+                  ies: response.data.ies,
                 }),
               );
               this.isAuthenticated.set(true);

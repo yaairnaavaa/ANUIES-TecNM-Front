@@ -79,44 +79,42 @@
       <div formGroupName="institutionalImage">
         <div class="space-y-4">
           <label class="text-sm font-semibold text-slate-700 block">Logotipo institucional</label>
-          <div class="flex items-center gap-6">
+          <p class="text-xs text-slate-500">URL de la imagen. Se mostrará en el menú lateral superior.</p>
+          <div class="flex flex-col sm:flex-row gap-6 items-start">
             <div
-              class="relative w-32 h-32 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden group hover:border-indigo-400 transition-colors"
+              class="relative w-32 h-32 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden shrink-0"
             >
               <img
-                *ngIf="iesForm.value.institutionalImage?.logo"
+                *ngIf="iesForm.value.institutionalImage?.logo && !logoPreviewError"
                 [src]="iesForm.value.institutionalImage.logo"
                 class="object-contain w-full h-full p-4"
+                (error)="logoPreviewError = true"
               />
-              <div *ngIf="!iesForm.value.institutionalImage?.logo" class="text-center p-4">
+              <div *ngIf="!iesForm.value.institutionalImage?.logo || logoPreviewError" class="text-center p-4">
                 <span class="text-slate-400 text-xs font-medium">Sin logo</span>
               </div>
             </div>
 
-            <div class="flex flex-col gap-2">
+            <div class="flex-1 min-w-0 space-y-2">
+              <label class="text-xs font-bold text-slate-600 block">Enlace (URL) del logotipo</label>
               <input
-                #logoInput
-                type="file"
-                accept="image/png,image/jpeg,image/jpg,image/svg+xml"
-                (change)="onLogoSelected($event)"
-                class="hidden"
+                type="url"
+                formControlName="logo"
+                placeholder="https://ejemplo.com/logo.png"
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition text-sm"
               />
-              <button
-                type="button"
-                (click)="logoInput.click()"
-                class="px-4 py-2 text-sm rounded-lg font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm"
-              >
-                Cambiar logo
-              </button>
-              <p class="text-[11px] text-slate-400">PNG, JPG o SVG. Máx. 2MB (Solo preview)</p>
+              <p class="text-[11px] text-slate-400">Pega la URL pública de la imagen del logotipo. Se verá en tiempo real en el menú.</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Personalización de colores -->
+      <!-- Personalización de colores (vista previa en tiempo real en el menú lateral) -->
       <div formGroupName="branding" class="space-y-6 mt-8">
-        <label class="text-sm font-semibold text-slate-700 block">Paleta de colores</label>
+        <div>
+          <label class="text-sm font-semibold text-slate-700 block">Paleta de colores</label>
+          <p class="text-xs text-slate-500 mt-1">Los cambios se reflejan al instante en el menú de la izquierda. Guarda para aplicarlos de forma permanente.</p>
+        </div>
 
         <div class="grid grid-cols-1 gap-4">
             <div
@@ -128,7 +126,8 @@
                 class="w-10 h-10 rounded-lg border-0 cursor-pointer bg-transparent"
               />
               <div>
-                <p class="text-xs font-bold text-slate-700">Color primario</p>
+                <p class="text-xs font-bold text-slate-700">Fondo del menú de opciones</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">Color de fondo del menú lateral</p>
                 <span class="font-mono text-[10px] uppercase text-slate-500">
                   {{ iesForm.value.branding?.primaryColor || '#000000' }}
                 </span>
@@ -144,7 +143,8 @@
                 class="w-10 h-10 rounded-lg border-0 cursor-pointer bg-transparent"
               />
               <div>
-                <p class="text-xs font-bold text-slate-700">Color secundario</p>
+                <p class="text-xs font-bold text-slate-700">Color de las letras del menú</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">Texto de opciones, títulos y nombre de usuario</p>
                 <span class="font-mono text-[10px] uppercase text-slate-500">
                   {{ iesForm.value.branding?.secondaryColor || '#000000' }}
                 </span>
@@ -160,17 +160,14 @@
                 class="w-10 h-10 rounded-lg border-0 cursor-pointer bg-transparent"
               />
               <div>
-                <p class="text-xs font-bold text-slate-700">Color de acento</p>
+                <p class="text-xs font-bold text-slate-700">Iconos</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">Iconos del menú de opciones</p>
                 <span class="font-mono text-[10px] uppercase text-slate-500">
                   {{ iesForm.value.branding?.accentColor || '#000000' }}
                 </span>
               </div>
             </div>
           </div>
-
-          <p class="text-xs text-slate-500 italic">
-            Nota: Los colores se guardarán pero aún no se aplicarán a la interfaz. Esa funcionalidad se implementará próximamente.
-          </p>
         </div>
 
       <footer class="mt-10 pt-6 border-t border-slate-100 flex justify-end">

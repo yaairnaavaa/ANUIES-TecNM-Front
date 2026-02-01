@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef, HostListener, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, HostListener, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -7,9 +7,11 @@ import {
   ReactiveFormsModule,
   FormArray,
 } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 import { IesService } from '../../../services/ies.service';
 import { AuthService } from '../../../services/auth.service';
+import { IESBrandingService } from '../../../services/ies-branding.service';
 
 /**
  * Secciones editables del perfil
@@ -22,11 +24,18 @@ type EditSection = 'general' | 'social' | 'visual';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './ies-profile-settings.html',
 })
-export class IesProfileSettings implements OnInit {
+export class IesProfileSettings implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private iesService = inject(IesService);
   private authService = inject(AuthService);
+  private brandingService = inject(IESBrandingService);
   private cdr = inject(ChangeDetectorRef);
+
+  private brandingSubscription?: Subscription;
+  private institutionalImageSubscription?: Subscription;
+
+  /** Si la imagen del logo falla al cargar en el preview. */
+  logoPreviewError = false;
 
   isSaving = false;
   showCareerModal = false;
@@ -63,7 +72,40 @@ export class IesProfileSettings implements OnInit {
   ngOnInit(): void {
     this.buildForm();
     this.buildNewCareerForm();
+    this.subscribeBrandingPreview();
+    this.subscribeLogoPreview();
     this.loadData();
+  }
+
+  ngOnDestroy(): void {
+    this.brandingSubscription?.unsubscribe();
+    this.institutionalImageSubscription?.unsubscribe();
+  }
+
+  /** Aplica el logo al menú lateral en tiempo real al cambiar la URL. */
+  private subscribeLogoPreview(): void {
+    const institutionalImage = this.iesForm.get('institutionalImage');
+    if (!institutionalImage) return;
+    this.institutionalImageSubscription = institutionalImage.valueChanges.subscribe((img: any) => {
+      this.logoPreviewError = false;
+      const url = img?.logo ?? '';
+      this.brandingService.setLogo(url);
+    });
+  }
+
+  /** Aplica los colores al sidebar en tiempo real al cambiar la paleta. */
+  private subscribeBrandingPreview(): void {
+    const branding = this.iesForm.get('branding');
+    if (!branding) return;
+    this.brandingSubscription = branding.valueChanges.subscribe((b: any) => {
+      if (b?.primaryColor != null || b?.secondaryColor != null || b?.accentColor != null) {
+        this.brandingService.setBranding(
+          b.primaryColor ?? '#0f213e',
+          b.secondaryColor ?? '#e2e8f0',
+          b.accentColor ?? '#10b981'
+        );
+      }
+    });
   }
 
   // ================================
@@ -81,8 +123,8 @@ export class IesProfileSettings implements OnInit {
       }),
 
       institutionalImage: this.fb.group({
-        logo: [''], // Solo para preview, no se guarda
-        banner: [''], // Solo para preview, no se guarda
+        logo: [''], // URL del logotipo (se muestra en el menú lateral)
+        banner: [''], // URL del banner
       }),
 
       socialMedia: this.fb.group({
@@ -294,9 +336,22 @@ export class IesProfileSettings implements OnInit {
 
     this.iesService.updateIdentidadVisual(iesId, {
       branding: this.iesForm.value.branding,
+      institutionalImage: { ...this.iesForm.value.institutionalImage, logo: this.iesForm.value.institutionalImage?.logo ?? '' },
     }).subscribe({
       next: (response: any) => {
         console.log('Identidad visual actualizada:', response);
+        const b = this.iesForm.value.branding;
+        const logoUrl = this.iesForm.value.institutionalImage?.logo ?? '';
+        if (b?.primaryColor != null || b?.secondaryColor != null || b?.accentColor != null) {
+          this.brandingService.setBranding(
+            b.primaryColor ?? '#0f213e',
+            b.secondaryColor ?? '#e2e8f0',
+            b.accentColor ?? '#10b981',
+            logoUrl
+          );
+        } else {
+          this.brandingService.setLogo(logoUrl);
+        }
         this.editModes.visual = false;
         this.isSaving = false;
         this.showToast('success', 'Identidad visual actualizada correctamente');

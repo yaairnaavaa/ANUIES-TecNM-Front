@@ -1,3 +1,45 @@
+/* Identidad visual: colores heredados del aside (--sidebar-secondary, --sidebar-accent) */
+.sidebar-theme .sidebar-text {
+  color: var(--sidebar-secondary, #e2e8f0);
+}
+
+.sidebar-theme .sidebar-icon {
+  color: var(--sidebar-secondary, #e2e8f0);
+  opacity: 0.9;
+}
+
+.sidebar-theme .sidebar-link:hover .sidebar-icon,
+.sidebar-theme .sidebar-link:hover .sidebar-text {
+  color: var(--sidebar-secondary, #e2e8f0);
+  opacity: 1;
+}
+
+.sidebar-theme .sidebar-accent {
+  color: var(--sidebar-accent, #10b981) !important;
+}
+
+.sidebar-theme .sidebar-accent-bg {
+  background-color: var(--sidebar-accent, #10b981) !important;
+}
+
+.sidebar-theme .sidebar-link {
+  color: var(--sidebar-secondary, #e2e8f0);
+}
+
+.sidebar-theme .sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-theme .sidebar-active {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--sidebar-secondary, #e2e8f0) !important;
+  border-left: 4px solid var(--sidebar-accent, #10b981);
+}
+
+.sidebar-theme .sidebar-active .sidebar-icon {
+  color: var(--sidebar-accent, #10b981) !important;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
