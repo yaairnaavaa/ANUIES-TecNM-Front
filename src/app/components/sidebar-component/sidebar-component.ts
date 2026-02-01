@@ -1,6 +1,6 @@
 import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { MenuItem } from '../../models/api.models';
 
@@ -19,7 +19,15 @@ interface MenuSection {
 })
 export class SidebarComponent {
   public authService = inject(AuthService);
+  private router = inject(Router);
   isOpen = signal(false);
+
+  /** Ruta a Mi cuenta según el layout actual (admin o ies) */
+  cuentaRoute = computed(() => {
+    const first = this.router.url.split('/')[1];
+    const base = first === 'admin' || first === 'ies' ? first : 'admin';
+    return `/${base}/profile`;
+  });
 
   // Datos del usuario (Signals Computados)
   userInitials = computed(() => {

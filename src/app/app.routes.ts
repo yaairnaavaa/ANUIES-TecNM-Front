@@ -15,6 +15,7 @@ import { RoleManagementComponent } from './pages/role-management/role-management
 import { StudentRegistrationComponent } from './pages/student-registration/student-registration';
 import { NextStep } from './pages/next-step/next-step';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password';
+import { UserProfileComponent } from './pages/user-profile/user-profile';
 
 export const routes: Routes = [
   {
@@ -47,6 +48,7 @@ export const routes: Routes = [
       { path: 'home', component: Home },
       { path: 'ies-gestion', component: IesGestion },
       { path: 'perfil-ies', component: IesProfileSettings },
+      { path: 'profile', component: UserProfileComponent },
       { path: 'campaigns', component: IesCampaignManagementComponent },
       { path: 'iems', component: IemsGestion },
       { path: 'aspirant', component: Aspirant },
@@ -62,6 +64,7 @@ export const routes: Routes = [
     component: AdminLayout,
     children: [
       { path: 'settings', component: IesProfileSettings },
+      { path: 'profile', component: UserProfileComponent },
       { path: 'iems', component: IemsGestion },
       { path: 'siguiente-paso', component: NextStep },
       { path: '', redirectTo: 'settings', pathMatch: 'full' },

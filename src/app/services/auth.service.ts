@@ -68,6 +68,17 @@ export class AuthService {
     );
   }
 
+  /**
+   * Cambiar contraseña (usuario autenticado). Requiere contraseña actual y nueva.
+   */
+  updatePassword(currentPassword: string, newPassword: string): Observable<{ success: boolean; message?: string }> {
+    return this.http.put<{ success: boolean; message?: string }>(
+      `${environment.apiUrl}/auth/updatepassword`,
+      { currentPassword, newPassword },
+      { withCredentials: true }
+    );
+  }
+
   logout(): void {
     // Llamar al backend para limpiar la cookie
     this.http.post(`${environment.apiUrl}/auth/logout`, {}).subscribe({

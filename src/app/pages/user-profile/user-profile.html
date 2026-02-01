@@ -1,0 +1,171 @@
+<div
+  class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 -m-4 p-4 lg:-m-8 lg:p-12 font-sans text-slate-900"
+>
+  <div class="max-w-5xl mx-auto space-y-14">
+    <!-- HEADER -->
+    <header class="flex justify-between items-end border-b border-slate-200 pb-8">
+      <div>
+        <h1 class="text-4xl font-black text-slate-800 flex items-center gap-3">
+        <i class="fas fa-user-circle text-blue-600"></i>
+        Mi cuenta</h1>
+        <p class="text-slate-500 mt-2 font-medium">
+          Datos de tu perfil y cambio de contraseña
+        </p>
+      </div>
+    </header>
+
+    <!-- CARDS: horizontal en pantallas grandes, vertical en pequeñas -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+    <!-- DATOS DEL PERFIL -->
+    <section class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden h-full flex flex-col">
+      <div class="p-8 flex justify-between items-center border-b border-slate-100 shrink-0">
+        <div>
+          <h3 class="text-2xl font-black text-slate-800">Datos del perfil</h3>
+          <p class="text-slate-500 text-sm mt-1">Información de tu cuenta (solo lectura)</p>
+        </div>
+      </div>
+      <div class="px-10 pb-10 pt-6 space-y-6 flex-1 min-h-0">
+        <div>
+          <label class="text-xs font-black text-indigo-500 uppercase tracking-wider">Nombre</label>
+          <p class="mt-2 text-slate-800 font-semibold text-lg">
+            {{ user()?.firstName }} {{ user()?.lastName }}
+            @if (user()?.secondLastName) {
+              {{ user()?.secondLastName }}
+            }
+          </p>
+        </div>
+        <div>
+          <label class="text-xs font-black text-indigo-500 uppercase tracking-wider">Correo</label>
+          <p class="mt-2 text-slate-800 font-semibold text-lg">{{ user()?.email }}</p>
+        </div>
+        <div>
+          <label class="text-xs font-black text-indigo-500 uppercase tracking-wider">Rol</label>
+          <p class="mt-2 text-slate-800 font-semibold text-lg">{{ user()?.role?.displayName ?? user()?.role?.name ?? '—' }}</p>
+        </div>
+        <div>
+          <label class="text-xs font-black text-indigo-500 uppercase tracking-wider">Institución (IES)</label>
+          <p class="mt-2 text-slate-800 font-semibold text-lg">{{ getIesName() }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CAMBIAR CONTRASEÑA -->
+    <section class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden h-full flex flex-col">
+      <div class="p-8 flex justify-between items-center border-b border-slate-100 shrink-0">
+        <div>
+          <h3 class="text-2xl font-black text-slate-800">Cambiar contraseña</h3>
+          <p class="text-slate-500 text-sm mt-1">Ingresa tu contraseña actual y la nueva (mínimo 6 caracteres)</p>
+        </div>
+      </div>
+      <div class="px-10 pb-10 pt-6 flex-1 min-h-0 flex flex-col">
+        @if (successMessage()) {
+          <div class="mb-8 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-700 text-sm font-bold flex items-center gap-2">
+            <span class="text-xl">✓</span>
+            {{ successMessage() }}
+          </div>
+        }
+        @if (errorMessage()) {
+          <div class="mb-8 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl text-red-700 text-sm font-bold flex items-center gap-2">
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()" class="space-y-6">
+          <div>
+            <label class="text-xs font-black text-indigo-500 uppercase tracking-wider">Contraseña actual</label>
+            <div class="relative mt-2">
+              <input
+                [type]="hideCurrent() ? 'password' : 'text'"
+                formControlName="currentPassword"
+                placeholder="••••••••"
+                class="w-full pl-4 pr-12 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition text-slate-900 font-medium"
+              />
+              <button
+                type="button"
+                (click)="toggleCurrentVisibility()"
+                class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-blue-600 transition-colors"
+              >
+                @if (hideCurrent()) {
+                  <i class="fas fa-eye"></i>
+                } @else {
+                  <i class="fas fa-eye-slash"></i>
+                }
+              </button>
+            </div>
+            @if (passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched) {
+              <p class="text-xs text-red-600 font-medium mt-1 ml-1">Requerido</p>
+            }
+          </div>
+
+          <div>
+            <label class="text-xs font-black text-indigo-500 uppercase tracking-wider">Nueva contraseña</label>
+            <div class="relative mt-2">
+              <input
+                [type]="hideNew() ? 'password' : 'text'"
+                formControlName="newPassword"
+                placeholder="Mínimo 6 caracteres"
+                class="w-full pl-4 pr-12 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition text-slate-900 font-medium"
+              />
+              <button
+                type="button"
+                (click)="toggleNewVisibility()"
+                class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-blue-600 transition-colors"
+              >
+                @if (hideNew()) {
+                  <i class="fas fa-eye"></i>
+                } @else {
+                  <i class="fas fa-eye-slash"></i>
+                }
+              </button>
+            </div>
+            @if (passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched) {
+              <p class="text-xs text-red-600 font-medium mt-1 ml-1">Mínimo 6 caracteres</p>
+            }
+          </div>
+
+          <div>
+            <label class="text-xs font-black text-indigo-500 uppercase tracking-wider">Confirmar nueva contraseña</label>
+            <div class="relative mt-2">
+              <input
+                [type]="hideConfirm() ? 'password' : 'text'"
+                formControlName="confirmPassword"
+                placeholder="Repite la contraseña"
+                class="w-full pl-4 pr-12 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition text-slate-900 font-medium"
+              />
+              <button
+                type="button"
+                (click)="toggleConfirmVisibility()"
+                class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-blue-600 transition-colors"
+              >
+                @if (hideConfirm()) {
+                  <i class="fas fa-eye"></i>
+                } @else {
+                  <i class="fas fa-eye-slash"></i>
+                }
+              </button>
+            </div>
+            @if (passwordForm.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched) {
+              <p class="text-xs text-red-600 font-medium mt-1 ml-1">Las contraseñas no coinciden</p>
+            }
+          </div>
+
+          <div class="flex justify-end pt-2">
+            <button
+              type="submit"
+              [disabled]="passwordForm.invalid || isLoading()"
+              class="px-8 py-4 bg-slate-900 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              @if (isLoading()) {
+                <span class="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span>Actualizando...</span>
+              } @else {
+                <span>Actualizar contraseña</span>
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+    </div>
+  </div>
+</div>
