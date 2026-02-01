@@ -2,6 +2,7 @@ import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProspectService } from '../../services/prospect.service';
+import { ExcelReportService } from '../../services/excel-report.service';
 import { Prospect } from '../../models/api.models';
 import { getCareerAbbreviation } from '../../utils/career-abbreviations';
 
@@ -14,6 +15,7 @@ import { getCareerAbbreviation } from '../../utils/career-abbreviations';
 })
 export class Aspirant implements OnInit {
   private prospectService = inject(ProspectService);
+  private excelReport = inject(ExcelReportService);
 
   aspirants = signal<Prospect[]>([]);
   selectedAspirant = signal<Prospect | null>(null);
@@ -215,6 +217,50 @@ export class Aspirant implements OnInit {
 
   isProfileComplete(aspirant: Prospect | null): boolean {
     return aspirant?.processStatus?.registrationComplete === true;
+  }
+
+  /**
+   * Exportar reporte Excel de aspirantes (tabla con formato)
+   */
+  exportAspirantsExcel(): void {
+    const data = this.filteredAspirants();
+    if (data.length === 0) {
+      alert('No hay aspirantes para exportar.');
+      return;
+    }
+    const rows = data.map((a) => ({
+      fullName: a.fullName ?? `${a.firstName ?? ''} ${a.lastName ?? ''} ${a.secondLastName ?? ''}`.trim(),
+      email: a.email ?? '',
+      curp: a.curp ?? '',
+      phone: (a.phone as { mobile?: string })?.mobile ?? '',
+      originIEMS: a.originIEMSName ?? a.originIEMS ?? '',
+      originCampaign: this.getOriginCampaignDisplay(a),
+      status: this.getStatusLabel(a.processStatus),
+      careers: (a.careerInterests ?? []).map((i) => i.career).join('; ') || '',
+      cycleName: a.cycleName ?? ''
+    }));
+    this.excelReport
+      .downloadFormattedExcel({
+        sheetName: 'Aspirantes',
+        filename: `reporte-aspirantes_${new Date().toISOString().slice(0, 10)}.xlsx`,
+        title: 'Reporte de Aspirantes',
+        columns: [
+          { key: 'fullName', label: 'Nombre completo', width: 28 },
+          { key: 'email', label: 'Correo', width: 26 },
+          { key: 'curp', label: 'CURP', width: 20 },
+          { key: 'phone', label: 'Teléfono', width: 16 },
+          { key: 'originIEMS', label: 'Origen IEMS', width: 22 },
+          { key: 'originCampaign', label: 'Campaña origen', width: 24 },
+          { key: 'status', label: 'Estatus', width: 14 },
+          { key: 'careers', label: 'Carreras de interés', width: 32 },
+          { key: 'cycleName', label: 'Ciclo', width: 16 }
+        ],
+        rows
+      })
+      .catch((err) => {
+        console.error('Error al exportar Excel:', err);
+        alert('No se pudo generar el reporte. Intenta de nuevo.');
+      });
   }
 
   /**

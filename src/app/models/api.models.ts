@@ -119,6 +119,7 @@ export interface Campaign {
   };
   targetedIEMS?: string[];
   targetedCareers?: string[];
+  promotedCareers?: string[];
   responsible?: string | User;
   status?: 'Planificada' | 'En curso' | 'Finalizada' | 'Cancelada' | 'Pausada';
   metrics?: {

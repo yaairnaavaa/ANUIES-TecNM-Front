@@ -70,7 +70,7 @@ export class CampaignService {
    * Actualizar campaña
    */
   updateCampaign(id: string, campaign: Partial<CreateCampaignDto>): Observable<ApiResponse<Campaign>> {
-    return this.http.put<ApiResponse<Campaign>>(`${this.baseUrl}/${id}`, campaign);
+    return this.http.patch<ApiResponse<Campaign>>(`${this.baseUrl}/${id}`, campaign);
   }
 
   /**

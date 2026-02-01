@@ -8,6 +8,7 @@ import { IesService } from '../../services/ies.service';
 import { IemsService } from '../../services/iems.service';
 import { UserService } from '../../services/user.service';
 import { CycleService } from '../../services/cycle.service';
+import { ExcelReportService } from '../../services/excel-report.service';
 import { environment } from '../../../environments/environment';
 
 interface CampaignDisplay {
@@ -22,6 +23,8 @@ interface CampaignDisplay {
   type: string;
   specificModality: string;
   cycleName: string;
+  totalRegistrados?: number;
+  totalCompletos?: number;
 }
 
 // Interfaces para datos de prueba
@@ -51,6 +54,7 @@ export class IesCampaignManagementComponent implements OnInit {
   private iemsService = inject(IemsService);
   private userService = inject(UserService);
   private cycleService = inject(CycleService);
+  private excelReport = inject(ExcelReportService);
   private fb = inject(FormBuilder);
 
   // Data
@@ -111,6 +115,8 @@ export class IesCampaignManagementComponent implements OnInit {
 
   careersList = signal<MockCareer[]>([]);
   selectedCareers = signal<string[]>([]);
+  /** Mensaje cuando no hay carreras (ej. IES sin carreras o usuario sin IES) */
+  careersSectionMessage = signal<string | null>(null);
 
   // Ciclo Activo
   activeCycle = signal<any>(null);
@@ -319,56 +325,53 @@ export class IesCampaignManagementComponent implements OnInit {
   loadMockData() {
     this.usersList.set(this.mockUsers);
     this.filteredUsers.set(this.mockUsers);
-    this.careersList.set(this.mockCareers);
+    // careersList se llena solo con loadCareersFromIES (carreras de la IES del usuario)
   }
 
   /**
-   * Cargar carreras de la IES del usuario autenticado o todas si no tiene IES
+   * Cargar solo las carreras de la IES a la que pertenece el usuario (endpoint /ies/:id/carreras).
+   * Si el usuario no tiene IES o la IES no tiene carreras, se muestra el mensaje correspondiente.
    */
   loadCareersFromIES() {
     const user = this.authService.currentUser();
     const userIES = user?.ies;
-    
-    if (userIES && typeof userIES === 'object') {
-      // Si userIES es un objeto completo con carreras
-      if (userIES.careers && userIES.careers.length > 0) {
-        const careers = userIES.careers
-          .filter(c => c.active)
-          .map(c => ({
-            id: c.code || c.name,
-            name: c.name,
-            code: c.code || ''
-          }));
-        this.careersList.set(careers);
-      } else {
-        this.loadAllCareers();
-      }
-    } else if (userIES && typeof userIES === 'string') {
-      // Si userIES es solo un ID, cargar datos completos de la IES
-      this.iesService.getIESById(userIES).subscribe({
-        next: (response) => {
-          if (response.success && response.data?.careers && response.data.careers.length > 0) {
-            const careers = response.data.careers
-              .filter(c => c.active)
-              .map(c => ({
-                id: c.code || c.name,
-                name: c.name,
-                code: c.code || ''
-              }));
-            this.careersList.set(careers);
-          } else {
-            this.loadAllCareers();
-          }
-        },
-        error: (error) => {
-          console.error('❌ Error cargando carreras de la IES:', error);
-          this.loadAllCareers();
-        }
-      });
-    } else {
-      // Si no hay IES, consultar todas
-      this.loadAllCareers();
+    const iesId =
+      !userIES
+        ? null
+        : typeof userIES === 'string'
+          ? userIES
+          : (userIES as any)?._id ?? (userIES as any)?.id ?? null;
+
+    if (!iesId) {
+      this.careersList.set([]);
+      this.careersSectionMessage.set('No tiene IES asignada. Solo se muestran carreras de su institución.');
+      return;
     }
+
+    this.careersSectionMessage.set(null);
+    this.iesService.getCareersIES(iesId).subscribe({
+      next: (response) => {
+        if (response.success && response.data && response.data.length > 0) {
+          const careers = response.data
+            .filter((c: { active?: boolean }) => c.active !== false)
+            .map((c: { _id?: string; id?: string; name: string; code?: string }) => ({
+              id: c._id ?? c.id ?? '',
+              name: c.name,
+              code: c.code ?? ''
+            }));
+          this.careersList.set(careers);
+          this.careersSectionMessage.set(null);
+        } else {
+          this.careersList.set([]);
+          this.careersSectionMessage.set('La IES no tiene carreras registradas.');
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error cargando carreras de la IES:', error);
+        this.careersList.set([]);
+        this.careersSectionMessage.set('La IES no tiene carreras registradas.');
+      }
+    });
   }
 
   /**
@@ -415,6 +418,65 @@ export class IesCampaignManagementComponent implements OnInit {
         this.careersList.set(this.mockCareers);
       }
     });
+  }
+
+  /**
+   * Exportar reporte Excel de campañas (tabla con formato)
+   */
+  exportCampaignsExcel() {
+    const data = this.filteredCampaigns();
+    if (data.length === 0) {
+      alert('No hay campañas para exportar.');
+      return;
+    }
+    const registrados = (c: CampaignDisplay) => c.totalRegistrados ?? 0;
+    const completos = (c: CampaignDisplay) => c.totalCompletos ?? 0;
+    const rows = data.map((c) => {
+      const interesados = Math.max(0, registrados(c) - completos(c));
+      const prospectos = completos(c);
+      const totalRegistros = interesados + prospectos;
+      return {
+        name: c.name,
+        institution: c.institution,
+        status: c.status,
+        cycleName: c.cycleName,
+        startDate: c.startDate,
+        alcanceEstimado: c.reach,
+        inversionTotal: c.cost,
+        alcanceReal: totalRegistros,
+        type: c.type,
+        specificModality: c.specificModality,
+        interesados,
+        prospectos,
+        totalRegistros
+      };
+    });
+    this.excelReport
+      .downloadFormattedExcel({
+        sheetName: 'Campañas',
+        filename: `reporte-campanas_${new Date().toISOString().slice(0, 10)}.xlsx`,
+        title: 'Reporte de Campañas e Impacto',
+        columns: [
+          { key: 'name', label: 'Campaña', width: 32 },
+          { key: 'institution', label: 'Institución', width: 28 },
+          { key: 'status', label: 'Estado', width: 14 },
+          { key: 'cycleName', label: 'Ciclo', width: 18 },
+          { key: 'startDate', label: 'Fecha inicio', width: 14 },
+          { key: 'alcanceEstimado', label: 'Alcance Estimado', width: 18 },
+          { key: 'inversionTotal', label: 'Inversión Total', width: 18 },
+          { key: 'alcanceReal', label: 'Alcance Real', width: 14 },
+          { key: 'type', label: 'Tipo', width: 14 },
+          { key: 'specificModality', label: 'Modalidad', width: 18 },
+          { key: 'interesados', label: 'Interesados', width: 18 },
+          { key: 'prospectos', label: 'Prospectos', width: 18 },
+          { key: 'totalRegistros', label: 'Total registros', width: 18 }
+        ],
+        rows
+      })
+      .catch((err) => {
+        console.error('Error al exportar Excel:', err);
+        alert('No se pudo generar el reporte. Intenta de nuevo.');
+      });
   }
 
   /**
@@ -490,7 +552,9 @@ export class IesCampaignManagementComponent implements OnInit {
         institution: institutionName,
         type: c.type,
         specificModality: c.specificModality,
-        cycleName: cycleName
+        cycleName: cycleName,
+        totalRegistrados: c.totalRegistrados ?? 0,
+        totalCompletos: c.totalCompletos ?? 0
       };
     });
   }
@@ -859,15 +923,18 @@ export class IesCampaignManagementComponent implements OnInit {
     const user = this.authService.currentUser();
     const userIES = user?.ies;
     let iesId: string | undefined;
-    
+
     if (userIES) {
-      // Usuario tiene IES asignada
-      iesId = typeof userIES === 'string' ? userIES : userIES._id;
+      // Usuario tiene IES asignada (puede ser string, objeto con _id o con id)
+      iesId =
+        typeof userIES === 'string'
+          ? userIES
+          : (userIES as any)?._id ?? (userIES as any)?.id ?? undefined;
     } else {
       // Usuario sin IES, usar la seleccionada en el formulario
       iesId = this.selectedIESForCampaign() || undefined;
     }
-    
+
     if (!iesId) {
       this.errorMessage.set('Debe seleccionar una IES para la campaña');
       this.isLoading.set(false);
@@ -1305,6 +1372,14 @@ export class IesCampaignManagementComponent implements OnInit {
   /**
    * Obtener nombre de carrera por ID
    */
+  /**
+   * Obtener array de carreras promocionadas de una campaña (backend puede enviar promotedCareers o targetedCareers).
+   */
+  getPromotedCareers(campaign: Campaign | null): string[] {
+    if (!campaign) return [];
+    return campaign.promotedCareers ?? campaign.targetedCareers ?? [];
+  }
+
   getCareerName(careerId: string): string {
     return this.careersList().find(c => c.id === careerId)?.name || careerId;
   }

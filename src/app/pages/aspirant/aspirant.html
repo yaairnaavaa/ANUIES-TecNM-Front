@@ -93,18 +93,27 @@
           />
         </div>
 
-        <div class="flex items-center gap-3">
-        <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Mostrar:</span>
-        <select
-          [ngModel]="itemsPerPage()"
-          (ngModelChange)="onItemsPerPageChange($event)"
-          class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-all"
-        >
-          @for (option of pageSizeOptions; track option) {
-            <option [value]="option">{{ option }} filas</option>
-          }
-        </select>
-      </div>
+        <div class="flex items-center gap-3 flex-wrap">
+          <button
+            type="button"
+            (click)="exportAspirantsExcel()"
+            [disabled]="filteredAspirants().length === 0"
+            class="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm"
+          >
+            <i class="fas fa-file-excel"></i>
+            Exportar Excel
+          </button>
+          <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Mostrar:</span>
+          <select
+            [ngModel]="itemsPerPage()"
+            (ngModelChange)="onItemsPerPageChange($event)"
+            class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-all"
+          >
+            @for (option of pageSizeOptions; track option) {
+              <option [value]="option">{{ option }} filas</option>
+            }
+          </select>
+        </div>
       </div>
 
       <!-- Filtros por estatus -->
