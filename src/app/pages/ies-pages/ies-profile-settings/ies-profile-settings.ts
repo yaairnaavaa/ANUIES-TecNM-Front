@@ -12,6 +12,7 @@ import { Subscription } from 'rxjs';
 import { IesService } from '../../../services/ies.service';
 import { AuthService } from '../../../services/auth.service';
 import { IESBrandingService } from '../../../services/ies-branding.service';
+import { NotificationService } from '../../../services/notification.service';
 
 /**
  * Secciones editables del perfil
@@ -29,6 +30,7 @@ export class IesProfileSettings implements OnInit, OnDestroy {
   private iesService = inject(IesService);
   private authService = inject(AuthService);
   private brandingService = inject(IESBrandingService);
+  private notificationService = inject(NotificationService);
   private cdr = inject(ChangeDetectorRef);
 
   private brandingSubscription?: Subscription;
@@ -45,7 +47,7 @@ export class IesProfileSettings implements OnInit, OnDestroy {
   menuPosition = { top: 0, left: 0 }; // Posición del menú
   editingCareerIndex: number | null = null; // Índice de la carrera que se está editando
   isEditMode = false; // Determina si el modal está en modo edición
-  
+
   // Signals para toasts
   successMessage = signal<string | null>(null);
   errorMessage = signal<string | null>(null);
@@ -161,13 +163,13 @@ export class IesProfileSettings implements OnInit, OnDestroy {
   // ================================
   private getIesId(): string | undefined {
     const user = this.authService.currentUser();
-    
+
     if (typeof user?.ies === 'string') {
       return user.ies;
     } else if (user?.ies && typeof user.ies === 'object') {
       return (user.ies as any)._id || (user.ies as any).id;
     }
-    
+
     return undefined;
   }
 
@@ -179,7 +181,7 @@ export class IesProfileSettings implements OnInit, OnDestroy {
     console.log('Usuario actual:', user);
 
     const iesId = this.getIesId();
-    
+
     if (!iesId) {
       console.error('No se pudo obtener el ID de la IES del usuario:', user);
       return;
@@ -237,13 +239,13 @@ export class IesProfileSettings implements OnInit, OnDestroy {
     console.log('=== INICIO loadCareers ===');
     console.log('IES ID:', iesId);
     this.loadingCareers = true;
-    
+
     this.iesService.getCareersIES(iesId).subscribe({
       next: (res: any) => {
         console.log('Carreras recibidas del servidor:', res);
         console.log('res.data:', res.data);
         console.log('Cantidad de carreras:', res.data?.length ?? 0);
-        
+
         this.careers.clear();
         console.log('Array de carreras limpiado');
 
@@ -289,15 +291,15 @@ export class IesProfileSettings implements OnInit, OnDestroy {
   // ================================
   saveGeneral(): void {
     if (this.iesForm.get('mision')?.invalid || this.iesForm.get('vision')?.invalid) {
-      alert('Por favor completa la misión y visión');
+      this.notificationService.warning('Por favor completa la misión y visión');
       return;
     }
 
     const iesId = this.getIesId();
-    
+
     if (!iesId) {
       console.error('No se pudo obtener el ID de la IES del usuario');
-      alert('Error: No se pudo identificar tu institución');
+      this.notificationService.error('Error: No se pudo identificar tu institución');
       return;
     }
 
@@ -324,10 +326,10 @@ export class IesProfileSettings implements OnInit, OnDestroy {
 
   saveBranding(): void {
     const iesId = this.getIesId();
-    
+
     if (!iesId) {
       console.error('No se pudo obtener el ID de la IES');
-      alert('Error: No se pudo identificar tu institución');
+      this.notificationService.error('Error: No se pudo identificar tu institución');
       return;
     }
 
@@ -366,10 +368,10 @@ export class IesProfileSettings implements OnInit, OnDestroy {
 
   saveSocial(): void {
     const iesId = this.getIesId();
-    
+
     if (!iesId) {
       console.error('No se pudo obtener el ID de la IES');
-      alert('Error: No se pudo identificar tu institución');
+      this.notificationService.error('Error: No se pudo identificar tu institución');
       return;
     }
 
@@ -457,16 +459,16 @@ export class IesProfileSettings implements OnInit, OnDestroy {
   // ================================
   toggleCareerMenu(index: number, event: MouseEvent): void {
     event.stopPropagation();
-    
+
     if (this.openCareerMenuIndex === index) {
       this.closeCareerMenu();
     } else {
       this.openCareerMenuIndex = index;
-      
+
       // Calcular posición del menú
       const button = event.currentTarget as HTMLElement;
       const rect = button.getBoundingClientRect();
-      
+
       this.menuPosition = {
         top: rect.bottom + 4, // 4px debajo del botón
         left: rect.right - 160 // Alineado a la derecha (160px = ancho del menú)
@@ -533,14 +535,14 @@ export class IesProfileSettings implements OnInit, OnDestroy {
         next: (response: any) => {
           console.log('Carrera creada exitosamente:', response);
           console.log('Respuesta completa:', JSON.stringify(response, null, 2));
-          
+
           this.savingCareer = false;
           this.closeCareerModal();
-          
+
           // Recargar carreras desde el servidor
           console.log('Recargando carreras para IES:', this.currentIesId);
           this.loadCareers(this.currentIesId!);
-          
+
           this.showToast('success', 'Carrera agregada correctamente');
         },
         error: (err: any) => {
@@ -568,15 +570,15 @@ export class IesProfileSettings implements OnInit, OnDestroy {
     this.iesService.updateCareer(careerId, this.newCareerForm.value).subscribe({
       next: (response: any) => {
         console.log('Carrera actualizada exitosamente:', response);
-        
+
         this.savingCareer = false;
         this.closeCareerModal();
-        
+
         // Recargar carreras desde el servidor
         if (this.currentIesId) {
           this.loadCareers(this.currentIesId);
         }
-        
+
         this.showToast('success', 'Carrera actualizada correctamente');
       },
       error: (err: any) => {
@@ -589,7 +591,7 @@ export class IesProfileSettings implements OnInit, OnDestroy {
 
   toggleCareerStatus(index: number): void {
     this.closeCareerMenu();
-    
+
     const career = this.careers.at(index);
     if (!career || !career.value._id) {
       console.error('No se encontró la carrera o no tiene ID');
@@ -617,9 +619,9 @@ export class IesProfileSettings implements OnInit, OnDestroy {
 
   deleteCareer(index: number): void {
     this.closeCareerMenu(); // Cerrar el menú
-    
+
     const career = this.careers.at(index).value;
-    
+
     if (!career._id) {
       console.log('Carrera sin ID, removiendo solo del formulario');
       this.careers.removeAt(index);
@@ -678,11 +680,9 @@ export class IesProfileSettings implements OnInit, OnDestroy {
   // ================================
   showToast(type: 'success' | 'error', message: string): void {
     if (type === 'success') {
-      this.successMessage.set(message);
-      setTimeout(() => this.successMessage.set(null), 4000);
+      this.notificationService.success(message);
     } else {
-      this.errorMessage.set(message);
-      setTimeout(() => this.errorMessage.set(null), 5000);
+      this.notificationService.error(message);
     }
   }
 }

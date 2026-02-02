@@ -2,6 +2,7 @@ import { Component, signal, computed, output, inject, OnInit, input } from '@ang
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IesService } from '../../../services/ies.service';
+import { NotificationService } from '../../../services/notification.service';
 import { Career } from '../../../models/api.models';
 
 @Component({
@@ -13,6 +14,7 @@ import { Career } from '../../../models/api.models';
 })
 export class CareersComponent implements OnInit {
   private iesService = inject(IesService);
+  private notificationService = inject(NotificationService);
   iesId = input.required<string>();
   onClose = output<void>();
   onSave = output<any>();
@@ -99,7 +101,7 @@ export class CareersComponent implements OnInit {
     const editingData = this.editingCarrera(); // Aquí está el nombre original
 
     if (!formData.name || !formData.code) {
-      alert('Nombre y código son obligatorios');
+      this.notificationService.warning('Nombre y código son obligatorios');
       return;
     }
 
@@ -123,7 +125,7 @@ export class CareersComponent implements OnInit {
       const careerId = (editingData as any).id;
 
       if (!careerId) {
-        alert('No se pudo identificar el ID de la carrera');
+        this.notificationService.error('No se pudo identificar el ID de la carrera');
         this.isLoading.set(false);
         return;
       }
@@ -131,7 +133,7 @@ export class CareersComponent implements OnInit {
       this.iesService.updateCareerIES(careerId, payload).subscribe({
         next: () => {
           this.handleSuccess('Carrera actualizada');
-          this.showToast('success', '¡Carrera actualizada correctamente!');
+          this.notificationService.success('¡Carrera actualizada correctamente!');
           this.isFormOpen.set(false);
         },
         error: (err) => this.handleError('Error al actualizar la carrera', err),
@@ -141,12 +143,12 @@ export class CareersComponent implements OnInit {
       this.iesService.createCareerIES(this.iesId(), payload).subscribe({
         next: () => {
           this.handleSuccess('Carrera creada');
-          this.showToast('success', '¡Carrera guardada correctamente!');
+          this.notificationService.success('¡Carrera guardada correctamente!');
           this.isFormOpen.set(false);
         },
         error: (err) => {
           this.handleError('Error al crear', err);
-          this.showToast('error', 'No se pudo guardar la carrera.');
+          this.notificationService.error('No se pudo guardar la carrera.');
         },
       });
     }
@@ -171,7 +173,7 @@ export class CareersComponent implements OnInit {
 
   private handleError(message: string, err: any) {
     console.error(message, err);
-    alert(message);
+    this.notificationService.error(message);
     this.isLoading.set(false);
   }
 
@@ -223,7 +225,7 @@ export class CareersComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-        alert('Error al cargar la información de la carrera');
+        this.notificationService.error('Error al cargar la información de la carrera');
       },
     });
   }
@@ -299,14 +301,5 @@ export class CareersComponent implements OnInit {
     }
   }
 
-  // Función auxiliar para mostrar mensajes con auto-cierre
-  showToast(type: 'success' | 'error', message: string) {
-    if (type === 'success') {
-      this.successMessage.set(message);
-      setTimeout(() => this.successMessage.set(null), 4000);
-    } else {
-      this.errorMessage.set(message);
-      setTimeout(() => this.errorMessage.set(null), 5000);
-    }
-  }
+
 }

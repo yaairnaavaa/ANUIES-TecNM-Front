@@ -4,4 +4,4 @@ export const environment = {
   apiUrl: 'https://anuies-back.vercel.app/api',
   ANUIES_FRONT_URL: 'https://anuies-front.vercel.app'
   //ANUIES_FRONT_URL: 'http://localhost:4200'
-  };
+};

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProspectService } from '../../services/prospect.service';
 import { ExcelReportService } from '../../services/excel-report.service';
+import { NotificationService } from '../../services/notification.service';
 import { Prospect } from '../../models/api.models';
 import { getCareerAbbreviation } from '../../utils/career-abbreviations';
 
@@ -16,6 +17,7 @@ import { getCareerAbbreviation } from '../../utils/career-abbreviations';
 export class Aspirant implements OnInit {
   private prospectService = inject(ProspectService);
   private excelReport = inject(ExcelReportService);
+  private notificationService = inject(NotificationService);
 
   aspirants = signal<Prospect[]>([]);
   selectedAspirant = signal<Prospect | null>(null);
@@ -74,13 +76,13 @@ export class Aspirant implements OnInit {
   // ========================================
   // ESTADÍSTICAS GENERALES DEL MÓDULO
   // ========================================
-  
+
   // Total de aspirantes
   totalAspirants = computed(() => this.aspirants().length);
 
   // Aspirantes con registro completo
   completedAspirants = computed(() => {
-    return this.aspirants().filter(a => 
+    return this.aspirants().filter(a =>
       a.processStatus?.registrationComplete === true
     ).length;
   });
@@ -92,7 +94,7 @@ export class Aspirant implements OnInit {
 
     // Contar todas las carreras de interés
     const careerCount: { [key: string]: number } = {};
-    
+
     aspirants.forEach(a => {
       a.careerInterests?.forEach(interest => {
         const career = interest.career;
@@ -103,7 +105,7 @@ export class Aspirant implements OnInit {
     // Encontrar la más solicitada
     let maxCount = 0;
     let topCareer = 'N/A';
-    
+
     Object.entries(careerCount).forEach(([career, count]) => {
       if (count > maxCount) {
         maxCount = count;
@@ -118,9 +120,9 @@ export class Aspirant implements OnInit {
   averageGrade = computed(() => {
     const aspirants = this.aspirants();
     const withGrades = aspirants.filter(a => a.averageGrade && a.averageGrade > 0);
-    
+
     if (withGrades.length === 0) return 0;
-    
+
     const sum = withGrades.reduce((acc, a) => acc + (a.averageGrade || 0), 0);
     return (sum / withGrades.length).toFixed(1);
   });
@@ -225,7 +227,7 @@ export class Aspirant implements OnInit {
   exportAspirantsExcel(): void {
     const data = this.filteredAspirants();
     if (data.length === 0) {
-      alert('No hay aspirantes para exportar.');
+      this.notificationService.warning('No hay aspirantes para exportar.');
       return;
     }
     const rows = data.map((a) => ({
@@ -259,7 +261,7 @@ export class Aspirant implements OnInit {
       })
       .catch((err) => {
         console.error('Error al exportar Excel:', err);
-        alert('No se pudo generar el reporte. Intenta de nuevo.');
+        this.notificationService.error('No se pudo generar el reporte. Intenta de nuevo.');
       });
   }
 
@@ -290,7 +292,7 @@ export class Aspirant implements OnInit {
 
     try {
       const cleanCurp = curp.trim().toUpperCase();
-      
+
       // Extraer año, mes y día (posiciones 4-9)
       const yearStr = cleanCurp.substring(4, 6);
       const monthStr = cleanCurp.substring(6, 8);
@@ -315,7 +317,7 @@ export class Aspirant implements OnInit {
 
       // Crear la fecha
       const date = new Date(fullYear, month - 1, day);
-      
+
       // Validar que la fecha sea válida (por ejemplo, 31 de febrero no es válido)
       if (date.getFullYear() !== fullYear || date.getMonth() !== month - 1 || date.getDate() !== day) {
         return null;

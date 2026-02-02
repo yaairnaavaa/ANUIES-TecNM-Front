@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IES } from '../../models/api.models';
 import { IesService } from '../../services/ies.service';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
 import { IesUserManagement } from '../ies-gestion-modals/ies-user-management/ies-user-management';
 import { IesEditComponent } from '../ies-gestion-modals/ies-edit-component/ies-edit-component';
 import { CareersComponent } from '../ies-gestion-modals/careers-component/careers-component';
@@ -17,6 +18,7 @@ type ViewState = 'list' | 'add' | 'edit' | 'users' | 'careers';
 })
 export class IesGestion implements OnInit {
   private iesService = inject(IesService);
+  private notificationService = inject(NotificationService);
 
   private authService = inject(AuthService);
   // Estado para controlar qué vista mostrar
@@ -80,9 +82,9 @@ export class IesGestion implements OnInit {
 
 
   manageCareers(ies: IES) {
-  this.selectedIes.set(ies); // Primero establecemos la IES seleccionada
-  this.currentView.set('careers'); // Luego cambiamos la vista para que el @if se active
-}
+    this.selectedIes.set(ies); // Primero establecemos la IES seleccionada
+    this.currentView.set('careers'); // Luego cambiamos la vista para que el @if se active
+  }
 
 
   backToList() {
@@ -157,25 +159,25 @@ export class IesGestion implements OnInit {
   visiblePages = computed(() => {
     const total = this.totalPages();
     if (total === 0) return [];
-    
+
     const current = this.currentPage();
     const pages: number[] = [];
-    
+
     if (total <= 5) {
       for (let i = 1; i <= total; i++) {
         pages.push(i);
       }
       return pages;
     }
-    
+
     const pageGroup = Math.floor((current - 1) / 5);
     const startPage = pageGroup * 5 + 1;
     const endPage = Math.min(startPage + 4, total);
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-    
+
     return pages;
   });
 
@@ -193,7 +195,7 @@ export class IesGestion implements OnInit {
     const total = this.totalPages();
     const pageGroup = Math.floor((current - 1) / 5);
     const maxGroup = Math.floor((total - 1) / 5);
-    
+
     if (pageGroup < maxGroup) {
       const newPage = (pageGroup + 1) * 5 + 1;
       this.goToPage(newPage);
@@ -203,7 +205,7 @@ export class IesGestion implements OnInit {
   hasPreviousGroup = computed(() => {
     const total = this.totalPages();
     if (total <= 5) return false;
-    
+
     const current = this.currentPage();
     const pageGroup = Math.floor((current - 1) / 5);
     return pageGroup > 0;
@@ -212,7 +214,7 @@ export class IesGestion implements OnInit {
   hasNextGroup = computed(() => {
     const total = this.totalPages();
     if (total <= 5) return false;
-    
+
     const current = this.currentPage();
     const pageGroup = Math.floor((current - 1) / 5);
     const maxGroup = Math.floor((total - 1) / 5);
@@ -245,20 +247,17 @@ export class IesGestion implements OnInit {
     this.iesService.createIES(this.newIes()).subscribe({
       next: (response) => {
         // 1. Establecemos el mensaje (se verá en el toast externo)
-        this.successMessage.set('Institución registrada correctamente');
+        this.notificationService.success('Institución registrada correctamente');
 
         // 2. CERRAMOS EL MODAL INMEDIATAMENTE
         this.isAdding.set(false); // O llama a this.closeModal() si limpia más datos
 
         this.loadIES();
         this.isLoading.set(false);
-
-        // Limpiar el toast después de unos segundos
-        setTimeout(() => this.successMessage.set(null), 3500);
       },
       error: (error) => {
         console.error('Error creando IES:', error);
-        this.errorMessage.set('Error al guardar: Verifique los datos');
+        this.notificationService.error('Error al guardar: Verifique los datos');
 
         // 3. OPCIONAL: Cerrar también en error
         // Si quieres que el usuario corrija, no lo cierres aquí.
@@ -266,12 +265,11 @@ export class IesGestion implements OnInit {
         this.isAdding.set(false);
 
         this.isLoading.set(false);
-        setTimeout(() => this.errorMessage.set(null), 5000);
       },
     });
   }
 
-  
+
   onSave(updatedIes: any) {
     console.log('Datos recibidos del hijo:', updatedIes);
     // Aquí iría tu lógica para llamar al servicio y actualizar en la BD
@@ -282,8 +280,9 @@ export class IesGestion implements OnInit {
   /**
    * Eliminar IES
    */
-  deleteIES(iesId: string) {
-    if (!confirm('¿Está seguro de eliminar esta IES?')) {
+  async deleteIES(iesId: string) {
+    const confirmed = await this.notificationService.confirm('¿Está seguro de eliminar esta IES?', 'Eliminar IES', 'Sí, eliminar');
+    if (!confirmed) {
       return;
     }
 
@@ -293,7 +292,7 @@ export class IesGestion implements OnInit {
       },
       error: (error) => {
         console.error('Error eliminando IES:', error);
-        alert('Error al eliminar la IES');
+        this.notificationService.error('Error al eliminar la IES');
       },
     });
   }

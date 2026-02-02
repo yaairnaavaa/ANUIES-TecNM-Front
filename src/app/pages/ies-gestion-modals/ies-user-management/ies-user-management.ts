@@ -13,6 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { UserService } from '../../../services/user.service';
 import { AuthService } from '../../../services/auth.service';
 import { RoleService } from '../../../services/role.service';
+import { NotificationService } from '../../../services/notification.service';
 import { User, Role } from '../../../models/api.models';
 
 interface UserDisplay {
@@ -45,6 +46,7 @@ export class IesUserManagement implements OnInit {
   private userService = inject(UserService);
   private authService = inject(AuthService);
   private roleService = inject(RoleService);
+  private notificationService = inject(NotificationService);
 
   // Recibimos los datos del padre
   @Input() iesName: string = '';
@@ -94,7 +96,7 @@ export class IesUserManagement implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           // Filtrar solo roles relacionados con IES
-          const roles = response.data.filter(r => 
+          const roles = response.data.filter(r =>
             r.name === 'Admin IES' || r.name === 'Operativo IES'
           );
           this.availableRoles.set(roles);
@@ -113,13 +115,13 @@ export class IesUserManagement implements OnInit {
   filterRoles(query: string) {
     this.roleSearchQuery.set(query);
     this.showRoleDropdown.set(true);
-    
+
     if (!query.trim()) {
       this.filteredRoles.set(this.availableRoles());
       return;
     }
-    
-    const filtered = this.availableRoles().filter(role => 
+
+    const filtered = this.availableRoles().filter(role =>
       role.displayName?.toLowerCase().includes(query.toLowerCase()) ||
       role.name?.toLowerCase().includes(query.toLowerCase())
     );
@@ -231,11 +233,11 @@ export class IesUserManagement implements OnInit {
   // Esta es la función que te marcaba el error en el HTML
   toggleAddUser(): void {
     if (this.isLimitReached() && !this.isAddingUser()) {
-      alert('Se ha alcanzado el límite máximo de usuarios permitidos.');
+      this.notificationService.warning('Se ha alcanzado el límite máximo de usuarios permitidos.');
       return;
     }
     this.isAddingUser.update((val) => !val);
-    
+
     // Resetear formulario cuando se cierra
     if (!this.isAddingUser()) {
       this.resetForm();
@@ -261,10 +263,10 @@ export class IesUserManagement implements OnInit {
    */
   saveNewUser(): void {
     const form = this.newUser();
-    
+
     // Validaciones básicas
     if (!form.firstName || !form.lastName || !form.email || !form.password || !form.role) {
-      alert('Por favor complete todos los campos obligatorios');
+      this.notificationService.warning('Por favor complete todos los campos obligatorios');
       return;
     }
 
@@ -292,13 +294,13 @@ export class IesUserManagement implements OnInit {
         this.isAddingUser.set(false);
         this.resetForm();
         this.loadUsers();
-        alert('Usuario creado exitosamente');
+        this.notificationService.success('Usuario creado exitosamente');
       },
       error: (error) => {
         console.error('Error creando usuario:', error);
         this.isSaving.set(false);
         this.errorMessage.set(error.error?.message || 'Error al crear el usuario');
-        alert(this.errorMessage());
+        this.notificationService.error(this.errorMessage()!);
       },
     });
   }
@@ -322,19 +324,20 @@ export class IesUserManagement implements OnInit {
   /**
    * Eliminar usuario
    */
-  deleteUser(userId: string): void {
-    if (!confirm('¿Desea eliminar este usuario?')) {
+  async deleteUser(userId: string): Promise<void> {
+    const confirmed = await this.notificationService.confirm('¿Desea eliminar este usuario?', 'Eliminar Usuario', 'Sí, eliminar');
+    if (!confirmed) {
       return;
     }
 
     this.userService.deleteUser(userId).subscribe({
       next: () => {
         this.loadUsers();
-        alert('Usuario eliminado correctamente');
+        this.notificationService.success('Usuario eliminado correctamente');
       },
       error: (error) => {
         console.error('Error eliminando usuario:', error);
-        alert('Error al eliminar el usuario');
+        this.notificationService.error('Error al eliminar el usuario');
       },
     });
   }
@@ -351,7 +354,7 @@ export class IesUserManagement implements OnInit {
       },
       error: (error) => {
         console.error('Error cambiando estado:', error);
-        alert('Error al cambiar el estado del usuario');
+        this.notificationService.error('Error al cambiar el estado del usuario');
       },
     });
   }

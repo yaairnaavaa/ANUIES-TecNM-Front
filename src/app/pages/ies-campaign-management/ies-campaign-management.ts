@@ -9,6 +9,7 @@ import { IemsService } from '../../services/iems.service';
 import { UserService } from '../../services/user.service';
 import { CycleService } from '../../services/cycle.service';
 import { ExcelReportService } from '../../services/excel-report.service';
+import { NotificationService } from '../../services/notification.service';
 import { environment } from '../../../environments/environment';
 
 interface CampaignDisplay {
@@ -55,6 +56,7 @@ export class IesCampaignManagementComponent implements OnInit {
   private userService = inject(UserService);
   private cycleService = inject(CycleService);
   private excelReport = inject(ExcelReportService);
+  private notificationService = inject(NotificationService);
   private fb = inject(FormBuilder);
 
   // Data
@@ -76,7 +78,7 @@ export class IesCampaignManagementComponent implements OnInit {
 
   // SELECCIÓN (Aquí vive la magia de las métricas)
   selectedCampaign = signal<CampaignDisplay | null>(null);
-  
+
   // Modal de detalles
   showDetailsModal = signal<boolean>(false);
   viewingCampaign = signal<CampaignDisplay | null>(null);
@@ -126,17 +128,17 @@ export class IesCampaignManagementComponent implements OnInit {
   filteredCampaignTypes = signal<string[]>(['Presencial', 'Digital']);
   campaignTypeSearch = signal('');
   showCampaignTypeDropdown = signal(false);
-  
+
   specificModalities = signal<string[]>([]);
   filteredSpecificModalities = signal<string[]>([]);
   specificModalitySearch = signal('');
   showSpecificModalityDropdown = signal(false);
-  
+
   reachUnits = ['Personas', 'Impresiones', 'Clics', 'Vistas', 'Asistentes'];
   filteredReachUnits = signal<string[]>(['Personas', 'Impresiones', 'Clics', 'Vistas', 'Asistentes']);
   reachUnitSearch = signal('');
   showReachUnitDropdown = signal(false);
-  
+
   // Opciones de estado de campaña
   campaignStatusOptions = ['Planificada', 'En curso', 'En pausa', 'Finalizada', 'Cancelada'];
   filteredCampaignStatuses = signal<string[]>(['Planificada', 'En curso', 'En pausa', 'Finalizada', 'Cancelada']);
@@ -214,46 +216,46 @@ export class IesCampaignManagementComponent implements OnInit {
   initializeForm() {
     const user = this.authService.currentUser();
     const hasIES = !!user?.ies;
-    
+
     this.campaignForm = this.fb.group({
       // Información básica
       name: ['', [Validators.required, Validators.minLength(5)]],
       description: [''],
-      
+
       // IES (solo si el usuario no tiene IES asignada)
       campaignIES: [hasIES ? null : '', hasIES ? [] : [Validators.required]],
-      
+
       // Tipo y modalidad (por defecto Presencial)
       type: ['Presencial', Validators.required],
       specificModality: ['', Validators.required],
-      
+
       // Periodo
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
-      
+
       // Alcance
       estimatedReach: [0, [Validators.required, Validators.min(1)]],
       actualReach: [0],
       reachUnit: ['Personas', Validators.required],
-      
+
       // Costos
       totalCost: [0, [Validators.required, Validators.min(0)]],
       costPerImpact: [0],
-      
+
       // Objetivos
       targetedIEMSId: [''],
       targetedIEMS: [''],
-      
+
       // Evaluación
       evaluationNotes: [''],
-      
+
       // Responsable (se bloqueará después de establecer el valor)
       responsible: [''],
       responsibleId: [''],
-      
+
       // Estado de la campaña (por defecto "Planificada")
       status: ['Planificada', Validators.required],
-      
+
       // Estado activo
       active: [true]
     });
@@ -268,13 +270,13 @@ export class IesCampaignManagementComponent implements OnInit {
         this.specificModalitySearch.set('');
       }
     });
-    
+
     // Cargar modalidades por defecto (Presencial)
     const defaultModalities = this.campaignService.getModalitiesByType('Presencial');
     this.specificModalities.set(defaultModalities);
     this.filteredSpecificModalities.set(defaultModalities);
     this.campaignTypeSearch.set('Presencial');
-    
+
     // Inicializar estado de campaña con "Planificada"
     this.campaignStatusSearch.set('Planificada');
     this.filteredCampaignStatuses.set(this.campaignStatusOptions);
@@ -282,7 +284,7 @@ export class IesCampaignManagementComponent implements OnInit {
     // Calcular costo por impacto automáticamente
     this.campaignForm.get('totalCost')?.valueChanges.subscribe(() => this.calculateCostPerImpact());
     this.campaignForm.get('actualReach')?.valueChanges.subscribe(() => this.calculateCostPerImpact());
-    
+
     // Sincronizar el input de estado con el valor del formulario
     this.campaignForm.get('status')?.valueChanges.subscribe(status => {
       if (status) {
@@ -296,7 +298,7 @@ export class IesCampaignManagementComponent implements OnInit {
    */
   loadIEMS() {
     this.isLoading.set(true);
-    
+
     this.iemsService.getAllIEMS({ active: true }).subscribe({
       next: (response) => {
         if (response.success && response.data) {
@@ -305,12 +307,12 @@ export class IesCampaignManagementComponent implements OnInit {
         } else {
           this.errorMessage.set('No se encontraron IEMS activas');
         }
-        
+
         this.isLoading.set(false);
       },
       error: (error) => {
         console.error('❌ Error cargando IEMS:', error);
-        
+
         this.errorMessage.set(
           `Error al cargar IEMS: ${error.error?.message || error.message || 'Error desconocido'}`
         );
@@ -383,7 +385,7 @@ export class IesCampaignManagementComponent implements OnInit {
         if (response.success && response.data) {
           // Crear un Set para evitar duplicados
           const careersMap = new Map<string, MockCareer>();
-          
+
           response.data.forEach(ies => {
             if (ies.careers && ies.careers.length > 0) {
               ies.careers
@@ -401,9 +403,9 @@ export class IesCampaignManagementComponent implements OnInit {
                 });
             }
           });
-          
+
           const allCareers = Array.from(careersMap.values());
-          
+
           if (allCareers.length > 0) {
             this.careersList.set(allCareers);
           } else {
@@ -426,7 +428,7 @@ export class IesCampaignManagementComponent implements OnInit {
   exportCampaignsExcel() {
     const data = this.filteredCampaigns();
     if (data.length === 0) {
-      alert('No hay campañas para exportar.');
+      this.notificationService.warning('No hay campañas para exportar.');
       return;
     }
     const registrados = (c: CampaignDisplay) => c.totalRegistrados ?? 0;
@@ -475,7 +477,7 @@ export class IesCampaignManagementComponent implements OnInit {
       })
       .catch((err) => {
         console.error('Error al exportar Excel:', err);
-        alert('No se pudo generar el reporte. Intenta de nuevo.');
+        this.notificationService.error('No se pudo generar el reporte. Intenta de nuevo.');
       });
   }
 
@@ -485,7 +487,7 @@ export class IesCampaignManagementComponent implements OnInit {
   calculateCostPerImpact() {
     const totalCost = this.campaignForm.get('totalCost')?.value || 0;
     const actualReach = this.campaignForm.get('actualReach')?.value || 0;
-    
+
     if (actualReach > 0 && totalCost > 0) {
       const costPerImpact = totalCost / actualReach;
       this.campaignForm.get('costPerImpact')?.setValue(costPerImpact, { emitEvent: false });
@@ -502,11 +504,11 @@ export class IesCampaignManagementComponent implements OnInit {
     this.campaignService.getCampaigns().subscribe({
       next: (response: any) => {
         console.log('📋 Respuesta de campañas:', response);
-        
+
         // Manejar diferentes estructuras de respuesta del API
         const isSuccess = response.success === true || response.status === 'success';
         const campaignsData = response.data || [];
-        
+
         if (isSuccess && campaignsData.length >= 0) {
           this.rawCampaigns.set(campaignsData);
           this.allCampaigns.set(this.mapCampaignsToDisplay(campaignsData));
@@ -542,8 +544,8 @@ export class IesCampaignManagementComponent implements OnInit {
       return {
         id: c._id || '',
         name: c.name,
-        startDate: typeof c.period?.startDate === 'string' 
-          ? c.period.startDate 
+        startDate: typeof c.period?.startDate === 'string'
+          ? c.period.startDate
           : c.period?.startDate?.toString() || '',
         reach: reach,
         cost: cost,
@@ -578,7 +580,7 @@ export class IesCampaignManagementComponent implements OnInit {
     const start = (this.currentPage() - 1) * this.itemsPerPage();
     return this.filteredCampaigns().slice(start, start + this.itemsPerPage());
   });
-  
+
   // Métricas dinámicas basadas en las campañas filtradas de la tabla o campaña seleccionada
   displayMetrics = computed(() => {
     const selected = this.selectedCampaign();
@@ -665,8 +667,9 @@ export class IesCampaignManagementComponent implements OnInit {
   /**
    * Eliminar campaña
    */
-  deleteCampaign(id: string) {
-    if (!confirm('¿Estás seguro de eliminar esta campaña?')) {
+  async deleteCampaign(id: string) {
+    const confirmed = await this.notificationService.confirm('¿Estás seguro de eliminar esta campaña?', 'Eliminar Campaña', 'Sí, eliminar');
+    if (!confirmed) {
       return;
     }
 
@@ -680,7 +683,7 @@ export class IesCampaignManagementComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error eliminando campaña:', error);
-        alert('Error al eliminar la campaña');
+        this.notificationService.error('Error al eliminar la campaña');
         this.isLoading.set(false);
       }
     });
@@ -696,7 +699,7 @@ export class IesCampaignManagementComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error actualizando estado:', error);
-        alert('Error al actualizar el estado de la campaña');
+        this.notificationService.error('Error al actualizar el estado de la campaña');
       }
     });
   }
@@ -713,12 +716,12 @@ export class IesCampaignManagementComponent implements OnInit {
 
     this.isEditMode.set(false);
     this.editingCampaignId.set(null);
-    
+
     // Construir nombre completo del usuario
-    const fullName = currentUser?.firstName 
+    const fullName = currentUser?.firstName
       ? `${currentUser.firstName} ${currentUser.lastName || ''}`.trim()
-      :  '';
-    
+      : '';
+
     this.campaignForm.reset({
       active: true,
       reachUnit: 'Personas',
@@ -730,33 +733,33 @@ export class IesCampaignManagementComponent implements OnInit {
       responsibleId: currentUser?.id || '',
       status: 'Planificada' // Estado por defecto
     });
-    
+
     // Establecer el nombre del usuario responsable y luego deshabilitar el campo
     this.campaignForm.patchValue({
       responsible: fullName
     });
-    
+
     // Deshabilitar el campo después de establecer el valor
     this.campaignForm.get('responsible')?.disable();
-    
+
     // Inicializar búsquedas de combos
     this.reachUnitSearch.set('Personas');
     this.filteredReachUnits.set(this.reachUnits);
-    
+
     this.selectedCareers.set([]);
     this.selectedIEMS.set(null);
     this.selectedIEMSName.set('');
     this.iemsSearchQuery.set('');
     this.showIEMSDropdown.set(false);
     this.filteredIEMS.set(this.iemsList());
-    
+
     // Resetear selección de IES (para usuarios sin IES asignada)
     this.selectedIESForCampaign.set(null);
     this.selectedIESName.set('');
     this.iesSearchQuery.set('');
     this.showIESDropdown.set(false);
     this.filteredIESForCampaign.set(this.iesList());
-    
+
     // Resetear tipo y modalidad
     this.campaignTypeSearch.set('Presencial');
     this.specificModalitySearch.set('');
@@ -765,12 +768,12 @@ export class IesCampaignManagementComponent implements OnInit {
     const defaultModalities = this.campaignService.getModalitiesByType('Presencial');
     this.specificModalities.set(defaultModalities);
     this.filteredSpecificModalities.set(defaultModalities);
-    
+
     // Resetear estado de campaña
     this.campaignStatusSearch.set('Planificada');
     this.filteredCampaignStatuses.set(this.campaignStatusOptions);
     this.showCampaignStatusDropdown.set(false);
-    
+
     this.showModal.set(true);
     this.isAdding.set(false);
   }
@@ -786,7 +789,7 @@ export class IesCampaignManagementComponent implements OnInit {
     this.campaignService.getCampaignById(campaignId).subscribe({
       next: (response: any) => {
         const campaign = response.data || response;
-        
+
         if (!campaign) {
           this.errorMessage.set('No se pudo cargar la información de la campaña');
           this.isLoading.set(false);
@@ -795,9 +798,9 @@ export class IesCampaignManagementComponent implements OnInit {
 
         this.isEditMode.set(true);
         this.editingCampaignId.set(campaignId);
-        
+
         const currentUser = this.authService.currentUser();
-        const fullName = currentUser?.firstName 
+        const fullName = currentUser?.firstName
           ? `${currentUser.firstName} ${currentUser.lastName || ''}`.trim()
           : '';
 
@@ -918,7 +921,7 @@ export class IesCampaignManagementComponent implements OnInit {
     this.errorMessage.set(null);
 
     const formValue = this.campaignForm.value;
-    
+
     // Obtener IES del usuario autenticado o la seleccionada en el formulario
     const user = this.authService.currentUser();
     const userIES = user?.ies;
@@ -947,7 +950,7 @@ export class IesCampaignManagementComponent implements OnInit {
       this.isLoading.set(false);
       return;
     }
-    
+
     // Construir el objeto de campaña con la estructura correcta del API
     const campaignData = {
       ies: {
@@ -988,7 +991,7 @@ export class IesCampaignManagementComponent implements OnInit {
       // Responsible
       responsible: {
         id: formValue.responsibleId || user?.id || '',
-        name: user?.firstName 
+        name: user?.firstName
           ? `${user.firstName} ${user.lastName || ''}`.trim()
           : ''
       },
@@ -1007,23 +1010,19 @@ export class IesCampaignManagementComponent implements OnInit {
         next: (response: any) => {
           this.isLoading.set(false);
           console.log('✅ Respuesta del servidor (actualización):', response);
-          
+
           // Verificar si la respuesta es exitosa (manejar diferentes estructuras de API)
-          const isSuccess = response.success === true || 
-                           response.status === 'success' || 
-                           response.data !== undefined;
-          
+          const isSuccess = response.success === true ||
+            response.status === 'success' ||
+            response.data !== undefined;
+
           if (isSuccess) {
             // Cerrar modal inmediatamente
             this.showModal.set(false);
             // Mostrar mensaje de éxito
-            this.successMessage.set('✅ Campaña actualizada exitosamente');
+            this.notificationService.success('✅ Campaña actualizada exitosamente');
             // Recargar lista de campañas
             this.loadCampaigns();
-            // Limpiar mensaje después de 5 segundos
-            setTimeout(() => {
-              this.successMessage.set(null);
-            }, 5000);
           } else {
             this.errorMessage.set('No se pudo actualizar la campaña');
           }
@@ -1040,23 +1039,19 @@ export class IesCampaignManagementComponent implements OnInit {
         next: (response: any) => {
           this.isLoading.set(false);
           console.log('✅ Respuesta del servidor (creación):', response);
-          
+
           // Verificar si la respuesta es exitosa (manejar diferentes estructuras de API)
-          const isSuccess = response.success === true || 
-                           response.status === 'success' || 
-                           response.data !== undefined;
-          
+          const isSuccess = response.success === true ||
+            response.status === 'success' ||
+            response.data !== undefined;
+
           if (isSuccess) {
             // Cerrar modal inmediatamente
             this.showModal.set(false);
             // Mostrar mensaje de éxito
-            this.successMessage.set('✅ Campaña creada exitosamente');
+            this.notificationService.success('✅ Campaña creada exitosamente');
             // Recargar lista de campañas
             this.loadCampaigns();
-            // Limpiar mensaje después de 5 segundos
-            setTimeout(() => {
-              this.successMessage.set(null);
-            }, 5000);
           } else {
             this.errorMessage.set('No se pudo crear la campaña');
           }
@@ -1091,13 +1086,13 @@ export class IesCampaignManagementComponent implements OnInit {
   filterCampaignType(query: string) {
     this.campaignTypeSearch.set(query);
     this.showCampaignTypeDropdown.set(true);
-    
+
     if (!query.trim()) {
       this.filteredCampaignTypes.set(this.campaignTypes);
       return;
     }
-    
-    const filtered = this.campaignTypes.filter(type => 
+
+    const filtered = this.campaignTypes.filter(type =>
       type.toLowerCase().includes(query.toLowerCase())
     );
     this.filteredCampaignTypes.set(filtered);
@@ -1110,7 +1105,7 @@ export class IesCampaignManagementComponent implements OnInit {
     this.campaignTypeSearch.set(type);
     this.campaignForm.patchValue({ type });
     this.showCampaignTypeDropdown.set(false);
-    
+
     // Cargar modalidades del tipo seleccionado
     const modalities = this.campaignService.getModalitiesByType(type as any);
     this.specificModalities.set(modalities);
@@ -1133,13 +1128,13 @@ export class IesCampaignManagementComponent implements OnInit {
   filterSpecificModality(query: string) {
     this.specificModalitySearch.set(query);
     this.showSpecificModalityDropdown.set(true);
-    
+
     if (!query.trim()) {
       this.filteredSpecificModalities.set(this.specificModalities());
       return;
     }
-    
-    const filtered = this.specificModalities().filter(modality => 
+
+    const filtered = this.specificModalities().filter(modality =>
       modality.toLowerCase().includes(query.toLowerCase())
     );
     this.filteredSpecificModalities.set(filtered);
@@ -1169,13 +1164,13 @@ export class IesCampaignManagementComponent implements OnInit {
   filterCampaignStatus(query: string) {
     this.campaignStatusSearch.set(query);
     this.showCampaignStatusDropdown.set(true);
-    
+
     if (!query.trim()) {
       this.filteredCampaignStatuses.set(this.campaignStatusOptions);
       return;
     }
-    
-    const filtered = this.campaignStatusOptions.filter(status => 
+
+    const filtered = this.campaignStatusOptions.filter(status =>
       status.toLowerCase().includes(query.toLowerCase())
     );
     this.filteredCampaignStatuses.set(filtered);
@@ -1205,13 +1200,13 @@ export class IesCampaignManagementComponent implements OnInit {
   filterReachUnit(query: string) {
     this.reachUnitSearch.set(query);
     this.showReachUnitDropdown.set(true);
-    
+
     if (!query.trim()) {
       this.filteredReachUnits.set(this.reachUnits);
       return;
     }
-    
-    const filtered = this.reachUnits.filter(unit => 
+
+    const filtered = this.reachUnits.filter(unit =>
       unit.toLowerCase().includes(query.toLowerCase())
     );
     this.filteredReachUnits.set(filtered);
@@ -1249,17 +1244,17 @@ export class IesCampaignManagementComponent implements OnInit {
   filterIEMS(query: string) {
     this.iemsSearchQuery.set(query);
     this.showIEMSDropdown.set(true);
-    
+
     if (!query.trim()) {
       // Si no hay query, mostrar todas las IEMS
       this.filteredIEMS.set(this.iemsList());
       return;
     }
-    
+
     const filtered = this.iemsList().filter(iems => {
       // Crear el texto completo "Estado - Nombre"
       const fullText = `${iems.address.state} - ${iems.name}`;
-      
+
       return fullText.toLowerCase().includes(query.toLowerCase()) ||
         iems.name.toLowerCase().includes(query.toLowerCase()) ||
         iems.code.toLowerCase().includes(query.toLowerCase()) ||
@@ -1287,12 +1282,12 @@ export class IesCampaignManagementComponent implements OnInit {
     this.selectedIEMS.set(iemsId);
     this.selectedIEMSName.set(iemsName);
     this.iemsSearchQuery.set(iemsName);
-    
+
     this.campaignForm.patchValue({
       targetedIEMSId: iemsId,
       targetedIEMS: iemsName
     });
-    
+
     // Cerrar dropdown después de seleccionar
     this.showIEMSDropdown.set(false);
   }
@@ -1327,7 +1322,7 @@ export class IesCampaignManagementComponent implements OnInit {
       this.filteredUsers.set(this.usersList());
       return;
     }
-    const filtered = this.usersList().filter(user => 
+    const filtered = this.usersList().filter(user =>
       user.name.toLowerCase().includes(query.toLowerCase()) ||
       user.email.toLowerCase().includes(query.toLowerCase())
     );
@@ -1352,13 +1347,13 @@ export class IesCampaignManagementComponent implements OnInit {
   toggleCareer(careerId: string) {
     const current = this.selectedCareers();
     const index = current.indexOf(careerId);
-    
+
     if (index > -1) {
       current.splice(index, 1);
     } else {
       current.push(careerId);
     }
-    
+
     this.selectedCareers.set([...current]);
   }
 
@@ -1399,24 +1394,24 @@ export class IesCampaignManagementComponent implements OnInit {
     if (!targetedIEMS || !Array.isArray(targetedIEMS) || targetedIEMS.length === 0) {
       return 'Sin nombre';
     }
-    
+
     const firstItem = targetedIEMS[0];
-    
+
     // Si es un objeto con iemsName
     if (typeof firstItem === 'object' && firstItem !== null && 'iemsName' in firstItem) {
       return firstItem.iemsName || 'Sin nombre';
     }
-    
+
     // Si es un string (ID), buscar el nombre
     if (typeof firstItem === 'string') {
       return this.getIEMSName(firstItem);
     }
-    
+
     // Si es un objeto con iemsId
     if (typeof firstItem === 'object' && firstItem !== null && 'iemsId' in firstItem) {
       return this.getIEMSName(firstItem.iemsId);
     }
-    
+
     return 'Sin nombre';
   }
 
@@ -1430,13 +1425,13 @@ export class IesCampaignManagementComponent implements OnInit {
   filterIESForCampaign(query: string) {
     this.iesSearchQuery.set(query);
     this.showIESDropdown.set(true);
-    
+
     if (!query.trim()) {
       this.filteredIESForCampaign.set(this.iesList());
       return;
     }
-    
-    const filtered = this.iesList().filter(ies => 
+
+    const filtered = this.iesList().filter(ies =>
       ies.name.toLowerCase().includes(query.toLowerCase()) ||
       ies.code.toLowerCase().includes(query.toLowerCase())
     );
@@ -1521,7 +1516,7 @@ export class IesCampaignManagementComponent implements OnInit {
     this.selectedCampaignForQR.set(campaign);
     this.showQRModal.set(true);
     this.linkCopied.set(false);
-    
+
     // Generar imagen personalizada del QR con el nombre de la campaña
     this.generateCustomQRImage();
   }
@@ -1598,47 +1593,47 @@ export class IesCampaignManagementComponent implements OnInit {
 
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    
+
     img.onload = () => {
       const canvas = document.createElement('canvas');
       const padding = 40;
       const textHeight = 80;
-      
+
       // Dimensiones del canvas: ancho del QR + padding, alto del QR + texto + padding
       canvas.width = img.width + (padding * 2);
       canvas.height = img.height + textHeight + (padding * 2);
-      
+
       const ctx = canvas.getContext('2d');
       if (ctx) {
         // Fondo blanco
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
+
         // Configurar texto
         ctx.fillStyle = '#1e293b'; // Color del texto (slate-800)
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        
+
         // Calcular el tamaño de fuente apropiado para el nombre de la campaña
         const maxWidth = canvas.width - (padding * 2);
         let fontSize = 24;
         ctx.font = `bold ${fontSize}px Arial, sans-serif`;
-        
+
         // Ajustar tamaño de fuente si el texto es muy largo
         while (ctx.measureText(campaign.name).width > maxWidth && fontSize > 12) {
           fontSize -= 2;
           ctx.font = `bold ${fontSize}px Arial, sans-serif`;
         }
-        
+
         // Dividir texto en líneas si es necesario
         const words = campaign.name.split(' ');
         const lines: string[] = [];
         let currentLine = words[0];
-        
+
         for (let i = 1; i < words.length; i++) {
           const testLine = currentLine + ' ' + words[i];
           const metrics = ctx.measureText(testLine);
-          
+
           if (metrics.width > maxWidth) {
             lines.push(currentLine);
             currentLine = words[i];
@@ -1647,28 +1642,28 @@ export class IesCampaignManagementComponent implements OnInit {
           }
         }
         lines.push(currentLine);
-        
+
         // Dibujar el nombre de la campaña (centrado en la parte superior)
         const lineHeight = fontSize + 5;
         const startY = padding + (textHeight / 2) - ((lines.length - 1) * lineHeight / 2);
-        
+
         lines.forEach((line, index) => {
           ctx.fillText(line, canvas.width / 2, startY + (index * lineHeight));
         });
-        
+
         // Dibujar el código QR debajo del texto
         ctx.drawImage(img, padding, textHeight + padding);
-        
+
         // Convertir canvas a data URL y guardarlo
         this.customQRImage.set(canvas.toDataURL('image/png'));
       }
     };
-    
+
     img.onerror = () => {
       console.error('Error al cargar la imagen del QR');
       this.customQRImage.set(this.qrImageUrl());
     };
-    
+
     img.src = this.qrImageUrl();
   }
 
@@ -1681,9 +1676,9 @@ export class IesCampaignManagementComponent implements OnInit {
       console.error('No hay imagen del QR disponible');
       return;
     }
-    
+
     const fileName = this.getQRFileName();
-    
+
     // Convertir data URL a blob y descargar
     fetch(customImage)
       .then(res => res.blob())

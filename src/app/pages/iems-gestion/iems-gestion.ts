@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IemsService } from '../../services/iems.service';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
 import { IEMS } from '../../models/api.models';
 
 @Component({
@@ -15,6 +16,7 @@ import { IEMS } from '../../models/api.models';
 export class IemsGestion implements OnInit {
   private iemsService = inject(IemsService);
   private authService = inject(AuthService);
+  private notificationService = inject(NotificationService);
   public isStateComboOpen: boolean = false;
   public isTypeComboOpen: boolean = false;
   public successMessage = signal<string | null>(null);
@@ -299,10 +301,10 @@ export class IemsGestion implements OnInit {
   visiblePages = computed(() => {
     const total = this.totalPages();
     if (total === 0) return [];
-    
+
     const current = this.currentPage();
     const pages: number[] = [];
-    
+
     // Si hay 5 o menos páginas, mostrar todas
     if (total <= 5) {
       for (let i = 1; i <= total; i++) {
@@ -310,16 +312,16 @@ export class IemsGestion implements OnInit {
       }
       return pages;
     }
-    
+
     // Calcular el rango de páginas a mostrar (grupos de 5)
     const pageGroup = Math.floor((current - 1) / 5);
     const startPage = pageGroup * 5 + 1;
     const endPage = Math.min(startPage + 4, total);
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-    
+
     return pages;
   });
 
@@ -376,7 +378,7 @@ export class IemsGestion implements OnInit {
       !iemsData.address?.municipality ||
       !iemsData.address?.state
     ) {
-      this.showError('Por favor completa todos los campos requeridos');
+      this.notificationService.warning('Por favor completa todos los campos requeridos');
       return;
     }
 
@@ -385,13 +387,13 @@ export class IemsGestion implements OnInit {
     const observer = {
       next: () => {
         const msg = this.editingIEMS() ? 'IEMS actualizada con éxito' : 'IEMS creada con éxito';
-        this.showSuccess(msg);
+        this.notificationService.success(msg);
         this.loadIEMS();
         this.closeModal();
       },
       error: (error: any) => {
         console.error('Error:', error);
-        this.showError(
+        this.notificationService.error(
           this.editingIEMS() ? 'Error al actualizar la IEMS' : 'Error al crear la IEMS',
         );
         this.isLoading.set(false);
@@ -405,22 +407,14 @@ export class IemsGestion implements OnInit {
     }
   }
 
-  // Métodos auxiliares para gestionar el auto-cierre de mensajes
-  private showSuccess(message: string) {
-    this.successMessage.set(message);
-    setTimeout(() => this.successMessage.set(null), 5000);
-  }
 
-  private showError(message: string) {
-    this.errorMessage.set(message);
-    setTimeout(() => this.errorMessage.set(null), 7000);
-  }
 
   /**
    * Eliminar IEMS
    */
-  deleteIEMS(id: string): void {
-    if (!confirm('¿Está seguro de eliminar esta IEMS?')) {
+  async deleteIEMS(id: string): Promise<void> {
+    const confirmed = await this.notificationService.confirm('¿Está seguro de eliminar esta IEMS?', 'Eliminar IEMS', 'Sí, eliminar');
+    if (!confirmed) {
       return;
     }
 
@@ -430,7 +424,7 @@ export class IemsGestion implements OnInit {
       },
       error: (error) => {
         console.error('Error eliminando IEMS:', error);
-        alert('Error al eliminar la IEMS');
+        this.notificationService.error('Error al eliminar la IEMS');
       },
     });
   }
@@ -477,15 +471,15 @@ export class IemsGestion implements OnInit {
   filterTypeOptions(query: string) {
     this.typeSearchQuery.set(query);
     this.showTypeDropdown.set(true);
-    
+
     if (!query.trim()) {
       // Si el usuario borra todo, limpiamos la selección y mostramos todas las opciones
       this.selectedType.set('');
       this.filteredTypeOptions.set(this.typeOptions.slice(1));
       return;
     }
-    
-    const filtered = this.typeOptions.slice(1).filter(opt => 
+
+    const filtered = this.typeOptions.slice(1).filter(opt =>
       opt.label.toLowerCase().includes(query.toLowerCase())
     );
     this.filteredTypeOptions.set(filtered);
@@ -532,15 +526,15 @@ export class IemsGestion implements OnInit {
   filterStateOptions(query: string) {
     this.stateSearchQuery.set(query);
     this.showStateDropdown.set(true);
-    
+
     if (!query.trim()) {
       // Si el usuario borra todo, limpiamos la selección y mostramos todas las opciones
       this.selectedState.set('all');
       this.filteredStateOptions.set(this.stateOptions.slice(1));
       return;
     }
-    
-    const filtered = this.stateOptions.slice(1).filter(state => 
+
+    const filtered = this.stateOptions.slice(1).filter(state =>
       state.toLowerCase().includes(query.toLowerCase())
     );
     this.filteredStateOptions.set(filtered);
@@ -629,7 +623,7 @@ export class IemsGestion implements OnInit {
     const total = this.totalPages();
     const pageGroup = Math.floor((current - 1) / 5);
     const maxGroup = Math.floor((total - 1) / 5);
-    
+
     if (pageGroup < maxGroup) {
       const newPage = (pageGroup + 1) * 5 + 1;
       this.goToPage(newPage);
@@ -642,7 +636,7 @@ export class IemsGestion implements OnInit {
   hasPreviousGroup = computed(() => {
     const total = this.totalPages();
     if (total <= 5) return false;
-    
+
     const current = this.currentPage();
     const pageGroup = Math.floor((current - 1) / 5);
     return pageGroup > 0;
@@ -654,7 +648,7 @@ export class IemsGestion implements OnInit {
   hasNextGroup = computed(() => {
     const total = this.totalPages();
     if (total <= 5) return false;
-    
+
     const current = this.currentPage();
     const pageGroup = Math.floor((current - 1) / 5);
     const maxGroup = Math.floor((total - 1) / 5);

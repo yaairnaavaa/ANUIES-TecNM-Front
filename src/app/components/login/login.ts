@@ -2,6 +2,7 @@ import { Component, signal, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -15,6 +16,7 @@ export class Login implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
+  private notificationService = inject(NotificationService);
 
   // 'login' muestra el acceso, 'forgot' muestra recuperar contraseña
   mode = signal<'login' | 'forgot'>('login');
@@ -39,9 +41,8 @@ export class Login implements OnInit {
   ngOnInit() {
     const reset = this.route.snapshot.queryParamMap.get('reset');
     if (reset === 'success') {
-      this.successMessage.set('Contraseña actualizada correctamente. Ya puedes iniciar sesión.');
+      this.notificationService.success('Contraseña actualizada correctamente. Ya puedes iniciar sesión.');
       this.router.navigate([], { queryParams: {}, queryParamsHandling: '' });
-      setTimeout(() => this.successMessage.set(''), 6000);
     }
   }
 
@@ -103,7 +104,8 @@ export class Login implements OnInit {
         this.isLoading.set(false);
         if (res.success) {
           this.errorMessage.set('');
-          alert(res.message || 'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada y spam.');
+          this.errorMessage.set('');
+          this.notificationService.success(res.message || 'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada y spam.');
           this.changeMode('login');
         } else {
           this.errorMessage.set(res.message || 'No se pudo enviar el correo.');
@@ -123,6 +125,6 @@ export class Login implements OnInit {
   }
 
   togglePasswordVisibility() {
-  this.hidePassword.update(v => !v);
-}
+    this.hidePassword.update(v => !v);
+  }
 }
