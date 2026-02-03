@@ -1,59 +1,84 @@
 import { Routes } from '@angular/router';
-import { Register } from './register/pages/register/register';
-import { Login } from './components/login/login';
 import { AdminLayout } from './layouts/admin-layout/admin-layout';
-import { IesGestion } from './pages/ies-gestion/ies-gestion';
-import { IesProfileSettings } from './pages/ies-pages/ies-profile-settings/ies-profile-settings';
-import { IesCampaignManagementComponent } from './pages/ies-campaign-management/ies-campaign-management';
-import { IemsGestion } from './pages/iems-gestion/iems-gestion';
 import { authGuard } from './guards/auth.guard';
 import { loginGuard } from './guards/login.guard';
-import { Aspirant } from './pages/aspirant/aspirant';
-import { Home } from './pages/home/home';
-import { Cycles } from './pages/cycles/cycles';
-import { RoleManagementComponent } from './pages/role-management/role-management';
-import { StudentRegistrationComponent } from './pages/student-registration/student-registration';
-import { NextStep } from './pages/next-step/next-step';
-import { ResetPasswordComponent } from './pages/reset-password/reset-password';
-import { UserProfileComponent } from './pages/user-profile/user-profile';
 
 export const routes: Routes = [
   {
     path: 'login',
-    component: Login,
+    loadComponent: () => import('./components/login/login').then((m) => m.Login),
     canActivate: [loginGuard],
   },
   {
     path: 'reset-password/:token',
-    component: ResetPasswordComponent,
+    loadComponent: () =>
+      import('./pages/reset-password/reset-password').then((m) => m.ResetPasswordComponent),
   },
   {
     path: 'register/:campaignId',
-    component: Register,
+    loadComponent: () => import('./register/pages/register/register').then((m) => m.Register),
   },
   {
     path: 'register',
-    component: Register,
+    loadComponent: () => import('./register/pages/register/register').then((m) => m.Register),
   },
   {
     path: 'registerStudent/:prospectId',
-    component: StudentRegistrationComponent,
+    loadComponent: () =>
+      import('./pages/student-registration/student-registration').then(
+        (m) => m.StudentRegistrationComponent,
+      ),
   },
   //  Rutas del usuario administrativo de un sistema de universidades
   {
     path: 'admin',
-    component: AdminLayout,
+    loadComponent: () => import('./layouts/admin-layout/admin-layout').then((m) => m.AdminLayout),
     canActivate: [authGuard],
     children: [
-      { path: 'home', component: Home },
-      { path: 'ies-gestion', component: IesGestion },
-      { path: 'perfil-ies', component: IesProfileSettings },
-      { path: 'profile', component: UserProfileComponent },
-      { path: 'campaigns', component: IesCampaignManagementComponent },
-      { path: 'iems', component: IemsGestion },
-      { path: 'aspirant', component: Aspirant },
-      { path: 'ciclos', component: Cycles },
-      { path: 'roles', component: RoleManagementComponent },
+      {
+        path: 'home',
+        loadComponent: () => import('./pages/home/home').then((m) => m.Home),
+      },
+      {
+        path: 'ies-gestion',
+        loadComponent: () => import('./pages/iems-gestion/iems-gestion').then((m) => m.IemsGestion),
+      },
+      {
+        path: 'perfil-ies',
+        loadComponent: () =>
+          import('./pages/ies-pages/ies-profile-settings/ies-profile-settings').then(
+            (m) => m.IesProfileSettings,
+          ),
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./pages/user-profile/user-profile').then((m) => m.UserProfileComponent),
+      },
+      {
+        path: 'campaigns',
+        loadComponent: () =>
+          import('./pages/ies-campaign-management/ies-campaign-management').then(
+            (m) => m.IesCampaignManagementComponent,
+          ),
+      },
+      {
+        path: 'iems',
+        loadComponent: () => import('./pages/iems-gestion/iems-gestion').then((m) => m.IemsGestion),
+      },
+      {
+        path: 'aspirant',
+        loadComponent: () => import('./pages/aspirant/aspirant').then((m) => m.Aspirant),
+      },
+      {
+        path: 'ciclos',
+        loadComponent: () => import('./pages/cycles/cycles').then((m) => m.Cycles),
+      },
+      {
+        path: 'roles',
+        loadComponent: () =>
+          import('./pages/role-management/role-management').then((m) => m.RoleManagementComponent),
+      },
       { path: '', redirectTo: 'ies-gestion', pathMatch: 'full' },
     ],
   },
@@ -61,12 +86,28 @@ export const routes: Routes = [
   {
     path: 'ies',
     canActivate: [authGuard],
-    component: AdminLayout,
+    loadComponent: () => import('./layouts/admin-layout/admin-layout').then((m) => m.AdminLayout),
     children: [
-      { path: 'settings', component: IesProfileSettings },
-      { path: 'profile', component: UserProfileComponent },
-      { path: 'iems', component: IemsGestion },
-      { path: 'siguiente-paso', component: NextStep },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./pages/ies-pages/ies-profile-settings/ies-profile-settings').then(
+            (m) => m.IesProfileSettings,
+          ),
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./pages/user-profile/user-profile').then((m) => m.UserProfileComponent),
+      },
+      {
+        path: 'iems',
+        loadComponent: () => import('./pages/iems-gestion/iems-gestion').then((m) => m.IemsGestion),
+      },
+      {
+        path: 'siguiente-paso',
+        loadComponent: () => import('./pages/next-step/next-step').then((m) => m.NextStep),
+      },
       { path: '', redirectTo: 'settings', pathMatch: 'full' },
     ],
   },
