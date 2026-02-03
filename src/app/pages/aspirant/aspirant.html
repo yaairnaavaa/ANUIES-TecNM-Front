@@ -11,7 +11,7 @@
     </div>
   </header>
 
-  <div class="space-y-4 w-full">
+  <div class="space-y-4">
     <div class="flex items-center gap-2 px-2">
       <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
       <span class="text-xs font-black text-slate-400 uppercase tracking-widest"
@@ -19,12 +19,13 @@
       >
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Total de Aspirantes -->
       <div
-        class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 w-full"
+        class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5"
       >
         <div
-          class="shrink-0 w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl shadow-lg shadow-blue-100"
+          class="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl shadow-lg shadow-blue-100"
         >
           <i class="fas fa-users"></i>
         </div>
@@ -32,21 +33,26 @@
           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
             Total Aspirantes
           </p>
-          <h3 class="text-3xl font-black text-slate-900 leading-tight">{{ totalAspirants() }}</h3>
+          <h3 class="text-3xl font-black text-slate-900 leading-tight">
+            {{ totalAspirants() }}
+          </h3>
         </div>
       </div>
 
+      <!-- Registros Completos -->
       <div
-        class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 w-full"
+        class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5"
       >
         <div
-          class="shrink-0 w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl"
+          class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl"
         >
           <i class="fas fa-check-circle"></i>
         </div>
-        <div class="flex-1">
+        <div>
           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Completos</p>
-          <h3 class="text-3xl font-black text-slate-900">{{ completedAspirants() }}</h3>
+          <h3 class="text-3xl font-black text-slate-900">
+            {{ completedAspirants() }}
+          </h3>
           <p class="text-[9px] text-slate-400 font-bold mt-0.5">
             {{
               totalAspirants() > 0
@@ -57,11 +63,12 @@
         </div>
       </div>
 
+      <!-- Carrera Más Solicitada -->
       <div
-        class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 w-full"
+        class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5"
       >
         <div
-          class="shrink-0 w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl"
+          class="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl"
         >
           <i class="fas fa-fire"></i>
         </div>
@@ -77,6 +84,8 @@
           </h3>
         </div>
       </div>
+
+    
     </div>
   </div>
 
@@ -181,79 +190,102 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          @for (a of paginatedAspirants(); track a._id) {
-            <tr class="transition-all hover:bg-blue-50/30 group">
-              <td class="px-8 py-5">
-                <div class="font-bold text-slate-800 uppercase">{{ a.fullName }}</div>
-                <div class="text-[10px] text-blue-600 font-black mt-1 uppercase italic">
-                  {{ a.email }}
-                </div>
-              </td>
+          @if (isLoading()) {
+            @for (i of [1, 2, 3, 4, 5]; track i) {
+              <tr class="animate-pulse">
+                <td class="px-8 py-5">
+                  <div class="h-4 w-32 bg-slate-200 rounded mb-2"></div>
+                  <div class="h-3 w-48 bg-slate-100 rounded"></div>
+                </td>
+                <td class="px-8 py-5">
+                  <div class="h-4 w-24 bg-slate-100 rounded"></div>
+                </td>
+                <td class="px-8 py-5">
+                  <div class="flex gap-2">
+                    <div class="h-6 w-12 bg-slate-100 rounded-lg"></div>
+                    <div class="h-6 w-12 bg-slate-100 rounded-lg"></div>
+                  </div>
+                </td>
+                <td class="px-8 py-5 text-center">
+                  <div class="w-10 h-10 bg-slate-100 rounded-full mx-auto"></div>
+                </td>
+              </tr>
+            }
+          } @else {
+            @for (a of paginatedAspirants(); track a._id) {
+              <tr class="transition-all hover:bg-blue-50/30 group">
+                <td class="px-8 py-5">
+                  <div class="font-bold text-slate-800 uppercase">{{ a.fullName }}</div>
+                  <div class="text-[10px] text-blue-600 font-black mt-1 uppercase italic">
+                    {{ a.email }}
+                  </div>
+                </td>
 
-              <td class="px-8 py-5">
-                <span class="text-xs font-bold text-slate-600 uppercase">
-                  {{ a.originIEMSName || a.originIEMS || 'No especificada' }}
-                </span>
-              </td>
+                <td class="px-8 py-5">
+                  <span class="text-xs font-bold text-slate-600 uppercase">
+                    {{ a.originIEMSName || a.originIEMS || 'No especificada' }}
+                  </span>
+                </td>
 
-              <td class="px-8 py-5">
-                <div class="flex flex-wrap gap-1.5">
-                  @for (interest of a.careerInterests?.slice(0, 3); track $index) {
-                    <span
-                      class="px-3 py-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xs font-black uppercase tracking-wide shadow-sm hover:shadow-md transition-all cursor-help"
-                      [title]="interest.career"
-                    >
-                      {{ getCareerAbbr(interest.career) }}
-                    </span>
-                  }
-                  @if (a.careerInterests && a.careerInterests.length > 3) {
-                    <span class="px-2 py-1 text-xs text-slate-500 font-bold italic"
-                      >+{{ a.careerInterests.length - 3 }} más</span
-                    >
-                  }
-                </div>
-              </td>
-
-              <td class="px-8 py-5 text-center relative overflow-visible">
-                <div class="relative inline-block text-left">
-                  <button
-                    type="button"
-                    (click)="$any(a).showMenu = !$any(a).showMenu; $event.stopPropagation()"
-                    class="flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all focus:outline-none"
-                  >
-                    <i class="fas fa-ellipsis-v"></i>
-                  </button>
-
-                  <div
-                    *ngIf="$any(a).showMenu"
-                    (clickOutside)="$any(a).showMenu = false"
-                    class="absolute right-0 bottom-full mb-2 z-[9999] w-52 rounded-2xl bg-white shadow-xl border border-slate-100"
-                  >
-                    <div class="py-1">
-                      <button
-                        type="button"
-                        (click)="openDetailsModal(a); $any(a).showMenu = false"
-                        class="flex items-center w-full px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                <td class="px-8 py-5">
+                  <div class="flex flex-wrap gap-1.5">
+                    @for (interest of a.careerInterests?.slice(0, 3); track $index) {
+                      <span
+                        class="px-3 py-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xs font-black uppercase tracking-wide shadow-sm hover:shadow-md transition-all cursor-help"
+                        [title]="interest.career"
                       >
-                        <i class="fas fa-eye mr-3 text-slate-400"></i>
-                        Ver Detalles
-                      </button>
+                        {{ getCareerAbbr(interest.career) }}
+                      </span>
+                    }
+                    @if (a.careerInterests && a.careerInterests.length > 3) {
+                      <span class="px-2 py-1 text-xs text-slate-500 font-bold italic"
+                        >+{{ a.careerInterests.length - 3 }} más</span
+                      >
+                    }
+                  </div>
+                </td>
+
+                <td class="px-8 py-5 text-center relative overflow-visible">
+                  <div class="relative inline-block text-left">
+                    <button
+                      type="button"
+                      (click)="$any(a).showMenu = !$any(a).showMenu; $event.stopPropagation()"
+                      class="flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all focus:outline-none"
+                    >
+                      <i class="fas fa-ellipsis-v"></i>
+                    </button>
+
+                    <div
+                      *ngIf="$any(a).showMenu"
+                      (clickOutside)="$any(a).showMenu = false"
+                      class="absolute right-0 bottom-full mb-2 z-[9999] w-52 rounded-2xl bg-white shadow-xl border border-slate-100"
+                    >
+                      <div class="py-1">
+                        <button
+                          type="button"
+                          (click)="openDetailsModal(a); $any(a).showMenu = false"
+                          class="flex items-center w-full px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        >
+                          <i class="fas fa-eye mr-3 text-slate-400"></i>
+                          Ver Detalles
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="4" class="px-8 py-20 text-center">
-                <div class="flex flex-col items-center gap-3">
-                  <i class="fas fa-search text-slate-200 text-4xl"></i>
-                  <p class="text-slate-400 font-medium italic">
-                    No se encontraron aspirantes que coincidan con "{{ searchTerm() }}"
-                  </p>
-                </div>
-              </td>
-            </tr>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="px-8 py-20 text-center">
+                  <div class="flex flex-col items-center gap-3">
+                    <i class="fas fa-search text-slate-200 text-4xl"></i>
+                    <p class="text-slate-400 font-medium italic">
+                      No se encontraron aspirantes que coincidan con "{{ searchTerm() }}"
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </table>
