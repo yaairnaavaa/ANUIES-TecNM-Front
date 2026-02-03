@@ -41,6 +41,8 @@ export class IesGestion implements OnInit {
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
 
+  isAdminNacional = computed(() => this.authService.hasRole('Admin Nacional'));
+
   ngOnInit(): void {
     this.loadIES();
   }

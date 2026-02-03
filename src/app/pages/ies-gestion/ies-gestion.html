@@ -10,210 +10,143 @@
       </p>
     </div>
 
-    <button
-      (click)="toggleAdd()"
-      class="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-200 active:scale-95 hover:bg-blue-700"
-    >
+    @if (isAdminNacional()) {
+    <button (click)="toggleAdd()"
+      class="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-200 active:scale-95 hover:bg-blue-700">
       <i class="fas fa-plus"></i>
       <span>Nueva Institución</span>
     </button>
+    }
   </div>
 
   @if (isAdding()) {
-    <div
-      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
-      (click)="closeModal()"
-    >
-      <div class="relative w-full max-w-3xl animate-slide-down" (click)="$event.stopPropagation()">
-        <div
-          class="bg-white rounded-[2.5rem] border-2 border-blue-50 shadow-xl shadow-blue-900/10 overflow-hidden"
-        >
-          <div
-            class="flex items-center justify-between px-8 py-5 border-b border-slate-100 bg-white"
-          >
-            <div class="flex items-center gap-4">
-              <div
-                class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200"
-              >
-                <i class="fas fa-university text-xl"></i>
-              </div>
-              <div>
-                <h2 class="text-lg font-black text-slate-800 leading-none">
-                  Registro de Nueva Institución
-                </h2>
-                <p class="text-xs text-slate-500 italic mt-1">
-                  Complete el expediente base de la IES
-                </p>
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
+    (click)="closeModal()">
+    <div class="relative w-full max-w-3xl animate-slide-down" (click)="$event.stopPropagation()">
+      <div class="bg-white rounded-[2.5rem] border-2 border-blue-50 shadow-xl shadow-blue-900/10 overflow-hidden">
+        <div class="flex items-center justify-between px-8 py-5 border-b border-slate-100 bg-white">
+          <div class="flex items-center gap-4">
+            <div
+              class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+              <i class="fas fa-university text-xl"></i>
+            </div>
+            <div>
+              <h2 class="text-lg font-black text-slate-800 leading-none">
+                Registro de Nueva Institución
+              </h2>
+              <p class="text-xs text-slate-500 italic mt-1">
+                Complete el expediente base de la IES
+              </p>
+            </div>
+          </div>
+          <button (click)="closeModal()"
+            class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition active:scale-95">
+            <i class="fas fa-times text-slate-500"></i>
+          </button>
+        </div>
+
+        <div class="px-8 py-6">
+          <div class="flex flex-col gap-4">
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nombre de la
+                IES</label>
+              <div class="relative">
+                <i class="fas fa-school absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                <input [(ngModel)]="newIes().name" type="text" placeholder="Ej. Instituto..."
+                  class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm" />
               </div>
             </div>
-            <button
-              (click)="closeModal()"
-              class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition active:scale-95"
-            >
-              <i class="fas fa-times text-slate-500"></i>
-            </button>
-          </div>
 
-          <div class="px-8 py-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Clave
+                  Oficial</label>
+                <div class="relative">
+                  <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                  <input [(ngModel)]="newIes().code" type="text" placeholder="13MSU0010Z"
+                    class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-mono text-sm" />
+                </div>
+              </div>
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Teléfono</label>
+                <div class="relative">
+                  <i class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                  <input [(ngModel)]="newIes().contact!.generalPhone" type="tel" placeholder="10 dígitos"
+                    class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm" />
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Responsable</label>
+              <div class="relative">
+                <i class="fas fa-user-tie absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                <input [(ngModel)]="newIes().contact!.responsable" type="text" placeholder="Nombre completo"
+                  class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm" />
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nombre del
+                Director</label>
+              <div class="relative">
+                <i class="fas fa-user-graduate absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                <input [(ngModel)]="newIes().contact!.nombreDirector" type="text"
+                  placeholder="Director(a) de la institución"
+                  class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm" />
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email</label>
+              <div class="relative">
+                <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                <input [(ngModel)]="newIes().contact!.email" type="email" placeholder="correo@institucion.mx"
+                  class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm" />
+              </div>
+            </div>
+
             <div class="flex flex-col gap-4">
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-                  >Nombre de la IES</label
-                >
-                <div class="relative">
-                  <i
-                    class="fas fa-school absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
-                  ></i>
-                  <input
-                    [(ngModel)]="newIes().name"
-                    type="text"
-                    placeholder="Ej. Instituto..."
-                    class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm"
-                  />
-                </div>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="space-y-1.5">
-                  <label
-                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-                    >Clave Oficial</label
-                  >
-                  <div class="relative">
-                    <i
-                      class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
-                    ></i>
-                    <input
-                      [(ngModel)]="newIes().code"
-                      type="text"
-                      placeholder="13MSU0010Z"
-                      class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-mono text-sm"
-                    />
-                  </div>
-                </div>
-                <div class="space-y-1.5">
-                  <label
-                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-                    >Teléfono</label
-                  >
-                  <div class="relative">
-                    <i
-                      class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
-                    ></i>
-                    <input
-                      [(ngModel)]="newIes().contact!.generalPhone"
-                      type="tel"
-                      placeholder="10 dígitos"
-                      class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-                  >Responsable</label
-                >
-                <div class="relative">
-                  <i
-                    class="fas fa-user-tie absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
-                  ></i>
-                  <input
-                    [(ngModel)]="newIes().contact!.responsable"
-                    type="text"
-                    placeholder="Nombre completo"
-                    class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm"
-                  />
-                </div>
-              </div>
-
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-                  >Nombre del Director</label
-                >
-                <div class="relative">
-                  <i
-                    class="fas fa-user-graduate absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
-                  ></i>
-                  <input
-                    [(ngModel)]="newIes().contact!.nombreDirector"
-                    type="text"
-                    placeholder="Director(a) de la institución"
-                    class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm"
-                  />
-                </div>
-              </div>
-
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-                  >Email</label
-                >
-                <div class="relative">
-                  <i
-                    class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
-                  ></i>
-                  <input
-                    [(ngModel)]="newIes().contact!.email"
-                    type="email"
-                    placeholder="correo@institucion.mx"
-                    class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm"
-                  />
-                </div>
-              </div>
-
-              <div class="flex flex-col gap-4">
-                <div class="flex justify-end mt-2">
-                  <button
-                    (click)="saveIES()"
-                    [disabled]="isLoading() || !isFormValid() || successMessage()"
-                    class="w-full md:w-auto min-w-[220px] py-3 px-8 font-black rounded-xl shadow-lg transition-all flex justify-center items-center gap-2 active:scale-95 bg-emerald-600 text-white disabled:bg-slate-200 disabled:text-slate-400"
-                  >
-                    @if (isLoading()) {
-                      <i class="fas fa-circle-notch animate-spin"></i>
-                      <span>Procesando...</span>
-                    } @else if (successMessage()) {
-                      <i class="fas fa-check"></i>
-                      <span>¡Guardado!</span>
-                    } @else {
-                      <i class="fas fa-save"></i>
-                      <span>Guardar Institución</span>
-                    }
-                  </button>
-                </div>
+              <div class="flex justify-end mt-2">
+                <button (click)="saveIES()" [disabled]="isLoading() || !isFormValid() || successMessage()"
+                  class="w-full md:w-auto min-w-[220px] py-3 px-8 font-black rounded-xl shadow-lg transition-all flex justify-center items-center gap-2 active:scale-95 bg-emerald-600 text-white disabled:bg-slate-200 disabled:text-slate-400">
+                  @if (isLoading()) {
+                  <i class="fas fa-circle-notch animate-spin"></i>
+                  <span>Procesando...</span>
+                  } @else if (successMessage()) {
+                  <i class="fas fa-check"></i>
+                  <span>¡Guardado!</span>
+                  } @else {
+                  <i class="fas fa-save"></i>
+                  <span>Guardar Institución</span>
+                  }
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
   }
 
   <div
-    class="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col animate-fade-in"
-  >
+    class="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col animate-fade-in">
     <div
-      class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4"
-    >
+      class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="relative w-full md:w-96">
         <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-        <input
-          [ngModel]="searchQuery()"
-          (ngModelChange)="onSearchChange($event)"
-          type="text"
+        <input [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)" type="text"
           placeholder="Buscar por nombre o clave..."
-          class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium"
-        />
+          class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium" />
       </div>
 
       <div class="flex items-center gap-3">
         <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Mostrar:</span>
-        <select
-          [ngModel]="itemsPerPage()"
-          (ngModelChange)="onItemsPerPageChange($event)"
-          class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-all"
-        >
+        <select [ngModel]="itemsPerPage()" (ngModelChange)="onItemsPerPageChange($event)"
+          class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-all">
           @for (option of pageSizeOptions; track option) {
-            <option [value]="option">{{ option }} filas</option>
+          <option [value]="option">{{ option }} filas</option>
           }
         </select>
       </div>
@@ -222,9 +155,7 @@
     <div class="overflow-x-auto min-h-[400px]">
       <table class="w-full text-left border-collapse">
         <thead>
-          <tr
-            class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-widest font-black"
-          >
+          <tr class="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-widest font-black">
             <th class="px-8 py-5">Institución</th>
             <th class="px-8 py-5">Clave Oficial</th>
             <th class="px-8 py-5">Contacto Principal</th>
@@ -234,309 +165,247 @@
         </thead>
         <tbody class="divide-y divide-slate-100">
           @for (ies of pagedIes(); track ies.code) {
-            <tr class="hover:bg-blue-50/30 transition-colors group">
-              <td class="px-8 py-5">
-                <div class="flex items-center gap-4">
-                  <div class="font-black text-slate-800 leading-tight uppercase text-sm">
-                    {{ ies.name }}
-                  </div>
+          <tr class="hover:bg-blue-50/30 transition-colors group">
+            <td class="px-8 py-5">
+              <div class="flex items-center gap-4">
+                <div class="font-black text-slate-800 leading-tight uppercase text-sm">
+                  {{ ies.name }}
                 </div>
-              </td>
-              <td class="px-8 py-5">
-                <span
-                  class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-mono text-xs font-bold border border-slate-200"
-                >
-                  {{ ies.code }}
-                </span>
-              </td>
-              <td class="px-8 py-5">
-                <div class="text-sm font-bold text-slate-700">
-                  {{ ies.contact.responsable || 'N/A' }}
-                </div>
-                <div class="text-xs text-slate-400 italic">{{ ies.contact.email }}</div>
-              </td>
-              <td class="px-8 py-5">
-                <span class="flex items-center gap-2 font-bold text-xs">
-                  <span
-                    class="w-2 h-2 rounded-full animate-pulse"
-                    [ngClass]="
+              </div>
+            </td>
+            <td class="px-8 py-5">
+              <span
+                class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-mono text-xs font-bold border border-slate-200">
+                {{ ies.code }}
+              </span>
+            </td>
+            <td class="px-8 py-5">
+              <div class="text-sm font-bold text-slate-700">
+                {{ ies.contact.responsable || 'N/A' }}
+              </div>
+              <div class="text-xs text-slate-400 italic">{{ ies.contact.email }}</div>
+            </td>
+            <td class="px-8 py-5">
+              <span class="flex items-center gap-2 font-bold text-xs">
+                <span class="w-2 h-2 rounded-full animate-pulse" [ngClass]="
                       ies.active
                         ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
                         : 'bg-slate-400'
-                    "
-                  ></span>
+                    "></span>
 
-                  <span [ngClass]="ies.active ? 'text-emerald-600' : 'text-slate-500'">
-                    {{ ies.active ? 'ACTIVA' : 'INACTIVA' }}
-                  </span>
+                <span [ngClass]="ies.active ? 'text-emerald-600' : 'text-slate-500'">
+                  {{ ies.active ? 'ACTIVA' : 'INACTIVA' }}
                 </span>
-              </td>
-              <td class="px-8 py-5 text-center">
-                <div class="relative inline-block text-left">
-                  <button
-                    #anchor
-                    type="button"
-                    (click)="$any(ies).showMenu = !$any(ies).showMenu"
-                    class="flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all focus:outline-none"
-                  >
-                    <i class="fas fa-ellipsis-v"></i>
-                  </button>
+              </span>
+            </td>
+            <td class="px-8 py-5 text-center">
+              <div class="relative inline-block text-left">
+                <button #anchor type="button" (click)="$any(ies).showMenu = !$any(ies).showMenu"
+                  class="flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all focus:outline-none">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
 
-                  <div
-                    *ngIf="$any(ies).showMenu"
-                    (mouseleave)="$any(ies).showMenu = false"
-                    class="fixed z-[100] w-64 mt-2 origin-top-right rounded-2xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden border border-slate-100"
-                    [style.left.px]="anchor.getBoundingClientRect().left - 200"
-                    [style.top.px]="anchor.getBoundingClientRect().bottom"
-                  >
-                    <div class="p-2 space-y-1">
-                      <button
-                        (click)="manageUsers(ies); $any(ies).showMenu = false"
-                        class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all"
-                      >
-                        <div
-                          class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 mr-3 group-hover:bg-blue-600 group-hover:text-white transition-all"
-                        >
-                          <i class="fas fa-users-cog"></i>
-                        </div>
-                        Gestionar Usuarios
-                      </button>
+                <div *ngIf="$any(ies).showMenu" (mouseleave)="$any(ies).showMenu = false"
+                  class="fixed z-[100] w-64 mt-2 origin-top-right rounded-2xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden border border-slate-100"
+                  [style.left.px]="anchor.getBoundingClientRect().left - 200"
+                  [style.top.px]="anchor.getBoundingClientRect().bottom">
+                  <div class="p-2 space-y-1">
+                    <button (click)="manageUsers(ies); $any(ies).showMenu = false"
+                      class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all">
+                      <div
+                        class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 mr-3 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                        <i class="fas fa-users-cog"></i>
+                      </div>
+                      Gestionar Usuarios
+                    </button>
 
-                      <button
-                        (click)="openEdit(ies); $any(ies).showMenu = false"
-                        class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl transition-all"
-                      >
-                        <div
-                          class="w-9 h-9 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 mr-3 group-hover:bg-emerald-600 group-hover:text-white transition-all"
-                        >
-                          <i class="fas fa-school"></i>
-                        </div>
-                        Editar Institución
-                      </button>
+                    <button (click)="openEdit(ies); $any(ies).showMenu = false"
+                      class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl transition-all">
+                      <div
+                        class="w-9 h-9 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 mr-3 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                        <i class="fas fa-school"></i>
+                      </div>
+                      Editar Institución
+                    </button>
 
-                      <button
-                        (click)="manageCareers(ies); $any(ies).showMenu = false"
-                        class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-purple-50 hover:text-purple-700 rounded-xl transition-all"
-                      >
-                        <div
-                          class="w-9 h-9 flex items-center justify-center rounded-lg bg-purple-50 text-purple-600 mr-3 group-hover:bg-purple-600 group-hover:text-white transition-all"
-                        >
-                          <i class="fas fa-graduation-cap"></i>
-                        </div>
-                        Gestionar Carreras
-                      </button>
-                    </div>
+                    <button (click)="manageCareers(ies); $any(ies).showMenu = false"
+                      class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-purple-50 hover:text-purple-700 rounded-xl transition-all">
+                      <div
+                        class="w-9 h-9 flex items-center justify-center rounded-lg bg-purple-50 text-purple-600 mr-3 group-hover:bg-purple-600 group-hover:text-white transition-all">
+                        <i class="fas fa-graduation-cap"></i>
+                      </div>
+                      Gestionar Carreras
+                    </button>
                   </div>
                 </div>
-              </td>
-            </tr>
+              </div>
+            </td>
+          </tr>
           }
           @if (isLoading()) {
-            <tr>
-              <td colspan="5" class="px-8 py-20 text-center">
-                <div class="flex flex-col items-center">
-                  <div
-                    class="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin mb-4"
-                  ></div>
-                  <p class="font-black text-slate-400 uppercase tracking-tighter animate-pulse">
-                    Consultando Instituciones...
-                  </p>
+          <tr>
+            <td colspan="5" class="px-8 py-20 text-center">
+              <div class="flex flex-col items-center">
+                <div class="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin mb-4">
                 </div>
-              </td>
-            </tr>
+                <p class="font-black text-slate-400 uppercase tracking-tighter animate-pulse">
+                  Consultando Instituciones...
+                </p>
+              </div>
+            </td>
+          </tr>
           } @else {
-            @for (ies of pagedIes(); track ies.code) {
-              <tr class="hover:bg-blue-50/30 transition-colors group"></tr>
-            } @empty {
-              <tr>
-                <td colspan="5" class="px-8 py-20 text-center">
-                  <div class="flex flex-col items-center opacity-30">
-                    <i class="fas fa-search text-5xl mb-4"></i>
-                    <p class="font-black text-xl uppercase tracking-tighter">Sin coincidencias</p>
-                  </div>
-                </td>
-              </tr>
-            }
+          @for (ies of pagedIes(); track ies.code) {
+          <tr class="hover:bg-blue-50/30 transition-colors group"></tr>
+          } @empty {
+          <tr>
+            <td colspan="5" class="px-8 py-20 text-center">
+              <div class="flex flex-col items-center opacity-30">
+                <i class="fas fa-search text-5xl mb-4"></i>
+                <p class="font-black text-xl uppercase tracking-tighter">Sin coincidencias</p>
+              </div>
+            </td>
+          </tr>
+          }
           }
         </tbody>
       </table>
     </div>
 
     <div
-      class="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4"
-    >
+      class="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="text-sm text-slate-500 font-bold order-2 md:order-1">
         Mostrando <span class="text-blue-600 font-black">{{ showingRange() }}</span> de
         <span class="text-slate-900 font-black">{{ allFilteredResults().length }}</span> IES
         registradas
       </div>
-      
+
       @if (totalPages() > 1) {
-        <div class="flex items-center gap-2 order-1 md:order-2">
-          <!-- Botón grupo anterior -->
-          @if (hasPreviousGroup()) {
-            <button
-              (click)="goToPreviousGroup()"
-              class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
-            >
-              <i class="fas fa-chevron-double-left text-xs"></i>
-            </button>
-          }
-          
-          <!-- Botón página anterior -->
-          <button
-            (click)="goToPage(currentPage() - 1)"
-            [disabled]="currentPage() === 1"
-            class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
-          >
-            <i class="fas fa-chevron-left"></i>
-          </button>
-          
-          <!-- Números de páginas (grupos de 5) -->
-          @for (page of visiblePages(); track page) {
-            <button
-              (click)="goToPage(page)"
-              [class]="
+      <div class="flex items-center gap-2 order-1 md:order-2">
+        <!-- Botón grupo anterior -->
+        @if (hasPreviousGroup()) {
+        <button (click)="goToPreviousGroup()"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+          <i class="fas fa-chevron-double-left text-xs"></i>
+        </button>
+        }
+
+        <!-- Botón página anterior -->
+        <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <!-- Números de páginas (grupos de 5) -->
+        @for (page of visiblePages(); track page) {
+        <button (click)="goToPage(page)" [class]="
                 page === currentPage()
                   ? 'w-10 h-10 flex items-center justify-center rounded-xl bg-blue-600 text-white font-black shadow-lg shadow-blue-200'
                   : 'w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-blue-50 font-bold transition-all shadow-sm'
-              "
-            >
-              {{ page }}
-            </button>
-          }
-          
-          <!-- Botón página siguiente -->
-          <button
-            (click)="goToPage(currentPage() + 1)"
-            [disabled]="currentPage() >= totalPages()"
-            class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
-          >
-            <i class="fas fa-chevron-right"></i>
-          </button>
-          
-          <!-- Botón grupo siguiente -->
-          @if (hasNextGroup()) {
-            <button
-              (click)="goToNextGroup()"
-              class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
-            >
-              <i class="fas fa-chevron-double-right text-xs"></i>
-            </button>
-          }
-        </div>
+              ">
+          {{ page }}
+        </button>
+        }
+
+        <!-- Botón página siguiente -->
+        <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() >= totalPages()"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <!-- Botón grupo siguiente -->
+        @if (hasNextGroup()) {
+        <button (click)="goToNextGroup()"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+          <i class="fas fa-chevron-double-right text-xs"></i>
+        </button>
+        }
+      </div>
       }
     </div>
   </div>
 
   @if (currentView() === 'edit' && selectedIes()) {
-    <app-ies-edit-component
-      [ies]="selectedIes()"
-      (onSave)="onSave($event)"
-      (onClose)="backToList()"
-    ></app-ies-edit-component>
+  <app-ies-edit-component [ies]="selectedIes()" (onSave)="onSave($event)"
+    (onClose)="backToList()"></app-ies-edit-component>
   }
 
   @if (currentView() === 'careers' && selectedIes()) {
-    <app-careers-component
-      [iesId]="selectedIes()?._id!"
-      (onSave)="onSave($event)"
-      (onClose)="backToList()"
-    ></app-careers-component>
+  <app-careers-component [iesId]="selectedIes()?._id!" (onSave)="onSave($event)"
+    (onClose)="backToList()"></app-careers-component>
   }
 
   @if (currentView() === 'users' && selectedIes()) {
-    <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 animate-fade-in">
-      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="backToList()"></div>
+  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 animate-fade-in">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="backToList()"></div>
 
-      <div
-        class="relative w-full max-w-7xl h-[92vh] bg-white rounded-[3rem] shadow-2xl animate-slide-up flex flex-col overflow-hidden border border-white/20"
-      >
-        <div class="flex items-center justify-between p-8 bg-white border-b border-slate-100">
-          <div class="flex items-center gap-5">
-            <div
-              class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg"
-            >
-              <i class="fas fa-users-cog text-xl"></i>
-            </div>
-            <div>
-              <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight">
-                Gestión Operativa
-              </h2>
-              <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">
-                {{ selectedIes()?.name }}
-              </p>
-            </div>
+    <div
+      class="relative w-full max-w-7xl h-[92vh] bg-white rounded-[3rem] shadow-2xl animate-slide-up flex flex-col overflow-hidden border border-white/20">
+      <div class="flex items-center justify-between p-8 bg-white border-b border-slate-100">
+        <div class="flex items-center gap-5">
+          <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+            <i class="fas fa-users-cog text-xl"></i>
           </div>
-
-          <button
-            (click)="backToList()"
-            class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all active:scale-90"
-          >
-            <i class="fas fa-times text-xl"></i>
-          </button>
+          <div>
+            <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight">
+              Gestión Operativa
+            </h2>
+            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">
+              {{ selectedIes()?.name }}
+            </p>
+          </div>
         </div>
 
-        <div class="flex-1 overflow-hidden bg-slate-50/50">
-          <app-ies-user-management
-            [iesName]="selectedIes()!.name"
-            [iesClave]="selectedIes()!.code"
-            [iesId]="selectedIes()!._id!"
-            (close)="backToList()"
-          >
-          </app-ies-user-management>
-        </div>
+        <button (click)="backToList()"
+          class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all active:scale-90">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-hidden bg-slate-50/50">
+        <app-ies-user-management [iesName]="selectedIes()!.name" [iesClave]="selectedIes()!.code"
+          [iesId]="selectedIes()!._id!" (close)="backToList()">
+        </app-ies-user-management>
       </div>
     </div>
+  </div>
   }
 </div>
 
 <div class="fixed top-6 right-6 z-[100] flex flex-col gap-3 w-full max-w-sm">
   @if (errorMessage()) {
-    <div
-      class="flex items-center gap-4 p-4 bg-white border-l-4 border-red-500 shadow-2xl rounded-2xl animate-slide-in-right"
-    >
-      <div
-        class="w-10 h-10 bg-red-50 text-red-500 rounded-full flex items-center justify-center shrink-0"
-      >
-        <i class="fas fa-exclamation-circle text-lg"></i>
-      </div>
-      <div class="flex-1">
-        <p class="text-xs font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
-          Error
-        </p>
-        <p class="text-sm font-bold text-slate-700 leading-tight">{{ errorMessage() }}</p>
-      </div>
-      <button
-        (click)="errorMessage.set(null)"
-        class="text-slate-300 hover:text-slate-500 transition-colors"
-      >
-        <i class="fas fa-times"></i>
-      </button>
+  <div
+    class="flex items-center gap-4 p-4 bg-white border-l-4 border-red-500 shadow-2xl rounded-2xl animate-slide-in-right">
+    <div class="w-10 h-10 bg-red-50 text-red-500 rounded-full flex items-center justify-center shrink-0">
+      <i class="fas fa-exclamation-circle text-lg"></i>
     </div>
+    <div class="flex-1">
+      <p class="text-xs font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
+        Error
+      </p>
+      <p class="text-sm font-bold text-slate-700 leading-tight">{{ errorMessage() }}</p>
+    </div>
+    <button (click)="errorMessage.set(null)" class="text-slate-300 hover:text-slate-500 transition-colors">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
   }
 
   @if (successMessage()) {
-    <div
-      class="flex items-center gap-4 p-4 bg-white border-l-4 border-emerald-500 shadow-2xl rounded-2xl animate-slide-in-right"
-    >
-      <div
-        class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center shrink-0"
-      >
-        <i class="fas fa-check-circle text-lg"></i>
-      </div>
-      <div class="flex-1">
-        <p class="text-xs font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
-          Éxito
-        </p>
-        <p class="text-sm font-bold text-slate-700 leading-tight">{{ successMessage() }}</p>
-      </div>
-      <button
-        (click)="successMessage.set(null)"
-        class="text-slate-300 hover:text-slate-500 transition-colors"
-      >
-        <i class="fas fa-times"></i>
-      </button>
+  <div
+    class="flex items-center gap-4 p-4 bg-white border-l-4 border-emerald-500 shadow-2xl rounded-2xl animate-slide-in-right">
+    <div class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center shrink-0">
+      <i class="fas fa-check-circle text-lg"></i>
     </div>
+    <div class="flex-1">
+      <p class="text-xs font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
+        Éxito
+      </p>
+      <p class="text-sm font-bold text-slate-700 leading-tight">{{ successMessage() }}</p>
+    </div>
+    <button (click)="successMessage.set(null)" class="text-slate-300 hover:text-slate-500 transition-colors">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
   }
 </div>

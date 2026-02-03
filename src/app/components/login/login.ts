@@ -80,7 +80,7 @@ export class Login implements OnInit {
           this.router.navigate(['/admin']);
         } else if (roleName === 'Admin IES' || roleName === 'Operativo IES') {
           // Los de la universidad van a su sección específica
-          this.router.navigate(['/ies']);
+          this.router.navigate(['/admin/home']);
         } else {
           this.router.navigate(['/register']);
         }
