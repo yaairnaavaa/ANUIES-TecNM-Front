@@ -1388,6 +1388,30 @@ export class IesCampaignManagementComponent implements OnInit {
   }
 
   /**
+   * Obtener nombre del responsable
+   */
+  getResponsibleName(campaign: Campaign): string {
+    if (!campaign.responsible) return 'No asignado';
+
+    if (typeof campaign.responsible === 'string') {
+      // Si es solo ID, intentamos buscarlo en la lista de usuarios cargada o devolvemos el ID/Placeholder
+      const user = this.usersList().find(u => u.id === campaign.responsible);
+      return user ? user.name : 'Usuario no encontrado';
+    }
+
+    // Check if it matches the structure { id, name } provided by user
+    if ('name' in campaign.responsible && (campaign.responsible as any).name) {
+      return (campaign.responsible as any).name;
+    }
+
+    // Si es objeto User estándar con firstName/lastName
+    const user = campaign.responsible as any; // Cast to any to access properties safely or use User interface
+    const firstName = user.firstName || '';
+    const lastName = user.lastName || '';
+    return `${firstName} ${lastName}`.trim() || 'Sin nombre';
+  }
+
+  /**
    * Obtener nombre del IEMS objetivo desde el array targetedIEMS
    */
   getTargetedIEMSName(targetedIEMS: any): string {

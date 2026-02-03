@@ -1,10 +1,11 @@
 <div class="p-6 lg:p-10 space-y-8 animate-fade-in bg-slate-50/50 min-h-screen">
-  
+
   <header class="flex flex-col md:flex-row justify-between items-center gap-6">
     <div>
       <h1 class="text-3xl font-black text-slate-900 tracking-tight italic flex items-center gap-3">
-      <i class="fas fa-bullhorn text-blue-600"></i>
-      Campañas e Impacto</h1>
+        <i class="fas fa-bullhorn text-blue-600"></i>
+        Campañas e Impacto
+      </h1>
       <p class="text-slate-500 font-medium italic">Análisis de rendimiento y retorno de inversión institucional</p>
     </div>
     <button (click)="openModal()"
@@ -16,48 +17,55 @@
 
   <!-- Notificación de éxito (fuera de la modal) -->
   @if (successMessage() && !showModal()) {
-    <div class="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-xl animate-in slide-in-from-top duration-300">
-      <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <i class="fas fa-check-circle text-emerald-500 text-xl"></i>
-          <p class="text-sm font-bold text-emerald-700">{{ successMessage() }}</p>
-        </div>
-        <button 
-          (click)="successMessage.set(null)"
-          class="text-emerald-600 hover:text-emerald-800 transition-colors"
-        >
-          <i class="fas fa-times"></i>
-        </button>
+  <div
+    class="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-xl animate-in slide-in-from-top duration-300">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-check-circle text-emerald-500 text-xl"></i>
+        <p class="text-sm font-bold text-emerald-700">{{ successMessage() }}</p>
       </div>
+      <button (click)="successMessage.set(null)" class="text-emerald-600 hover:text-emerald-800 transition-colors">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
+  </div>
   }
 
   <div class="space-y-4">
     <div class="flex items-center gap-2 px-2">
-       <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-       <span class="text-xs font-black text-slate-400 uppercase tracking-widest">{{ displayMetrics().label }}</span>
-       @if(selectedCampaign()){
-         <button (click)="selectedCampaign.set(null); $event.stopPropagation()" class="text-[10px] bg-slate-200 px-2 py-0.5 rounded-md hover:bg-slate-300 transition-colors font-bold text-slate-600">LIMPIAR SELECCIÓN</button>
-       }
+      <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+      <span class="text-xs font-black text-slate-400 uppercase tracking-widest">{{ displayMetrics().label }}</span>
+      @if(selectedCampaign()){
+      <button (click)="selectedCampaign.set(null); $event.stopPropagation()"
+        class="text-[10px] bg-slate-200 px-2 py-0.5 rounded-md hover:bg-slate-300 transition-colors font-bold text-slate-600">LIMPIAR
+        SELECCIÓN</button>
+      }
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      
-      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:shadow-md" [class.border-blue-500]="selectedCampaign()">
-        <div class="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl shadow-lg shadow-blue-100">
-          <i class="fas" [class.fa-university]="!displayMetrics().isGlobal" [class.fa-network-wired]="displayMetrics().isGlobal"></i>
+
+      <div
+        class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:shadow-md"
+        [class.border-blue-500]="selectedCampaign()">
+        <div
+          class="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl shadow-lg shadow-blue-100">
+          <i class="fas" [class.fa-university]="!displayMetrics().isGlobal"
+            [class.fa-network-wired]="displayMetrics().isGlobal"></i>
         </div>
         <div class="flex-1 min-w-0">
           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
             {{ displayMetrics().isGlobal ? 'Cobertura' : 'Institución' }}
           </p>
           <h3 class="text-sm md:text-base font-black text-slate-900 leading-tight uppercase break-words">
-            {{ displayMetrics().isGlobal ? (displayMetrics().institutionCount + ' Escuela' + (displayMetrics().institutionCount !== 1 ? 's' : '')) : displayMetrics().institutionName }}
+            {{ displayMetrics().isGlobal ? (displayMetrics().institutionCount + ' Escuela' +
+            (displayMetrics().institutionCount !== 1 ? 's' : '')) : displayMetrics().institutionName }}
           </h3>
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:shadow-md" [class.border-blue-500]="selectedCampaign()">
+      <div
+        class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:shadow-md"
+        [class.border-blue-500]="selectedCampaign()">
         <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl">
           <i class="fas fa-bullseye"></i>
         </div>
@@ -67,17 +75,22 @@
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:shadow-md" [class.border-blue-500]="selectedCampaign()">
+      <div
+        class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:shadow-md"
+        [class.border-blue-500]="selectedCampaign()">
         <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl">
           <i class="fas fa-dollar-sign"></i>
         </div>
         <div>
           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inversión</p>
-          <h3 class="text-2xl font-black text-slate-900">{{ displayMetrics().cost | currency:'MXN':'symbol-narrow' }}</h3>
+          <h3 class="text-2xl font-black text-slate-900">{{ displayMetrics().cost | currency:'MXN':'symbol-narrow' }}
+          </h3>
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:shadow-md" [class.border-blue-500]="selectedCampaign()">
+      <div
+        class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:shadow-md"
+        [class.border-blue-500]="selectedCampaign()">
         <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl">
           <i class="fas fa-chart-line"></i>
         </div>
@@ -90,8 +103,9 @@
   </div>
 
   <div class="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-    
-    <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+    <div
+      class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="relative w-full md:w-96">
         <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
         <input type="text" [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)"
@@ -100,23 +114,16 @@
       </div>
 
       <div class="flex items-center gap-3 flex-wrap">
-        <button
-          type="button"
-          (click)="exportCampaignsExcel()"
-          [disabled]="filteredCampaigns().length === 0"
-          class="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm"
-        >
+        <button type="button" (click)="exportCampaignsExcel()" [disabled]="filteredCampaigns().length === 0"
+          class="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm">
           <i class="fas fa-file-excel"></i>
           Exportar Excel
         </button>
         <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Mostrar:</span>
-        <select
-          [ngModel]="itemsPerPage()"
-          (ngModelChange)="onItemsPerPageChange($event)"
-          class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-all"
-        >
+        <select [ngModel]="itemsPerPage()" (ngModelChange)="onItemsPerPageChange($event)"
+          class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-all">
           @for (option of pageSizeOptions; track option) {
-            <option [value]="option">{{ option }} filas</option>
+          <option [value]="option">{{ option }} filas</option>
           }
         </select>
       </div>
@@ -135,135 +142,108 @@
         </thead>
         <tbody class="divide-y divide-slate-100">
           @for(c of pagedCampaigns(); track c.id) {
-            <tr 
-              (click)="selectCampaign(c)"
-              class="transition-all hover:bg-blue-50/30 group cursor-pointer"
-              [class.bg-blue-50/50]="selectedCampaign()?.id === c.id"
-            >
-              <td class="px-8 py-5 text-left">
-                <div class="font-bold text-slate-800 leading-tight uppercase">{{ c.name }}</div>
-                <div class="text-[10px] text-blue-600 font-black uppercase tracking-tighter mt-1 italic">
-                  <i class="fas fa-university mr-1"></i>{{ c.institution }}
-                </div>
-                <div class="text-xs text-slate-400 mt-0.5 italic">{{ c.startDate | date:'dd/MM/yyyy' }}</div>
-              </td>
-              <td class="px-8 py-5 text-center">
-                <span [ngClass]="{
+          <tr (click)="selectCampaign(c)" class="transition-all hover:bg-blue-50/30 group cursor-pointer"
+            [class.bg-blue-50/50]="selectedCampaign()?.id === c.id">
+            <td class="px-8 py-5 text-left">
+              <div class="font-bold text-slate-800 leading-tight uppercase">{{ c.name }}</div>
+              <div class="text-[10px] text-blue-600 font-black uppercase tracking-tighter mt-1 italic">
+                <i class="fas fa-university mr-1"></i>{{ c.institution }}
+              </div>
+              <div class="text-xs text-slate-400 mt-0.5 italic">{{ c.startDate | date:'dd/MM/yyyy' }}</div>
+            </td>
+            <td class="px-8 py-5 text-center">
+              <span [ngClass]="{
                   'bg-blue-100 text-blue-700': c.status === 'Planificada',
                   'bg-emerald-100 text-emerald-700': c.status === 'En curso',
                   'bg-slate-100 text-slate-500': c.status === 'Finalizada',
                   'bg-red-100 text-red-700': c.status === 'Cancelada'
                 }" class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">
-                  {{ c.status }}
-                </span>
-              </td>
-              <td class="px-8 py-5 text-center">
-                <div class="flex items-center justify-center gap-2">
-                  <i class="far fa-calendar text-slate-400 text-xs"></i>
-                  <span class="text-xs font-bold text-slate-700">{{ c.cycleName }}</span>
-                </div>
-              </td>
-              <td class="px-8 py-5 font-mono text-xs font-bold text-slate-600 text-center">
-                {{ (c.totalRegistrados ?? 0) | number }}
-              </td>
-              <td class="px-8 py-5 text-center" (click)="$event.stopPropagation()">
-                <div class="relative inline-block text-center">
-                  <button
-                    #anchor
-                    type="button"
-                    (click)="$any(c).showMenu = !$any(c).showMenu; $event.stopPropagation()"
-                    class="flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all focus:outline-none"
-                  >
-                    <i class="fas fa-ellipsis-v"></i>
-                  </button>
+                {{ c.status }}
+              </span>
+            </td>
+            <td class="px-8 py-5 text-center">
+              <div class="flex items-center justify-center gap-2">
+                <i class="far fa-calendar text-slate-400 text-xs"></i>
+                <span class="text-xs font-bold text-slate-700">{{ c.cycleName }}</span>
+              </div>
+            </td>
+            <td class="px-8 py-5 font-mono text-xs font-bold text-slate-600 text-center">
+              {{ (c.totalRegistrados ?? 0) | number }}
+            </td>
+            <td class="px-8 py-5 text-center" (click)="$event.stopPropagation()">
+              <div class="relative inline-block text-center">
+                <button #anchor type="button" (click)="$any(c).showMenu = !$any(c).showMenu; $event.stopPropagation()"
+                  class="flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all focus:outline-none">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
 
-                  <div
-                    *ngIf="$any(c).showMenu"
-                    (mouseleave)="$any(c).showMenu = false"
-                    class="fixed z-[100] w-64 rounded-2xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden border border-slate-100"
-                    [style.left.px]="anchor.getBoundingClientRect().left - 200"
-                    [style.top.px]="anchor.getBoundingClientRect().top - 150"
-                  >
-                    <div class="p-2 space-y-1">
-                      <button
-                        (click)="openDetailsModal(c); $any(c).showMenu = false"
-                        class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all"
-                      >
-                        <div
-                          class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 mr-3 group-hover:bg-blue-600 group-hover:text-white transition-all"
-                        >
-                          <i class="fas fa-eye"></i>
-                        </div>
-                        Ver Detalles
-                      </button>
+                <div *ngIf="$any(c).showMenu" (mouseleave)="$any(c).showMenu = false"
+                  class="fixed z-[100] w-64 rounded-2xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden border border-slate-100"
+                  [style.left.px]="anchor.getBoundingClientRect().left - 200"
+                  [style.top.px]="anchor.getBoundingClientRect().top - 150">
+                  <div class="p-2 space-y-1">
+                    <button (click)="openDetailsModal(c); $any(c).showMenu = false"
+                      class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all">
+                      <div
+                        class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 mr-3 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                        <i class="fas fa-eye"></i>
+                      </div>
+                      Ver Detalles
+                    </button>
 
-                      <button
-                        (click)="openQRModal(c); $any(c).showMenu = false"
-                        class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl transition-all"
-                      >
-                        <div
-                          class="w-9 h-9 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 mr-3 group-hover:bg-emerald-600 group-hover:text-white transition-all"
-                        >
-                          <i class="fas fa-qrcode"></i>
-                        </div>
-                        Generar QR
-                      </button>
+                    <button (click)="openQRModal(c); $any(c).showMenu = false"
+                      class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl transition-all">
+                      <div
+                        class="w-9 h-9 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 mr-3 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                        <i class="fas fa-qrcode"></i>
+                      </div>
+                      Generar QR
+                    </button>
 
-                      <button
-                        (click)="editCampaign(c.id); $any(c).showMenu = false"
-                        class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all"
-                      >
-                        <div
-                          class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 mr-3 group-hover:bg-blue-600 group-hover:text-white transition-all"
-                        >
-                          <i class="fas fa-edit"></i>
-                        </div>
-                        Editar Campaña
-                      </button>
-                    </div>
+                    <button (click)="editCampaign(c.id); $any(c).showMenu = false"
+                      class="group flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all">
+                      <div
+                        class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 mr-3 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                        <i class="fas fa-edit"></i>
+                      </div>
+                      Editar Campaña
+                    </button>
                   </div>
                 </div>
-              </td>
-            </tr>
+              </div>
+            </td>
+          </tr>
           } @empty {
-            <tr>
-              <td colspan="6" class="px-8 py-20 text-center">
-                <div class="flex flex-col items-center gap-3">
-                  <i class="fas fa-search text-slate-200 text-4xl"></i>
-                  <p class="text-slate-400 font-medium italic">No se encontraron campañas registradas</p>
-                </div>
-              </td>
-            </tr>
+          <tr>
+            <td colspan="6" class="px-8 py-20 text-center">
+              <div class="flex flex-col items-center gap-3">
+                <i class="fas fa-search text-slate-200 text-4xl"></i>
+                <p class="text-slate-400 font-medium italic">No se encontraron campañas registradas</p>
+              </div>
+            </td>
+          </tr>
           }
         </tbody>
       </table>
     </div>
 
     <div
-      class="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4"
-    >
+      class="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="text-sm text-slate-500 font-bold order-2 md:order-1">
         Mostrando <span class="text-blue-600 font-black">{{ showingRange() }}</span> de
         <span class="text-slate-900 font-black">{{ filteredCampaigns().length }}</span> campañas
       </div>
       <div class="flex items-center gap-2 order-1 md:order-2">
-        <button
-          (click)="goToPage(currentPage() - 1)"
-          [disabled]="currentPage() === 1"
-          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
-        >
+        <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm">
           <i class="fas fa-chevron-left"></i>
         </button>
         <div
-          class="flex items-center bg-white border border-slate-200 rounded-xl px-4 h-10 font-black text-xs text-slate-700 shadow-sm uppercase"
-        >
+          class="flex items-center bg-white border border-slate-200 rounded-xl px-4 h-10 font-black text-xs text-slate-700 shadow-sm uppercase">
           Pág. {{ currentPage() }} / {{ totalPages() || 1 }}
         </div>
-        <button
-          (click)="goToPage(currentPage() + 1)"
-          [disabled]="currentPage() >= totalPages()"
-          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
-        >
+        <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() >= totalPages()"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white disabled:opacity-20 transition-all shadow-sm">
           <i class="fas fa-chevron-right"></i>
         </button>
       </div>
@@ -277,12 +257,14 @@
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="closeModal()"></div>
 
     <!-- Modal Container -->
-    <div class="relative w-full max-w-6xl max-h-[90vh] bg-white rounded-[3rem] shadow-2xl animate-slide-up flex flex-col overflow-hidden border border-white/20">
-      
+    <div
+      class="relative w-full max-w-6xl max-h-[90vh] bg-white rounded-[3rem] shadow-2xl animate-slide-up flex flex-col overflow-hidden border border-white/20">
+
       <!-- Header -->
       <div class="flex items-center justify-between p-8 bg-white border-b-2 border-slate-100 shrink-0">
         <div class="flex items-center gap-5">
-          <div class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-2xl text-white shadow-lg shadow-blue-200">
+          <div
+            class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-2xl text-white shadow-lg shadow-blue-200">
             <i class="fas fa-bullhorn"></i>
           </div>
           <div>
@@ -291,20 +273,18 @@
             </h2>
             <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">
               @if (activeCycle() && !isEditMode()) {
-                <i class="far fa-calendar text-blue-500 mr-1"></i>
-                Ciclo {{ activeCycle().name }}
+              <i class="far fa-calendar text-blue-500 mr-1"></i>
+              Ciclo {{ activeCycle().name }}
               } @else {
-                Gestión de Campañas Institucionales
+              Gestión de Campañas Institucionales
               }
             </p>
           </div>
         </div>
 
         <div class="flex items-center gap-4">
-          <button
-            (click)="closeModal()"
-            class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-500 transition-all active:scale-90"
-          >
+          <button (click)="closeModal()"
+            class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-500 transition-all active:scale-90">
             <i class="fas fa-times text-2xl"></i>
           </button>
         </div>
@@ -312,27 +292,27 @@
 
       <!-- Messages -->
       @if (errorMessage()) {
-        <div class="mx-8 mt-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-xl">
-          <div class="flex items-center gap-3">
-            <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
-            <p class="text-sm font-bold text-red-700">{{ errorMessage() }}</p>
-          </div>
+      <div class="mx-8 mt-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-xl">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+          <p class="text-sm font-bold text-red-700">{{ errorMessage() }}</p>
         </div>
+      </div>
       }
 
       @if (successMessage()) {
-        <div class="mx-8 mt-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-xl">
-          <div class="flex items-center gap-3">
-            <i class="fas fa-check-circle text-emerald-500 text-xl"></i>
-            <p class="text-sm font-bold text-emerald-700">{{ successMessage() }}</p>
-          </div>
+      <div class="mx-8 mt-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-xl">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-check-circle text-emerald-500 text-xl"></i>
+          <p class="text-sm font-bold text-emerald-700">{{ successMessage() }}</p>
         </div>
+      </div>
       }
 
       <!-- Form Content -->
       <div class="flex-1 overflow-y-auto p-8">
         <form [formGroup]="campaignForm" class="space-y-8">
-          
+
           <!-- SECCIÓN 1: ASIGNACIÓN Y ESTADO -->
           <div class="space-y-6">
             <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
@@ -343,80 +323,70 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
+
               <!-- IES de la Campaña - Solo para usuarios sin IES asignada -->
               @if (!userHasIES()) {
-                <div class="space-y-2 md:col-span-2">
-                  <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                    Institución de Educación Superior *
-                  </label>
-                  <div class="relative group">
-                    <i class="fas fa-university absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
-                    <input
-                      type="text"
-                      [value]="iesSearchQuery()"
-                      (input)="filterIESForCampaign($any($event.target).value)"
-                      (focus)="showIESDropdown.set(true)"
-                      (blur)="onIESBlur()"
-                      placeholder="Seleccionar tecnológico responsable..."
-                      autocomplete="off"
-                      class="w-full pl-12 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                      [class.border-blue-500]="selectedIESForCampaign()"
-                      [class.border-red-300]="campaignForm.get('campaignIES')?.invalid && campaignForm.get('campaignIES')?.touched"
-                    />
+              <div class="space-y-2 md:col-span-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Institución de Educación Superior *
+                </label>
+                <div class="relative group">
+                  <i class="fas fa-university absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
+                  <input type="text" [value]="iesSearchQuery()"
+                    (input)="filterIESForCampaign($any($event.target).value)" (focus)="showIESDropdown.set(true)"
+                    (blur)="onIESBlur()" placeholder="Seleccionar tecnológico responsable..." autocomplete="off"
+                    class="w-full pl-12 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                    [class.border-blue-500]="selectedIESForCampaign()"
+                    [class.border-red-300]="campaignForm.get('campaignIES')?.invalid && campaignForm.get('campaignIES')?.touched" />
 
-                    <!-- Botón limpiar -->
-                    @if (selectedIESForCampaign()) {
-                      <button
-                        type="button"
-                        (click)="clearIESSelection()"
-                        class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-100 transition-colors z-10"
-                      >
-                        <i class="fas fa-times text-xs text-red-500"></i>
-                      </button>
-                    }
+                  <!-- Botón limpiar -->
+                  @if (selectedIESForCampaign()) {
+                  <button type="button" (click)="clearIESSelection()"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-100 transition-colors z-10">
+                    <i class="fas fa-times text-xs text-red-500"></i>
+                  </button>
+                  }
 
-                    <!-- Dropdown IES -->
-                    @if (filteredIESForCampaign().length > 0 && showIESDropdown()) {
-                      <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-60 overflow-y-auto">
-                        @for (ies of filteredIESForCampaign(); track ies._id) {
-                          <li
-                            (mousedown)="selectIESForCampaign(ies)"
-                            class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-medium text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
-                            [class.bg-blue-50]="selectedIESForCampaign() === ies._id"
-                          >
-                            <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
-                                 [class.border-blue-600]="selectedIESForCampaign() === ies._id"
-                                 [class.bg-blue-600]="selectedIESForCampaign() === ies._id"
-                                 [class.border-slate-300]="selectedIESForCampaign() !== ies._id">
-                              @if (selectedIESForCampaign() === ies._id) {
-                                <i class="fas fa-check text-white text-xs"></i>
-                              }
-                            </div>
-                            <div class="flex-1">
-                              <div class="font-bold text-slate-800">{{ ies.name }}</div>
-                              <div class="text-xs text-slate-500">{{ ies.code }}</div>
-                            </div>
-                          </li>
+                  <!-- Dropdown IES -->
+                  @if (filteredIESForCampaign().length > 0 && showIESDropdown()) {
+                  <ul
+                    class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-60 overflow-y-auto">
+                    @for (ies of filteredIESForCampaign(); track ies._id) {
+                    <li (mousedown)="selectIESForCampaign(ies)"
+                      class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-medium text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                      [class.bg-blue-50]="selectedIESForCampaign() === ies._id">
+                      <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                        [class.border-blue-600]="selectedIESForCampaign() === ies._id"
+                        [class.bg-blue-600]="selectedIESForCampaign() === ies._id"
+                        [class.border-slate-300]="selectedIESForCampaign() !== ies._id">
+                        @if (selectedIESForCampaign() === ies._id) {
+                        <i class="fas fa-check text-white text-xs"></i>
                         }
-                      </ul>
-                    }
-
-                    @if (iesList().length === 0 && showIESDropdown()) {
-                      <div class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl p-4">
-                        <p class="text-sm text-slate-500 text-center">
-                          <i class="fas fa-info-circle mr-2"></i>
-                          No hay IES disponibles.
-                        </p>
                       </div>
+                      <div class="flex-1">
+                        <div class="font-bold text-slate-800">{{ ies.name }}</div>
+                        <div class="text-xs text-slate-500">{{ ies.code }}</div>
+                      </div>
+                    </li>
                     }
-                  </div>
+                  </ul>
+                  }
 
-                  <p class="text-[11px] text-slate-400 mt-2 italic font-medium ml-1">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    Selecciona el tecnológico al que pertenecerá esta campaña ({{ iesList().length }} disponibles)
-                  </p>
+                  @if (iesList().length === 0 && showIESDropdown()) {
+                  <div class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl p-4">
+                    <p class="text-sm text-slate-500 text-center">
+                      <i class="fas fa-info-circle mr-2"></i>
+                      No hay IES disponibles.
+                    </p>
+                  </div>
+                  }
                 </div>
+
+                <p class="text-[11px] text-slate-400 mt-2 italic font-medium ml-1">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  Selecciona el tecnológico al que pertenecerá esta campaña ({{ iesList().length }} disponibles)
+                </p>
+              </div>
               }
               <!-- Usuario Responsable (Bloqueado - Usuario actual) -->
               <div class="space-y-2">
@@ -425,12 +395,8 @@
                 </label>
                 <div class="relative">
                   <i class="fas fa-user-check absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10"></i>
-                  <input
-                    type="text"
-                    formControlName="responsible"
-                    readonly
-                    class="w-full pl-12 pr-4 py-3.5 bg-slate-100 border border-slate-200 rounded-2xl outline-none font-bold text-slate-600 cursor-not-allowed"
-                  />
+                  <input type="text" formControlName="responsible" readonly
+                    class="w-full pl-12 pr-4 py-3.5 bg-slate-100 border border-slate-200 rounded-2xl outline-none font-bold text-slate-600 cursor-not-allowed" />
                   <i class="fas fa-lock absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                 </div>
                 <p class="text-[11px] text-slate-400 italic font-medium ml-1">
@@ -446,40 +412,34 @@
                 </label>
                 <div class="relative group">
                   <i class="fas fa-flag absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
-                  <input
-                    type="text"
-                    [value]="campaignStatusSearch()"
+                  <input type="text" [value]="campaignStatusSearch()"
                     (input)="filterCampaignStatus($any($event.target).value)"
-                    (focus)="showCampaignStatusDropdown.set(true)"
-                    (blur)="onCampaignStatusBlur()"
-                    placeholder="Seleccionar estado de la campaña..."
-                    autocomplete="off"
+                    (focus)="showCampaignStatusDropdown.set(true)" (blur)="onCampaignStatusBlur()"
+                    placeholder="Seleccionar estado de la campaña..." autocomplete="off"
                     class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
                     [class.border-red-300]="campaignForm.get('status')?.invalid && campaignForm.get('status')?.touched"
-                    [class.border-blue-500]="campaignForm.get('status')?.value"
-                  />
+                    [class.border-blue-500]="campaignForm.get('status')?.value" />
 
                   <!-- Dropdown Estados -->
                   @if (filteredCampaignStatuses().length > 0 && showCampaignStatusDropdown()) {
-                    <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
-                      @for (status of filteredCampaignStatuses(); track status) {
-                        <li
-                          (mousedown)="selectCampaignStatus(status)"
-                          class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-bold text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
-                          [class.bg-blue-50]="campaignForm.get('status')?.value === status"
-                        >
-                          <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
-                               [class.border-blue-600]="campaignForm.get('status')?.value === status"
-                               [class.bg-blue-600]="campaignForm.get('status')?.value === status"
-                               [class.border-slate-300]="campaignForm.get('status')?.value !== status">
-                            @if (campaignForm.get('status')?.value === status) {
-                              <i class="fas fa-check text-white text-xs"></i>
-                            }
-                          </div>
-                          <span>{{ status }}</span>
-                        </li>
-                      }
-                    </ul>
+                  <ul
+                    class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+                    @for (status of filteredCampaignStatuses(); track status) {
+                    <li (mousedown)="selectCampaignStatus(status)"
+                      class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-bold text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                      [class.bg-blue-50]="campaignForm.get('status')?.value === status">
+                      <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                        [class.border-blue-600]="campaignForm.get('status')?.value === status"
+                        [class.bg-blue-600]="campaignForm.get('status')?.value === status"
+                        [class.border-slate-300]="campaignForm.get('status')?.value !== status">
+                        @if (campaignForm.get('status')?.value === status) {
+                        <i class="fas fa-check text-white text-xs"></i>
+                        }
+                      </div>
+                      <span>{{ status }}</span>
+                    </li>
+                    }
+                  </ul>
                   }
                 </div>
                 <p class="text-[11px] text-slate-400 italic font-medium ml-1">
@@ -507,40 +467,33 @@
                 </label>
                 <div class="relative group">
                   <i class="fas fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
-                  <input
-                    type="text"
-                    [value]="campaignTypeSearch()"
-                    (input)="filterCampaignType($any($event.target).value)"
-                    (focus)="showCampaignTypeDropdown.set(true)"
-                    (blur)="onCampaignTypeBlur()"
-                    placeholder="Seleccionar tipo de campaña..."
-                    autocomplete="off"
+                  <input type="text" [value]="campaignTypeSearch()"
+                    (input)="filterCampaignType($any($event.target).value)" (focus)="showCampaignTypeDropdown.set(true)"
+                    (blur)="onCampaignTypeBlur()" placeholder="Seleccionar tipo de campaña..." autocomplete="off"
                     class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
                     [class.border-red-300]="campaignForm.get('type')?.invalid && campaignForm.get('type')?.touched"
-                    [class.border-blue-500]="campaignForm.get('type')?.value"
-                  />
+                    [class.border-blue-500]="campaignForm.get('type')?.value" />
 
                   <!-- Dropdown Tipos -->
                   @if (filteredCampaignTypes().length > 0 && showCampaignTypeDropdown()) {
-                    <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
-                      @for (type of filteredCampaignTypes(); track type) {
-                        <li
-                          (mousedown)="selectCampaignType(type)"
-                          class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-bold text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
-                          [class.bg-blue-50]="campaignForm.get('type')?.value === type"
-                        >
-                          <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
-                               [class.border-blue-600]="campaignForm.get('type')?.value === type"
-                               [class.bg-blue-600]="campaignForm.get('type')?.value === type"
-                               [class.border-slate-300]="campaignForm.get('type')?.value !== type">
-                            @if (campaignForm.get('type')?.value === type) {
-                              <i class="fas fa-check text-white text-xs"></i>
-                            }
-                          </div>
-                          <span>{{ type }}</span>
-                        </li>
-                      }
-                    </ul>
+                  <ul
+                    class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+                    @for (type of filteredCampaignTypes(); track type) {
+                    <li (mousedown)="selectCampaignType(type)"
+                      class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-bold text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                      [class.bg-blue-50]="campaignForm.get('type')?.value === type">
+                      <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                        [class.border-blue-600]="campaignForm.get('type')?.value === type"
+                        [class.bg-blue-600]="campaignForm.get('type')?.value === type"
+                        [class.border-slate-300]="campaignForm.get('type')?.value !== type">
+                        @if (campaignForm.get('type')?.value === type) {
+                        <i class="fas fa-check text-white text-xs"></i>
+                        }
+                      </div>
+                      <span>{{ type }}</span>
+                    </li>
+                    }
+                  </ul>
                   }
                 </div>
               </div>
@@ -552,118 +505,103 @@
                 </label>
                 <div class="relative group">
                   <i class="fas fa-tags absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
-                  <input
-                    type="text"
-                    [value]="specificModalitySearch()"
+                  <input type="text" [value]="specificModalitySearch()"
                     (input)="filterSpecificModality($any($event.target).value)"
-                    (focus)="showSpecificModalityDropdown.set(true)"
-                    (blur)="onSpecificModalityBlur()"
-                    [disabled]="!campaignForm.get('type')?.value"
-                    placeholder="Seleccionar modalidad..."
+                    (focus)="showSpecificModalityDropdown.set(true)" (blur)="onSpecificModalityBlur()"
+                    [disabled]="!campaignForm.get('type')?.value" placeholder="Seleccionar modalidad..."
                     autocomplete="off"
                     class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     [class.border-red-300]="campaignForm.get('specificModality')?.invalid && campaignForm.get('specificModality')?.touched"
-                    [class.border-blue-500]="campaignForm.get('specificModality')?.value"
-                  />
+                    [class.border-blue-500]="campaignForm.get('specificModality')?.value" />
 
                   <!-- Dropdown Modalidades -->
-                  @if (filteredSpecificModalities().length > 0 && showSpecificModalityDropdown() && campaignForm.get('type')?.value) {
-                    <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-60 overflow-y-auto">
-                      @for (modality of filteredSpecificModalities(); track modality) {
-                        <li
-                          (mousedown)="selectSpecificModality(modality)"
-                          class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-medium text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
-                          [class.bg-blue-50]="campaignForm.get('specificModality')?.value === modality"
-                        >
-                          <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
-                               [class.border-blue-600]="campaignForm.get('specificModality')?.value === modality"
-                               [class.bg-blue-600]="campaignForm.get('specificModality')?.value === modality"
-                               [class.border-slate-300]="campaignForm.get('specificModality')?.value !== modality">
-                            @if (campaignForm.get('specificModality')?.value === modality) {
-                              <i class="fas fa-check text-white text-xs"></i>
-                            }
-                          </div>
-                          <span>{{ modality }}</span>
-                        </li>
-                      }
-                    </ul>
+                  @if (filteredSpecificModalities().length > 0 && showSpecificModalityDropdown() &&
+                  campaignForm.get('type')?.value) {
+                  <ul
+                    class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-60 overflow-y-auto">
+                    @for (modality of filteredSpecificModalities(); track modality) {
+                    <li (mousedown)="selectSpecificModality(modality)"
+                      class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-medium text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                      [class.bg-blue-50]="campaignForm.get('specificModality')?.value === modality">
+                      <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                        [class.border-blue-600]="campaignForm.get('specificModality')?.value === modality"
+                        [class.bg-blue-600]="campaignForm.get('specificModality')?.value === modality"
+                        [class.border-slate-300]="campaignForm.get('specificModality')?.value !== modality">
+                        @if (campaignForm.get('specificModality')?.value === modality) {
+                        <i class="fas fa-check text-white text-xs"></i>
+                        }
+                      </div>
+                      <span>{{ modality }}</span>
+                    </li>
+                    }
+                  </ul>
                   }
                 </div>
               </div>
 
               <!-- IEMS Objetivo - Solo para Presencial -->
               @if (campaignForm.get('type')?.value === 'Presencial') {
-                <div class="space-y-2 md:col-span-2">
-                  <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                    IEMS Objetivo (Preparatoria/Bachillerato)
-                  </label>
-                  <div class="relative group">
-                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
-                    <input
-                      #iemsInput
-                      type="text"
-                      [value]="iemsSearchQuery()"
-                      (input)="filterIEMS($any($event.target).value)"
-                      (focus)="showIEMSDropdown.set(true)"
-                      (blur)="onIEMSBlur()"
-                      placeholder="Seleccionar preparatoria/bachillerato..."
-                      autocomplete="off"
-                      class="w-full pl-12 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                      [class.border-blue-500]="selectedIEMS()"
-                    />
+              <div class="space-y-2 md:col-span-2">
+                <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  IEMS Objetivo (Preparatoria/Bachillerato)
+                </label>
+                <div class="relative group">
+                  <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
+                  <input #iemsInput type="text" [value]="iemsSearchQuery()"
+                    (input)="filterIEMS($any($event.target).value)" (focus)="showIEMSDropdown.set(true)"
+                    (blur)="onIEMSBlur()" placeholder="Seleccionar preparatoria/bachillerato..." autocomplete="off"
+                    class="w-full pl-12 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                    [class.border-blue-500]="selectedIEMS()" />
 
-                    <!-- Botón limpiar -->
-                    @if (selectedIEMS()) {
-                      <button
-                        type="button"
-                        (click)="clearIEMSSelection()"
-                        class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-100 transition-colors z-10"
-                      >
-                        <i class="fas fa-times text-xs text-red-500"></i>
-                      </button>
-                    }
+                  <!-- Botón limpiar -->
+                  @if (selectedIEMS()) {
+                  <button type="button" (click)="clearIEMSSelection()"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-100 transition-colors z-10">
+                    <i class="fas fa-times text-xs text-red-500"></i>
+                  </button>
+                  }
 
-                    <!-- Dropdown IEMS -->
-                    @if (filteredIEMS().length > 0 && showIEMSDropdown()) {
-                      <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-60 overflow-y-auto">
-                        @for (iems of filteredIEMS(); track iems._id) {
-                          <li
-                            (mousedown)="selectIEMS(iems._id!, iems.address.state + ' - ' + iems.name)"
-                            class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-medium text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
-                            [class.bg-blue-50]="isIEMSSelected(iems._id!)"
-                          >
-                            <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
-                                 [class.border-blue-600]="isIEMSSelected(iems._id!)"
-                                 [class.bg-blue-600]="isIEMSSelected(iems._id!)"
-                                 [class.border-slate-300]="!isIEMSSelected(iems._id!)">
-                              @if (isIEMSSelected(iems._id!)) {
-                                <i class="fas fa-check text-white text-xs"></i>
-                              }
-                            </div>
-                            <div class="flex-1">
-                              <div class="font-bold text-slate-800">{{ iems.address.state }} - {{ iems.name }}</div>
-                              <div class="text-xs text-slate-500">{{ iems.type }} - {{ iems.address.municipality }}</div>
-                            </div>
-                          </li>
+                  <!-- Dropdown IEMS -->
+                  @if (filteredIEMS().length > 0 && showIEMSDropdown()) {
+                  <ul
+                    class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-60 overflow-y-auto">
+                    @for (iems of filteredIEMS(); track iems._id) {
+                    <li (mousedown)="selectIEMS(iems._id!, iems.address.state + ' - ' + iems.name)"
+                      class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-medium text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                      [class.bg-blue-50]="isIEMSSelected(iems._id!)">
+                      <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                        [class.border-blue-600]="isIEMSSelected(iems._id!)"
+                        [class.bg-blue-600]="isIEMSSelected(iems._id!)"
+                        [class.border-slate-300]="!isIEMSSelected(iems._id!)">
+                        @if (isIEMSSelected(iems._id!)) {
+                        <i class="fas fa-check text-white text-xs"></i>
                         }
-                      </ul>
-                    }
-                    
-                    @if (iemsList().length === 0 && showIEMSDropdown()) {
-                      <div class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl p-4">
-                        <p class="text-sm text-slate-500 text-center">
-                          <i class="fas fa-info-circle mr-2"></i>
-                          No hay IEMS disponibles. Asegúrate de que el backend esté funcionando.
-                        </p>
                       </div>
+                      <div class="flex-1">
+                        <div class="font-bold text-slate-800">{{ iems.address.state }} - {{ iems.name }}</div>
+                        <div class="text-xs text-slate-500">{{ iems.type }} - {{ iems.address.municipality }}</div>
+                      </div>
+                    </li>
                     }
-                  </div>
+                  </ul>
+                  }
 
-                  <p class="text-[11px] text-slate-400 mt-2 italic font-medium ml-1">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    Selecciona la institución de nivel medio superior donde se aplicará la campaña ({{ iemsList().length }} disponibles)
-                  </p>
+                  @if (iemsList().length === 0 && showIEMSDropdown()) {
+                  <div class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl p-4">
+                    <p class="text-sm text-slate-500 text-center">
+                      <i class="fas fa-info-circle mr-2"></i>
+                      No hay IEMS disponibles. Asegúrate de que el backend esté funcionando.
+                    </p>
+                  </div>
+                  }
                 </div>
+
+                <p class="text-[11px] text-slate-400 mt-2 italic font-medium ml-1">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  Selecciona la institución de nivel medio superior donde se aplicará la campaña ({{ iemsList().length
+                  }} disponibles)
+                </p>
+              </div>
               }
             </div>
           </div>
@@ -685,13 +623,9 @@
                 </label>
                 <div class="relative">
                   <i class="fas fa-tag absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
-                  <input
-                    type="text"
-                    formControlName="name"
-                    placeholder="Ej. Campaña de Promoción Verano 2024"
+                  <input type="text" formControlName="name" placeholder="Ej. Campaña de Promoción Verano 2024"
                     class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                    [class.border-red-300]="campaignForm.get('name')?.invalid && campaignForm.get('name')?.touched"
-                  />
+                    [class.border-red-300]="campaignForm.get('name')?.invalid && campaignForm.get('name')?.touched" />
                 </div>
               </div>
 
@@ -700,12 +634,9 @@
                 <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
                   Descripción
                 </label>
-                <textarea
-                  formControlName="description"
-                  rows="3"
+                <textarea formControlName="description" rows="3"
                   placeholder="Describe los objetivos y características de la campaña..."
-                  class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium resize-none"
-                ></textarea>
+                  class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium resize-none"></textarea>
               </div>
             </div>
           </div>
@@ -727,12 +658,9 @@
                 </label>
                 <div class="relative">
                   <i class="fas fa-calendar-day absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
-                  <input
-                    type="date"
-                    formControlName="startDate"
+                  <input type="date" formControlName="startDate"
                     class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                    [class.border-red-300]="campaignForm.get('startDate')?.invalid && campaignForm.get('startDate')?.touched"
-                  />
+                    [class.border-red-300]="campaignForm.get('startDate')?.invalid && campaignForm.get('startDate')?.touched" />
                 </div>
               </div>
 
@@ -743,12 +671,9 @@
                 </label>
                 <div class="relative">
                   <i class="fas fa-calendar-check absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
-                  <input
-                    type="date"
-                    formControlName="endDate"
+                  <input type="date" formControlName="endDate"
                     class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                    [class.border-red-300]="campaignForm.get('endDate')?.invalid && campaignForm.get('endDate')?.touched"
-                  />
+                    [class.border-red-300]="campaignForm.get('endDate')?.invalid && campaignForm.get('endDate')?.touched" />
                 </div>
               </div>
             </div>
@@ -771,14 +696,9 @@
                 </label>
                 <div class="relative">
                   <i class="fas fa-chart-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
-                  <input
-                    type="number"
-                    formControlName="estimatedReach"
-                    min="0"
-                    placeholder="0"
+                  <input type="number" formControlName="estimatedReach" min="0" placeholder="0"
                     class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                    [class.border-red-300]="campaignForm.get('estimatedReach')?.invalid && campaignForm.get('estimatedReach')?.touched"
-                  />
+                    [class.border-red-300]="campaignForm.get('estimatedReach')?.invalid && campaignForm.get('estimatedReach')?.touched" />
                 </div>
               </div>
 
@@ -789,40 +709,33 @@
                 </label>
                 <div class="relative group">
                   <i class="fas fa-ruler-combined absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
-                  <input
-                    type="text"
-                    [value]="reachUnitSearch()"
-                    (input)="filterReachUnit($any($event.target).value)"
-                    (focus)="showReachUnitDropdown.set(true)"
-                    (blur)="onReachUnitBlur()"
-                    placeholder="Seleccionar unidad..."
-                    autocomplete="off"
+                  <input type="text" [value]="reachUnitSearch()" (input)="filterReachUnit($any($event.target).value)"
+                    (focus)="showReachUnitDropdown.set(true)" (blur)="onReachUnitBlur()"
+                    placeholder="Seleccionar unidad..." autocomplete="off"
                     class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
                     [class.border-red-300]="campaignForm.get('reachUnit')?.invalid && campaignForm.get('reachUnit')?.touched"
-                    [class.border-blue-500]="campaignForm.get('reachUnit')?.value"
-                  />
+                    [class.border-blue-500]="campaignForm.get('reachUnit')?.value" />
 
                   <!-- Dropdown Unidades -->
                   @if (filteredReachUnits().length > 0 && showReachUnitDropdown()) {
-                    <ul class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
-                      @for (unit of filteredReachUnits(); track unit) {
-                        <li
-                          (mousedown)="selectReachUnit(unit)"
-                          class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-bold text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
-                          [class.bg-blue-50]="campaignForm.get('reachUnit')?.value === unit"
-                        >
-                          <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
-                               [class.border-blue-600]="campaignForm.get('reachUnit')?.value === unit"
-                               [class.bg-blue-600]="campaignForm.get('reachUnit')?.value === unit"
-                               [class.border-slate-300]="campaignForm.get('reachUnit')?.value !== unit">
-                            @if (campaignForm.get('reachUnit')?.value === unit) {
-                              <i class="fas fa-check text-white text-xs"></i>
-                            }
-                          </div>
-                          <span>{{ unit }}</span>
-                        </li>
-                      }
-                    </ul>
+                  <ul
+                    class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+                    @for (unit of filteredReachUnits(); track unit) {
+                    <li (mousedown)="selectReachUnit(unit)"
+                      class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-bold text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                      [class.bg-blue-50]="campaignForm.get('reachUnit')?.value === unit">
+                      <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                        [class.border-blue-600]="campaignForm.get('reachUnit')?.value === unit"
+                        [class.bg-blue-600]="campaignForm.get('reachUnit')?.value === unit"
+                        [class.border-slate-300]="campaignForm.get('reachUnit')?.value !== unit">
+                        @if (campaignForm.get('reachUnit')?.value === unit) {
+                        <i class="fas fa-check text-white text-xs"></i>
+                        }
+                      </div>
+                      <span>{{ unit }}</span>
+                    </li>
+                    }
+                  </ul>
                   }
                 </div>
                 <p class="text-[11px] text-slate-400 italic font-medium ml-1">
@@ -850,15 +763,9 @@
                 </label>
                 <div class="relative">
                   <i class="fas fa-money-bill-wave absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
-                  <input
-                    type="number"
-                    formControlName="totalCost"
-                    min="0"
-                    step="0.01"
-                    placeholder="0.00"
+                  <input type="number" formControlName="totalCost" min="0" step="0.01" placeholder="0.00"
                     class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-mono font-medium"
-                    [class.border-red-300]="campaignForm.get('totalCost')?.invalid && campaignForm.get('totalCost')?.touched"
-                  />
+                    [class.border-red-300]="campaignForm.get('totalCost')?.invalid && campaignForm.get('totalCost')?.touched" />
                 </div>
               </div>
             </div>
@@ -874,52 +781,48 @@
             </div>
 
             @if (careersSectionMessage()) {
-              <div class="p-4 rounded-2xl border border-amber-200 bg-amber-50 flex items-center gap-3">
-                <i class="fas fa-exclamation-circle text-amber-600 text-xl shrink-0"></i>
-                <p class="text-sm font-bold text-amber-800">{{ careersSectionMessage() }}</p>
-              </div>
+            <div class="p-4 rounded-2xl border border-amber-200 bg-amber-50 flex items-center gap-3">
+              <i class="fas fa-exclamation-circle text-amber-600 text-xl shrink-0"></i>
+              <p class="text-sm font-bold text-amber-800">{{ careersSectionMessage() }}</p>
+            </div>
             } @else {
-              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                @for (career of careersList(); track career.id) {
-                  <button
-                    type="button"
-                    (click)="toggleCareer(career.id)"
-                    class="p-4 border-2 rounded-2xl transition-all text-left"
-                    [class.border-blue-500]="isCareerSelected(career.id)"
-                    [class.bg-blue-50]="isCareerSelected(career.id)"
-                    [class.border-slate-200]="!isCareerSelected(career.id)"
-                    [class.hover:border-slate-300]="!isCareerSelected(career.id)"
-                  >
-                    <div class="flex items-start gap-2">
-                      <div class="w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all"
-                           [class.border-blue-600]="isCareerSelected(career.id)"
-                           [class.bg-blue-600]="isCareerSelected(career.id)"
-                           [class.border-slate-300]="!isCareerSelected(career.id)">
-                        @if (isCareerSelected(career.id)) {
-                          <i class="fas fa-check text-white text-xs"></i>
-                        }
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <div class="text-xs font-black text-slate-800 leading-tight">
-                          {{ career.name }}
-                        </div>
-                        <div class="text-[10px] text-slate-500 font-bold mt-0.5">
-                          {{ career.code }}
-                        </div>
-                      </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              @for (career of careersList(); track career.id) {
+              <button type="button" (click)="toggleCareer(career.id)"
+                class="p-4 border-2 rounded-2xl transition-all text-left"
+                [class.border-blue-500]="isCareerSelected(career.id)" [class.bg-blue-50]="isCareerSelected(career.id)"
+                [class.border-slate-200]="!isCareerSelected(career.id)"
+                [class.hover:border-slate-300]="!isCareerSelected(career.id)">
+                <div class="flex items-start gap-2">
+                  <div class="w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all"
+                    [class.border-blue-600]="isCareerSelected(career.id)"
+                    [class.bg-blue-600]="isCareerSelected(career.id)"
+                    [class.border-slate-300]="!isCareerSelected(career.id)">
+                    @if (isCareerSelected(career.id)) {
+                    <i class="fas fa-check text-white text-xs"></i>
+                    }
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-xs font-black text-slate-800 leading-tight">
+                      {{ career.name }}
                     </div>
-                  </button>
-                }
-              </div>
+                    <div class="text-[10px] text-slate-500 font-bold mt-0.5">
+                      {{ career.code }}
+                    </div>
+                  </div>
+                </div>
+              </button>
+              }
+            </div>
             }
 
             @if (selectedCareers().length > 0) {
-              <div class="p-3 bg-amber-50 rounded-2xl border border-amber-100">
-                <p class="text-xs font-bold text-amber-700">
-                  <i class="fas fa-info-circle mr-1"></i>
-                  {{ selectedCareers().length }} carrera(s) seleccionada(s)
-                </p>
-              </div>
+            <div class="p-3 bg-amber-50 rounded-2xl border border-amber-100">
+              <p class="text-xs font-bold text-amber-700">
+                <i class="fas fa-info-circle mr-1"></i>
+                {{ selectedCareers().length }} carrera(s) seleccionada(s)
+              </p>
+            </div>
             }
           </div>
 
@@ -929,26 +832,18 @@
       <!-- Footer con botones -->
       <div class="p-8 border-t border-slate-100 bg-slate-50/50 shrink-0">
         <div class="flex items-center justify-end gap-4">
-          <button
-            type="button"
-            (click)="closeModal()"
-            [disabled]="isLoading()"
-            class="px-8 py-3.5 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-2xl hover:bg-slate-50 transition-all active:scale-95 disabled:opacity-50"
-          >
+          <button type="button" (click)="closeModal()" [disabled]="isLoading()"
+            class="px-8 py-3.5 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-2xl hover:bg-slate-50 transition-all active:scale-95 disabled:opacity-50">
             Cancelar
           </button>
-          <button
-            type="button"
-            (click)="saveCampaign()"
-            [disabled]="isLoading() || campaignForm.invalid"
-            class="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 hover:shadow-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
+          <button type="button" (click)="saveCampaign()" [disabled]="isLoading() || campaignForm.invalid"
+            class="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 hover:shadow-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             @if (isLoading()) {
-              <i class="fas fa-circle-notch animate-spin"></i>
-              <span>Procesando...</span>
+            <i class="fas fa-circle-notch animate-spin"></i>
+            <span>Procesando...</span>
             } @else {
-              <i class="fas fa-save"></i>
-              <span>{{ isEditMode() ? 'Actualizar Campaña' : 'Crear Campaña' }}</span>
+            <i class="fas fa-save"></i>
+            <span>{{ isEditMode() ? 'Actualizar Campaña' : 'Crear Campaña' }}</span>
             }
           </button>
         </div>
@@ -960,420 +855,407 @@
 
   <!-- MODAL DE DETALLES DE CAMPAÑA -->
   @if (showDetailsModal() && viewingCampaign()) {
-    <div class="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-fade-in">
-      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="closeDetailsModal()"></div>
+  <div class="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-fade-in">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="closeDetailsModal()"></div>
 
-      <div
-        class="relative bg-white w-full max-w-4xl max-h-[90vh] rounded-[3rem] shadow-2xl animate-slide-up border border-white/20 flex flex-col overflow-hidden"
-      >
-        <!-- Header -->
-        <div
-          class="px-10 py-8 border-b-2 border-slate-100 bg-white flex justify-between items-center shrink-0"
-        >
-          <div class="flex items-center gap-4">
-            <div
-              class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200"
-            >
-              <i class="fas fa-bullhorn text-xl"></i>
+    <div
+      class="relative bg-white w-full max-w-4xl max-h-[90vh] rounded-[3rem] shadow-2xl animate-slide-up border border-white/20 flex flex-col overflow-hidden">
+      <!-- Header -->
+      <div class="px-10 py-8 border-b-2 border-slate-100 bg-white flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-4">
+          <div
+            class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+            <i class="fas fa-bullhorn text-xl"></i>
+          </div>
+          <div>
+            <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight">
+              Detalles de la Campaña
+            </h3>
+            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">
+              Información Completa
+            </p>
+          </div>
+        </div>
+        <button type="button" (click)="closeDetailsModal()"
+          class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-500 transition-all active:scale-90">
+          <i class="fas fa-times text-2xl"></i>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 overflow-y-auto p-10 space-y-8">
+        @if (viewingCampaign(); as campaign) {
+        @if (getFullCampaign(campaign.id); as fullCampaign) {
+        <!-- INFORMACIÓN BÁSICA -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+            <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+              <i class="fas fa-info-circle text-blue-600"></i>
             </div>
-            <div>
-              <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight">
-                Detalles de la Campaña
-              </h3>
-              <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">
-                Información Completa
-              </p>
+            <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+              Información Básica
+            </h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Nombre de la Campaña
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ campaign.name }}
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Institución
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ campaign.institution }}
+              </div>
+            </div>
+
+            @if (fullCampaign.description) {
+            <div class="space-y-2 md:col-span-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Descripción
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-medium text-slate-700">
+                {{ fullCampaign.description }}
+              </div>
+            </div>
+            }
+
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Responsable
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-medium text-slate-700">
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-user-circle text-slate-400"></i>
+                  {{ getResponsibleName(fullCampaign) }}
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Tipo
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ campaign.type }}
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Modalidad Específica
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ campaign.specificModality }}
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Estado
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
+                <span [ngClass]="{
+                        'bg-blue-100 text-blue-700': campaign.status === 'Planificada',
+                        'bg-emerald-100 text-emerald-700': campaign.status === 'En curso',
+                        'bg-slate-100 text-slate-500': campaign.status === 'Finalizada',
+                        'bg-red-100 text-red-700': campaign.status === 'Cancelada'
+                      }" class="px-3 py-1 rounded-full text-[10px] font-black uppercase">
+                  {{ campaign.status }}
+                </span>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Ciclo
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ campaign.cycleName }}
+              </div>
             </div>
           </div>
-          <button
-            type="button"
-            (click)="closeDetailsModal()"
-            class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-500 transition-all active:scale-90"
-          >
-            <i class="fas fa-times text-2xl"></i>
-          </button>
         </div>
 
-        <!-- Content -->
-        <div class="flex-1 overflow-y-auto p-10 space-y-8">
-          @if (viewingCampaign(); as campaign) {
-            @if (getFullCampaign(campaign.id); as fullCampaign) {
-              <!-- INFORMACIÓN BÁSICA -->
-              <div class="space-y-4">
-                <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
-                  <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-info-circle text-blue-600"></i>
-                  </div>
-                  <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
-                    Información Básica
-                  </h3>
-                </div>
+        <!-- PERIODO -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+            <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+              <i class="fas fa-calendar-alt text-emerald-600"></i>
+            </div>
+            <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+              Periodo de Ejecución
+            </h3>
+          </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Nombre de la Campaña
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ campaign.name }}
-                    </div>
-                  </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Fecha de Inicio
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ fullCampaign.period.startDate! | date:'dd/MM/yyyy' }}
+              </div>
+            </div>
 
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Institución
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ campaign.institution }}
-                    </div>
-                  </div>
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Fecha de Finalización
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ fullCampaign.period.endDate! | date:'dd/MM/yyyy' }}
+              </div>
+            </div>
+          </div>
+        </div>
 
-                  @if (fullCampaign.description) {
-                    <div class="space-y-2 md:col-span-2">
-                      <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                        Descripción
-                      </label>
-                      <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-medium text-slate-700">
-                        {{ fullCampaign.description }}
-                      </div>
-                    </div>
-                  }
+        <!-- ALCANCE Y COSTOS -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+            <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+              <i class="fas fa-bullseye text-purple-600"></i>
+            </div>
+            <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+              Alcance y Costos
+            </h3>
+          </div>
 
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Tipo
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ campaign.type }}
-                    </div>
-                  </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Alcance Estimado
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ campaign.reach | number }}
+              </div>
+            </div>
 
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Modalidad Específica
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ campaign.specificModality }}
-                    </div>
-                  </div>
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Unidad
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ fullCampaign.reach.unit! || 'Personas' }}
+              </div>
+            </div>
 
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Estado
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
-                      <span [ngClass]="{
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Alcance Real
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ (campaign.totalRegistrados ?? 0) | number }}
+              </div>
+            </div>
+
+            <div class="space-y-2 md:col-span-3">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Inversión Total
+              </label>
+              <div
+                class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-mono font-bold text-slate-700">
+                {{ campaign.cost | currency:'MXN' }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- IEMS OBJETIVO -->
+        @if (fullCampaign.targetedIEMS && fullCampaign.targetedIEMS.length > 0) {
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+            <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+              <i class="fas fa-school text-amber-600"></i>
+            </div>
+            <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+              IEMS Objetivo
+            </h3>
+          </div>
+
+          <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
+            <div class="text-sm font-bold text-slate-700">
+              <i class="fas fa-school text-amber-600 mr-2"></i>
+              {{ getTargetedIEMSName(fullCampaign.targetedIEMS) }}
+            </div>
+          </div>
+        </div>
+        }
+
+        <!-- CARRERAS PROMOCIONADAS -->
+        @if (getPromotedCareers(fullCampaign).length) {
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+            <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+              <i class="fas fa-graduation-cap text-amber-600"></i>
+            </div>
+            <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+              Carreras Promocionadas
+            </h3>
+          </div>
+
+          <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+              {{ getPromotedCareers(fullCampaign).length }} carrera(s) promocionada(s)
+            </p>
+            <ul class="flex flex-wrap gap-2 list-none">
+              @for (careerId of getPromotedCareers(fullCampaign); track careerId) {
+              <li>
+                <span
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-800 rounded-xl text-sm font-bold">
+                  <i class="fas fa-graduation-cap text-amber-600 text-xs"></i>
+                  {{ getCareerName(careerId) }}
+                </span>
+              </li>
+              }
+            </ul>
+          </div>
+        </div>
+        }
+        } @else {
+        <!-- Si no hay campaña completa, mostrar solo la información básica -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
+            <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+              <i class="fas fa-info-circle text-blue-600"></i>
+            </div>
+            <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+              Información Básica
+            </h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Nombre de la Campaña
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ campaign.name }}
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Institución
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ campaign.institution }}
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Estado
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
+                <span [ngClass]="{
                         'bg-blue-100 text-blue-700': campaign.status === 'Planificada',
                         'bg-emerald-100 text-emerald-700': campaign.status === 'En curso',
                         'bg-slate-100 text-slate-500': campaign.status === 'Finalizada',
                         'bg-red-100 text-red-700': campaign.status === 'Cancelada'
                       }" class="px-3 py-1 rounded-full text-[10px] font-black uppercase">
-                        {{ campaign.status }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Ciclo
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ campaign.cycleName }}
-                    </div>
-                  </div>
-                </div>
+                  {{ campaign.status }}
+                </span>
               </div>
+            </div>
 
-              <!-- PERIODO -->
-              <div class="space-y-4">
-                <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
-                  <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-calendar-alt text-emerald-600"></i>
-                  </div>
-                  <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
-                    Periodo de Ejecución
-                  </h3>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Fecha de Inicio
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ fullCampaign.period.startDate! | date:'dd/MM/yyyy' }}
-                    </div>
-                  </div>
-
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Fecha de Finalización
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ fullCampaign.period.endDate! | date:'dd/MM/yyyy' }}
-                    </div>
-                  </div>
-                </div>
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Ciclo
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ campaign.cycleName }}
               </div>
+            </div>
 
-              <!-- ALCANCE Y COSTOS -->
-              <div class="space-y-4">
-                <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
-                  <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-bullseye text-purple-600"></i>
-                  </div>
-                  <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
-                    Alcance y Costos
-                  </h3>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Alcance Estimado
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ campaign.reach | number }}
-                    </div>
-                  </div>
-
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Unidad
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ fullCampaign.reach.unit! || 'Personas' }}
-                    </div>
-                  </div>
-
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Alcance Real
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ (campaign.totalRegistrados ?? 0) | number }}
-                    </div>
-                  </div>
-
-                  <div class="space-y-2 md:col-span-3">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Inversión Total
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-mono font-bold text-slate-700">
-                      {{ campaign.cost | currency:'MXN' }}
-                    </div>
-                  </div>
-                </div>
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Alcance Estimado
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ campaign.reach | number }}
               </div>
+            </div>
 
-              <!-- IEMS OBJETIVO -->
-              @if (fullCampaign.targetedIEMS && fullCampaign.targetedIEMS.length > 0) {
-                <div class="space-y-4">
-                  <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
-                    <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-                      <i class="fas fa-school text-amber-600"></i>
-                    </div>
-                    <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
-                      IEMS Objetivo
-                    </h3>
-                  </div>
-
-                  <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
-                    <div class="text-sm font-bold text-slate-700">
-                      <i class="fas fa-school text-amber-600 mr-2"></i>
-                      {{ getTargetedIEMSName(fullCampaign.targetedIEMS) }}
-                    </div>
-                  </div>
-                </div>
-              }
-
-              <!-- CARRERAS PROMOCIONADAS -->
-              @if (getPromotedCareers(fullCampaign).length) {
-                <div class="space-y-4">
-                  <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
-                    <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-                      <i class="fas fa-graduation-cap text-amber-600"></i>
-                    </div>
-                    <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
-                      Carreras Promocionadas
-                    </h3>
-                  </div>
-
-                  <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
-                      {{ getPromotedCareers(fullCampaign).length }} carrera(s) promocionada(s)
-                    </p>
-                    <ul class="flex flex-wrap gap-2 list-none">
-                      @for (careerId of getPromotedCareers(fullCampaign); track careerId) {
-                        <li>
-                          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-800 rounded-xl text-sm font-bold">
-                            <i class="fas fa-graduation-cap text-amber-600 text-xs"></i>
-                            {{ getCareerName(careerId) }}
-                          </span>
-                        </li>
-                      }
-                    </ul>
-                  </div>
-                </div>
-              }
-            } @else {
-              <!-- Si no hay campaña completa, mostrar solo la información básica -->
-              <div class="space-y-4">
-                <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
-                  <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-info-circle text-blue-600"></i>
-                  </div>
-                  <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
-                    Información Básica
-                  </h3>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Nombre de la Campaña
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ campaign.name }}
-                    </div>
-                  </div>
-
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Institución
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ campaign.institution }}
-                    </div>
-                  </div>
-
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Estado
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
-                      <span [ngClass]="{
-                        'bg-blue-100 text-blue-700': campaign.status === 'Planificada',
-                        'bg-emerald-100 text-emerald-700': campaign.status === 'En curso',
-                        'bg-slate-100 text-slate-500': campaign.status === 'Finalizada',
-                        'bg-red-100 text-red-700': campaign.status === 'Cancelada'
-                      }" class="px-3 py-1 rounded-full text-[10px] font-black uppercase">
-                        {{ campaign.status }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Ciclo
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ campaign.cycleName }}
-                    </div>
-                  </div>
-
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Alcance Estimado
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ campaign.reach | number }}
-                    </div>
-                  </div>
-
-                  <div class="space-y-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Alcance Real
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
-                      {{ (campaign.totalRegistrados ?? 0) | number }}
-                    </div>
-                  </div>
-
-                  <div class="space-y-2 md:col-span-2">
-                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Inversión Total
-                    </label>
-                    <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-mono font-bold text-slate-700">
-                      {{ campaign.cost | currency:'MXN' }}
-                    </div>
-                  </div>
-                </div>
+            <div class="space-y-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Alcance Real
+              </label>
+              <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-bold text-slate-700">
+                {{ (campaign.totalRegistrados ?? 0) | number }}
               </div>
-            }
-          }
+            </div>
+
+            <div class="space-y-2 md:col-span-2">
+              <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Inversión Total
+              </label>
+              <div
+                class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-mono font-bold text-slate-700">
+                {{ campaign.cost | currency:'MXN' }}
+              </div>
+            </div>
+          </div>
         </div>
+        }
+        }
+      </div>
     </div>
   </div>
   }
 
   <!-- MODAL DE QR CODE -->
   @if (showQRModal()) {
-    <div class="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" (click)="closeQRModal()"></div>
+  <div class="fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" (click)="closeQRModal()"></div>
 
-      <div
-        class="relative bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300"
-      >
-        <button
-          (click)="closeQRModal()"
-          class="absolute right-6 top-6 text-gray-400 hover:text-gray-600 transition-colors z-10"
-        >
-          <i class="fas fa-times text-xl"></i>
-        </button>
+    <div
+      class="relative bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+      <button (click)="closeQRModal()"
+        class="absolute right-6 top-6 text-gray-400 hover:text-gray-600 transition-colors z-10">
+        <i class="fas fa-times text-xl"></i>
+      </button>
 
-        <div class="p-8 pt-12 text-center">
-          <div
-            class="bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem] p-6 mb-6 inline-block mx-auto"
-          >
-            @if (customQRImage()) {
-              <div class="flex items-center justify-center bg-white rounded-xl shadow-inner overflow-hidden">
-                <img
-                  [src]="customQRImage()"
-                  [alt]="'QR Code para ' + qrUrl()"
-                  class="max-w-full h-auto object-contain"
-                  onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%23f3f4f6\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%239ca3af\' font-family=\'Arial\' font-size=\'14\'%3EError cargando QR%3C/text%3E%3C/svg%3E'"
-                />
-              </div>
-            } @else {
-              <div class="w-48 h-48 flex items-center justify-center bg-white rounded-xl shadow-inner">
-                <i class="fas fa-spinner fa-spin text-gray-400 text-3xl"></i>
-              </div>
-            }
+      <div class="p-8 pt-12 text-center">
+        <div class="bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem] p-6 mb-6 inline-block mx-auto">
+          @if (customQRImage()) {
+          <div class="flex items-center justify-center bg-white rounded-xl shadow-inner overflow-hidden">
+            <img [src]="customQRImage()" [alt]="'QR Code para ' + qrUrl()" class="max-w-full h-auto object-contain"
+              onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%23f3f4f6\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%239ca3af\' font-family=\'Arial\' font-size=\'14\'%3EError cargando QR%3C/text%3E%3C/svg%3E'" />
           </div>
-
-          <h3 class="text-xl font-black text-gray-800 mb-2">Registro por QR</h3>
-          <p class="text-sm text-gray-500 font-medium mb-6 leading-relaxed">
-            Los aspirantes pueden escanear este código para registrarse directamente desde su celular.
-          </p>
-
-          <div
-            class="flex items-center gap-2 bg-gray-50 p-2 pl-4 rounded-2xl border border-gray-100 mb-6"
-          >
-            <input
-              type="text"
-              [value]="qrUrl()"
-              readonly
-              class="bg-transparent border-none text-xs font-bold text-blue-600 outline-none w-full"
-            />
-            <button
-              (click)="copyQRLink()"
-              class="bg-white text-gray-700 text-[10px] font-black uppercase px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-100 active:scale-95 transition-all"
-            >
-              {{ linkCopied() ? 'Copiado!' : 'Copiar' }}
-            </button>
+          } @else {
+          <div class="w-48 h-48 flex items-center justify-center bg-white rounded-xl shadow-inner">
+            <i class="fas fa-spinner fa-spin text-gray-400 text-3xl"></i>
           </div>
+          }
+        </div>
 
-          <button
-            (click)="downloadQR()"
-            class="w-full bg-emerald-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-emerald-500/20 hover:bg-emerald-700 transition-all flex items-center justify-center gap-3 uppercase text-xs tracking-widest"
-          >
-            <i class="fas fa-download"></i> Descargar QR
+        <h3 class="text-xl font-black text-gray-800 mb-2">Registro por QR</h3>
+        <p class="text-sm text-gray-500 font-medium mb-6 leading-relaxed">
+          Los aspirantes pueden escanear este código para registrarse directamente desde su celular.
+        </p>
+
+        <div class="flex items-center gap-2 bg-gray-50 p-2 pl-4 rounded-2xl border border-gray-100 mb-6">
+          <input type="text" [value]="qrUrl()" readonly
+            class="bg-transparent border-none text-xs font-bold text-blue-600 outline-none w-full" />
+          <button (click)="copyQRLink()"
+            class="bg-white text-gray-700 text-[10px] font-black uppercase px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-100 active:scale-95 transition-all">
+            {{ linkCopied() ? 'Copiado!' : 'Copiar' }}
           </button>
         </div>
+
+        <button (click)="downloadQR()"
+          class="w-full bg-emerald-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-emerald-500/20 hover:bg-emerald-700 transition-all flex items-center justify-center gap-3 uppercase text-xs tracking-widest">
+          <i class="fas fa-download"></i> Descargar QR
+        </button>
       </div>
     </div>
+  </div>
   }
 </div>
-
-
