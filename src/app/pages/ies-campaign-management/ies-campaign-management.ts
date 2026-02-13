@@ -81,6 +81,9 @@ export class IesCampaignManagementComponent implements OnInit {
 
   // Auth
   currentUser = this.authService.currentUser;
+  
+  // Verificar si el usuario es Admin Nacional
+  isAdminNacional = computed(() => this.authService.hasRole('Admin Nacional'));
 
   // SELECCIÓN (Aquí vive la magia de las métricas)
   selectedCampaign = signal<CampaignDisplay | null>(null);
@@ -338,6 +341,7 @@ export class IesCampaignManagementComponent implements OnInit {
   /**
    * Cargar solo las carreras de la IES a la que pertenece el usuario (endpoint /ies/:id/carreras).
    * Si el usuario no tiene IES o la IES no tiene carreras, se muestra el mensaje correspondiente.
+   * Si es Admin Nacional, carga todas las carreras de todas las IES.
    */
   loadCareersFromIES() {
     const user = this.authService.currentUser();
@@ -348,6 +352,13 @@ export class IesCampaignManagementComponent implements OnInit {
         : typeof userIES === 'string'
           ? userIES
           : (userIES as any)?._id ?? (userIES as any)?.id ?? null;
+
+    // Si es Admin Nacional, cargar todas las carreras
+    if (this.isAdminNacional()) {
+      this.loadAllCareers();
+      this.careersSectionMessage.set('Mostrando carreras de todas las IES. Puedes filtrar al seleccionar una IES específica.');
+      return;
+    }
 
     if (!iesId) {
       this.careersList.set([]);
@@ -388,7 +399,7 @@ export class IesCampaignManagementComponent implements OnInit {
     this.iesService.getAllIES({ active: true }).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          // Crear un Set para evitar duplicados
+          // Crear un Map para evitar duplicados basado en el _id real
           const careersMap = new Map<string, MockCareer>();
 
           response.data.forEach(ies => {
@@ -396,11 +407,14 @@ export class IesCampaignManagementComponent implements OnInit {
               ies.careers
                 .filter(c => c.active)
                 .forEach(career => {
-                  const careerKey = career.code || career.name;
-                  // Solo agregar si no existe o si queremos mantener la primera ocurrencia
-                  if (!careersMap.has(careerKey)) {
-                    careersMap.set(careerKey, {
-                      id: careerKey,
+                  // Usar el ID real del documento (_id o id)
+                  // TypeScript: career puede tener _id del backend aunque no esté en la interfaz
+                  const careerId = (career as any)._id || career.id || '';
+                  
+                  // Solo agregar si no existe (evitar duplicados de carreras con mismo _id)
+                  if (careerId && !careersMap.has(careerId)) {
+                    careersMap.set(careerId, {
+                      id: careerId,
                       name: career.name,
                       code: career.code || ''
                     });
@@ -423,6 +437,47 @@ export class IesCampaignManagementComponent implements OnInit {
       error: (error) => {
         console.error('❌ Error cargando todas las IES:', error);
         this.careersList.set(this.mockCareers);
+      }
+    });
+  }
+
+  /**
+   * Cargar carreras de una IES específica (para Admin Nacional)
+   */
+  private loadCareersForSpecificIES(iesId: string, onComplete?: () => void) {
+    this.careersSectionMessage.set(null);
+    this.iesService.getCareersIES(iesId).subscribe({
+      next: (response) => {
+        if (response.success && response.data && response.data.length > 0) {
+          const careers = response.data
+            .filter((c: { active?: boolean }) => c.active !== false)
+            .map((c: { _id?: string; id?: string; name: string; code?: string }) => ({
+              id: c._id ?? c.id ?? '',
+              name: c.name,
+              code: c.code ?? ''
+            }));
+          this.careersList.set(careers);
+          this.careersSectionMessage.set(`Mostrando ${careers.length} carrera(s) de la IES seleccionada`);
+          
+          // Ejecutar callback si existe (para seleccionar carreras después de cargarlas)
+          if (onComplete) {
+            onComplete();
+          }
+        } else {
+          this.careersList.set([]);
+          this.careersSectionMessage.set('La IES seleccionada no tiene carreras registradas.');
+          if (onComplete) {
+            onComplete();
+          }
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error cargando carreras de la IES:', error);
+        this.careersList.set([]);
+        this.careersSectionMessage.set('Error al cargar carreras de la IES seleccionada.');
+        if (onComplete) {
+          onComplete();
+        }
       }
     });
   }
@@ -876,10 +931,36 @@ export class IesCampaignManagementComponent implements OnInit {
             this.selectedIESForCampaign.set(iesId);
             this.selectedIESName.set(campaign.ies?.iesName || campaign.ies?.name || '');
             this.iesSearchQuery.set(campaign.ies?.iesName || campaign.ies?.name || '');
+            
+            // Si es Admin Nacional, cargar carreras de esta IES y después seleccionar las promocionadas
+            if (this.isAdminNacional()) {
+              const promotedCareers = campaign.promotedCareers || [];
+              const activeStatus = campaign.active !== undefined ? campaign.active : true;
+              
+              this.loadCareersForSpecificIES(iesId, () => {
+                // Este callback se ejecuta DESPUÉS de que las carreras se hayan cargado
+                if (promotedCareers.length > 0) {
+                  this.selectedCareers.set([...promotedCareers]);
+                } else {
+                  this.selectedCareers.set([]);
+                }
+                
+                // Estado activo
+                this.campaignForm.patchValue({
+                  active: activeStatus
+                });
+                
+                // Mostrar modal DESPUÉS de cargar las carreras
+                this.isLoading.set(false);
+                this.showModal.set(true);
+              });
+              // Salir temprano ya que el modal se mostrará en el callback
+              return;
+            }
           }
         }
 
-        // Configurar carreras promocionadas
+        // Configurar carreras promocionadas (solo si NO es Admin Nacional)
         if (campaign.promotedCareers && campaign.promotedCareers.length > 0) {
           this.selectedCareers.set([...campaign.promotedCareers]);
         } else {
@@ -1393,8 +1474,26 @@ export class IesCampaignManagementComponent implements OnInit {
     return campaign.promotedCareers ?? campaign.targetedCareers ?? [];
   }
 
+  /**
+   * Obtener nombre de carrera por ID
+   * Busca en la lista cargada, si no encuentra, devuelve el código/nombre abreviado
+   */
   getCareerName(careerId: string): string {
-    return this.careersList().find(c => c.id === careerId)?.name || careerId;
+    // Buscar en la lista cargada de carreras
+    const career = this.careersList().find(c => c.id === careerId);
+    if (career) {
+      return career.name;
+    }
+    
+    // Si no se encuentra, podría ser porque las carreras aún no se han cargado
+    // o porque el ID es antiguo. Devolver algo más legible que el ID completo
+    if (careerId.length > 20) {
+      // Es un ObjectId de MongoDB, mostrar abreviado
+      return `Carrera ${careerId.substring(careerId.length - 6)}`;
+    }
+    
+    // Si es corto, probablemente sea un código de carrera
+    return careerId;
   }
 
   /**
@@ -1513,6 +1612,13 @@ export class IesCampaignManagementComponent implements OnInit {
       campaignIES: ies._id
     });
     this.showIESDropdown.set(false);
+    
+    // Si es Admin Nacional, cargar carreras de la IES seleccionada
+    if (this.isAdminNacional() && ies._id) {
+      // Limpiar carreras seleccionadas al cambiar de IES
+      this.selectedCareers.set([]);
+      this.loadCareersForSpecificIES(ies._id);
+    }
   }
 
   /**
@@ -1526,6 +1632,12 @@ export class IesCampaignManagementComponent implements OnInit {
       campaignIES: ''
     });
     this.filteredIESForCampaign.set(this.iesList());
+    
+    // Si es Admin Nacional, volver a cargar todas las carreras
+    if (this.isAdminNacional()) {
+      this.loadAllCareers();
+      this.careersSectionMessage.set('Mostrando carreras de todas las IES. Selecciona una IES para filtrar.');
+    }
   }
 
   /**
