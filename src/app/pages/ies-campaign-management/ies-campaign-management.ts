@@ -356,7 +356,8 @@ export class IesCampaignManagementComponent implements OnInit {
     // Si es Admin Nacional, cargar todas las carreras
     if (this.isAdminNacional()) {
       this.loadAllCareers();
-      this.careersSectionMessage.set('Mostrando carreras de todas las IES. Puedes filtrar al seleccionar una IES específica.');
+      // No establecer mensaje para mostrar el grid de carreras
+      this.careersSectionMessage.set(null);
       return;
     }
 
@@ -457,7 +458,8 @@ export class IesCampaignManagementComponent implements OnInit {
               code: c.code ?? ''
             }));
           this.careersList.set(careers);
-          this.careersSectionMessage.set(`Mostrando ${careers.length} carrera(s) de la IES seleccionada`);
+          // NO establecer mensaje aquí - dejar null para mostrar el grid
+          this.careersSectionMessage.set(null);
           
           // Ejecutar callback si existe (para seleccionar carreras después de cargarlas)
           if (onComplete) {
@@ -931,6 +933,11 @@ export class IesCampaignManagementComponent implements OnInit {
             this.selectedIESForCampaign.set(iesId);
             this.selectedIESName.set(campaign.ies?.iesName || campaign.ies?.name || '');
             this.iesSearchQuery.set(campaign.ies?.iesName || campaign.ies?.name || '');
+            
+            // Actualizar el valor del formulario (necesario para que el formulario sea válido)
+            this.campaignForm.patchValue({
+              campaignIES: iesId
+            });
             
             // Si es Admin Nacional, cargar carreras de esta IES y después seleccionar las promocionadas
             if (this.isAdminNacional()) {
@@ -1636,7 +1643,8 @@ export class IesCampaignManagementComponent implements OnInit {
     // Si es Admin Nacional, volver a cargar todas las carreras
     if (this.isAdminNacional()) {
       this.loadAllCareers();
-      this.careersSectionMessage.set('Mostrando carreras de todas las IES. Selecciona una IES para filtrar.');
+      // No establecer mensaje para mostrar el grid de carreras
+      this.careersSectionMessage.set(null);
     }
   }
 
