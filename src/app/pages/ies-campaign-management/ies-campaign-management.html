@@ -529,37 +529,51 @@
                 </div>
               </div>
 
-              <!-- IEMS Objetivo - Solo para Presencial -->
+              <!-- IEMS Objetivo - Solo para Presencial con selección múltiple -->
               @if (campaignForm.get('type')?.value === 'Presencial') {
               <div class="space-y-2 md:col-span-2">
                 <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
                   IEMS Objetivo (Preparatoria/Bachillerato)
                 </label>
+
+                <!-- IEMS seleccionadas (chips) -->
+                @if (selectedIEMSList().length > 0) {
+                <div class="flex flex-wrap gap-2 mb-3 p-3 bg-blue-50 rounded-xl border border-blue-200">
+                  @for (iems of selectedIEMSList(); track iems.id) {
+                  <div class="flex items-center gap-2 px-3 py-1.5 bg-white border-2 border-blue-200 rounded-full text-sm font-bold text-blue-700">
+                    <i class="fas fa-school text-xs"></i>
+                    <span>{{ iems.name }}</span>
+                    <button type="button" (click)="removeIEMS(iems.id)"
+                      class="w-5 h-5 flex items-center justify-center rounded-full hover:bg-red-100 transition-colors ml-1">
+                      <i class="fas fa-times text-xs text-red-500"></i>
+                    </button>
+                  </div>
+                  }
+                  <button type="button" (click)="clearAllIEMS()"
+                    class="px-3 py-1.5 bg-red-50 border-2 border-red-200 rounded-full text-sm font-bold text-red-600 hover:bg-red-100 transition-colors">
+                    <i class="fas fa-trash-alt text-xs mr-1"></i>
+                    Limpiar todo
+                  </button>
+                </div>
+                }
+
                 <div class="relative group">
                   <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 z-10"></i>
                   <input #iemsInput type="text" [value]="iemsSearchQuery()"
                     (input)="filterIEMS($any($event.target).value)" (focus)="showIEMSDropdown.set(true)"
-                    (blur)="onIEMSBlur()" placeholder="Seleccionar preparatoria/bachillerato..." autocomplete="off"
-                    class="w-full pl-12 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                    [class.border-blue-500]="selectedIEMS()" />
+                    (blur)="onIEMSBlur()" placeholder="Buscar y seleccionar preparatorias..." autocomplete="off"
+                    class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
+                    [class.border-blue-500]="selectedIEMSList().length > 0" />
 
-                  <!-- Botón limpiar -->
-                  @if (selectedIEMS()) {
-                  <button type="button" (click)="clearIEMSSelection()"
-                    class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-100 transition-colors z-10">
-                    <i class="fas fa-times text-xs text-red-500"></i>
-                  </button>
-                  }
-
-                  <!-- Dropdown IEMS -->
+                  <!-- Dropdown IEMS con checkboxes -->
                   @if (filteredIEMS().length > 0 && showIEMSDropdown()) {
                   <ul
                     class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-60 overflow-y-auto">
                     @for (iems of filteredIEMS(); track iems._id) {
-                    <li (mousedown)="selectIEMS(iems._id!, iems.address.state + ' - ' + iems.name)"
+                    <li (mousedown)="toggleIEMS(iems._id!, iems.name)"
                       class="px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-medium text-slate-700 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
                       [class.bg-blue-50]="isIEMSSelected(iems._id!)">
-                      <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                      <div class="w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all"
                         [class.border-blue-600]="isIEMSSelected(iems._id!)"
                         [class.bg-blue-600]="isIEMSSelected(iems._id!)"
                         [class.border-slate-300]="!isIEMSSelected(iems._id!)">
@@ -588,8 +602,7 @@
 
                 <p class="text-[11px] text-slate-400 mt-2 italic font-medium ml-1">
                   <i class="fas fa-info-circle mr-1"></i>
-                  Selecciona la institución de nivel medio superior donde se aplicará la campaña ({{ iemsList().length
-                  }} disponibles)
+                  Puedes seleccionar múltiples preparatorias para esta campaña ({{ selectedIEMSList().length }} seleccionadas de {{ iemsList().length }} disponibles)
                 </p>
               </div>
               }
@@ -1057,7 +1070,7 @@
           </div>
         </div>
 
-        <!-- IEMS OBJETIVO -->
+        <!-- IEMS OBJETIVO (Múltiples) -->
         @if (fullCampaign.targetedIEMS && fullCampaign.targetedIEMS.length > 0) {
         <div class="space-y-4">
           <div class="flex items-center gap-3 pb-3 border-b-2 border-slate-100">
@@ -1065,15 +1078,23 @@
               <i class="fas fa-school text-amber-600"></i>
             </div>
             <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">
-              IEMS Objetivo
+              IEMS Objetivo ({{ fullCampaign.targetedIEMS.length }})
             </h3>
           </div>
 
-          <div class="px-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem]">
-            <div class="text-sm font-bold text-slate-700">
-              <i class="fas fa-school text-amber-600 mr-2"></i>
-              {{ getTargetedIEMSName(fullCampaign.targetedIEMS) }}
+          <div class="space-y-2">
+            @for (iems of fullCampaign.targetedIEMS; track $index) {
+            <div class="px-6 py-3 bg-amber-50 border-2 border-amber-200 rounded-xl flex items-center gap-3">
+              <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-school text-amber-600 text-sm"></i>
+              </div>
+              <div class="flex-1">
+                <div class="text-sm font-bold text-slate-800">
+                  {{ getIEMSDisplayName(iems) }}
+                </div>
+              </div>
             </div>
+            }
           </div>
         </div>
         }

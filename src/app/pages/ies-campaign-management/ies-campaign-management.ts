@@ -42,6 +42,12 @@ interface MockCareer {
   code: string;
 }
 
+// Interface para IEMS en campañas
+interface CampaignIEMS {
+  iemsId: string;
+  iemsName: string;
+}
+
 @Component({
   selector: 'app-ies-campaign-management',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, CurrencyPipe, DecimalPipe],
@@ -95,12 +101,11 @@ export class IesCampaignManagementComponent implements OnInit {
   isEditMode = signal(false);
   editingCampaignId = signal<string | null>(null);
 
-  // Autocomplete states para IEMS
+  // Autocomplete states para IEMS - Selección múltiple
   iemsList = signal<IEMS[]>([]);
   filteredIEMS = signal<IEMS[]>([]);
   iemsSearchQuery = signal('');
-  selectedIEMS = signal<string | null>(null); // Solo una IEMS
-  selectedIEMSName = signal<string>('');
+  selectedIEMSList = signal<Array<{id: string, name: string}>>([]); // Lista de IEMS seleccionados
   showIEMSDropdown = signal(false);
 
   // Autocomplete states para IES (cuando usuario no tiene IES asignada)
@@ -747,8 +752,7 @@ export class IesCampaignManagementComponent implements OnInit {
     this.filteredReachUnits.set(this.reachUnits);
 
     this.selectedCareers.set([]);
-    this.selectedIEMS.set(null);
-    this.selectedIEMSName.set('');
+    this.selectedIEMSList.set([]);
     this.iemsSearchQuery.set('');
     this.showIEMSDropdown.set(false);
     this.filteredIEMS.set(this.iemsList());
@@ -852,17 +856,17 @@ export class IesCampaignManagementComponent implements OnInit {
         this.reachUnitSearch.set(reachUnit);
         this.filteredReachUnits.set(this.reachUnits);
 
-        // Configurar IEMS si existe
+        // Configurar IEMS si existen (múltiples)
         if (campaign.targetedIEMS && campaign.targetedIEMS.length > 0) {
-          const iems = campaign.targetedIEMS[0];
-          this.selectedIEMS.set(iems.iemsId);
-          this.selectedIEMSName.set(iems.iemsName || '');
-          this.iemsSearchQuery.set(iems.iemsName || '');
+          const iemsList = (campaign.targetedIEMS as CampaignIEMS[]).map((iems: CampaignIEMS) => ({
+            id: iems.iemsId,
+            name: iems.iemsName || ''
+          }));
+          this.selectedIEMSList.set(iemsList);
         } else {
-          this.selectedIEMS.set(null);
-          this.selectedIEMSName.set('');
-          this.iemsSearchQuery.set('');
+          this.selectedIEMSList.set([]);
         }
+        this.iemsSearchQuery.set('');
         this.showIEMSDropdown.set(false);
 
         // Configurar IES si el usuario no tiene una asignada
@@ -973,11 +977,12 @@ export class IesCampaignManagementComponent implements OnInit {
       costs: {
         total: Number(formValue.totalCost) || 0
       },
-      // targetedIEMS solo si es tipo Presencial y hay IEMS seleccionada
-      ...(formValue.type === 'Presencial' && this.selectedIEMS() ? {
-        targetedIEMS: [{
-          iemsId: this.selectedIEMS()!
-        }]
+      // targetedIEMS solo si es tipo Presencial y hay IEMS seleccionadas
+      ...(formValue.type === 'Presencial' && this.selectedIEMSList().length > 0 ? {
+        targetedIEMS: this.selectedIEMSList().map(iems => ({
+          iemsId: iems.id,
+          iemsName: iems.name
+        }))
       } : {}),
       // Carreras promocionadas
       promotedCareers: this.selectedCareers().length > 0 ? this.selectedCareers() : [],
@@ -1276,40 +1281,53 @@ export class IesCampaignManagementComponent implements OnInit {
   }
 
   /**
-   * Seleccionar IEMS (solo una)
+   * Seleccionar/Deseleccionar IEMS (múltiple)
    */
-  selectIEMS(iemsId: string, iemsName: string) {
-    this.selectedIEMS.set(iemsId);
-    this.selectedIEMSName.set(iemsName);
-    this.iemsSearchQuery.set(iemsName);
-
-    this.campaignForm.patchValue({
-      targetedIEMSId: iemsId,
-      targetedIEMS: iemsName
-    });
-
-    // Cerrar dropdown después de seleccionar
-    this.showIEMSDropdown.set(false);
+  toggleIEMS(iemsId: string, iemsName: string) {
+    const currentList = this.selectedIEMSList();
+    const index = currentList.findIndex(iems => iems.id === iemsId);
+    
+    if (index > -1) {
+      // Ya está seleccionado, removerlo
+      const newList = currentList.filter(iems => iems.id !== iemsId);
+      this.selectedIEMSList.set(newList);
+    } else {
+      // No está seleccionado, agregarlo
+      this.selectedIEMSList.set([...currentList, { id: iemsId, name: iemsName }]);
+    }
+    
+    // Limpiar campo de búsqueda
+    this.iemsSearchQuery.set('');
   }
 
   /**
    * Verificar si IEMS está seleccionada
    */
   isIEMSSelected(iemsId: string): boolean {
-    return this.selectedIEMS() === iemsId;
+    return this.selectedIEMSList().some(iems => iems.id === iemsId);
+  }
+
+  /**
+   * Remover un IEMS específico de la selección
+   */
+  removeIEMS(iemsId: string) {
+    const newList = this.selectedIEMSList().filter(iems => iems.id !== iemsId);
+    this.selectedIEMSList.set(newList);
+  }
+
+  /**
+   * Limpiar toda la selección de IEMS
+   */
+  clearAllIEMS() {
+    this.selectedIEMSList.set([]);
+    this.iemsSearchQuery.set('');
   }
 
   /**
    * Limpiar selección de IEMS
    */
   clearIEMSSelection() {
-    this.selectedIEMS.set(null);
-    this.selectedIEMSName.set('');
-    this.iemsSearchQuery.set('');
-    this.campaignForm.patchValue({
-      targetedIEMSId: '',
-      targetedIEMS: ''
-    });
+    this.clearAllIEMS();
     this.filteredIEMS.set(this.iemsList());
   }
 
@@ -1434,6 +1452,28 @@ export class IesCampaignManagementComponent implements OnInit {
     // Si es un objeto con iemsId
     if (typeof firstItem === 'object' && firstItem !== null && 'iemsId' in firstItem) {
       return this.getIEMSName(firstItem.iemsId);
+    }
+
+    return 'Sin nombre';
+  }
+
+  /**
+   * Obtener nombre de IEMS para mostrar (maneja diferentes formatos)
+   */
+  getIEMSDisplayName(iems: any): string {
+    // Si es un objeto con iemsName
+    if (typeof iems === 'object' && iems !== null && 'iemsName' in iems) {
+      return iems.iemsName || 'Sin nombre';
+    }
+
+    // Si es un string (ID), buscar el nombre
+    if (typeof iems === 'string') {
+      return this.getIEMSName(iems);
+    }
+
+    // Si tiene iemsId
+    if (typeof iems === 'object' && iems !== null && 'iemsId' in iems) {
+      return this.getIEMSName(iems.iemsId);
     }
 
     return 'Sin nombre';
