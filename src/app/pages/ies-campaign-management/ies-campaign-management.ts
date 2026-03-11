@@ -42,6 +42,12 @@ interface MockCareer {
   code: string;
 }
 
+// Interface para IEMS en campañas
+interface CampaignIEMS {
+  iemsId: string;
+  iemsName: string;
+}
+
 @Component({
   selector: 'app-ies-campaign-management',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, CurrencyPipe, DecimalPipe],
@@ -75,6 +81,9 @@ export class IesCampaignManagementComponent implements OnInit {
 
   // Auth
   currentUser = this.authService.currentUser;
+  
+  // Verificar si el usuario es Admin Nacional
+  isAdminNacional = computed(() => this.authService.hasRole('Admin Nacional'));
 
   // SELECCIÓN (Aquí vive la magia de las métricas)
   selectedCampaign = signal<CampaignDisplay | null>(null);
@@ -95,12 +104,11 @@ export class IesCampaignManagementComponent implements OnInit {
   isEditMode = signal(false);
   editingCampaignId = signal<string | null>(null);
 
-  // Autocomplete states para IEMS
+  // Autocomplete states para IEMS - Selección múltiple
   iemsList = signal<IEMS[]>([]);
   filteredIEMS = signal<IEMS[]>([]);
   iemsSearchQuery = signal('');
-  selectedIEMS = signal<string | null>(null); // Solo una IEMS
-  selectedIEMSName = signal<string>('');
+  selectedIEMSList = signal<Array<{id: string, name: string}>>([]); // Lista de IEMS seleccionados
   showIEMSDropdown = signal(false);
 
   // Autocomplete states para IES (cuando usuario no tiene IES asignada)
@@ -333,6 +341,7 @@ export class IesCampaignManagementComponent implements OnInit {
   /**
    * Cargar solo las carreras de la IES a la que pertenece el usuario (endpoint /ies/:id/carreras).
    * Si el usuario no tiene IES o la IES no tiene carreras, se muestra el mensaje correspondiente.
+   * Si es Admin Nacional, carga todas las carreras de todas las IES.
    */
   loadCareersFromIES() {
     const user = this.authService.currentUser();
@@ -343,6 +352,14 @@ export class IesCampaignManagementComponent implements OnInit {
         : typeof userIES === 'string'
           ? userIES
           : (userIES as any)?._id ?? (userIES as any)?.id ?? null;
+
+    // Si es Admin Nacional, cargar todas las carreras
+    if (this.isAdminNacional()) {
+      this.loadAllCareers();
+      // No establecer mensaje para mostrar el grid de carreras
+      this.careersSectionMessage.set(null);
+      return;
+    }
 
     if (!iesId) {
       this.careersList.set([]);
@@ -383,7 +400,7 @@ export class IesCampaignManagementComponent implements OnInit {
     this.iesService.getAllIES({ active: true }).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          // Crear un Set para evitar duplicados
+          // Crear un Map para evitar duplicados basado en el _id real
           const careersMap = new Map<string, MockCareer>();
 
           response.data.forEach(ies => {
@@ -391,11 +408,14 @@ export class IesCampaignManagementComponent implements OnInit {
               ies.careers
                 .filter(c => c.active)
                 .forEach(career => {
-                  const careerKey = career.code || career.name;
-                  // Solo agregar si no existe o si queremos mantener la primera ocurrencia
-                  if (!careersMap.has(careerKey)) {
-                    careersMap.set(careerKey, {
-                      id: careerKey,
+                  // Usar el ID real del documento (_id o id)
+                  // TypeScript: career puede tener _id del backend aunque no esté en la interfaz
+                  const careerId = (career as any)._id || career.id || '';
+                  
+                  // Solo agregar si no existe (evitar duplicados de carreras con mismo _id)
+                  if (careerId && !careersMap.has(careerId)) {
+                    careersMap.set(careerId, {
+                      id: careerId,
                       name: career.name,
                       code: career.code || ''
                     });
@@ -418,6 +438,48 @@ export class IesCampaignManagementComponent implements OnInit {
       error: (error) => {
         console.error('❌ Error cargando todas las IES:', error);
         this.careersList.set(this.mockCareers);
+      }
+    });
+  }
+
+  /**
+   * Cargar carreras de una IES específica (para Admin Nacional)
+   */
+  private loadCareersForSpecificIES(iesId: string, onComplete?: () => void) {
+    this.careersSectionMessage.set(null);
+    this.iesService.getCareersIES(iesId).subscribe({
+      next: (response) => {
+        if (response.success && response.data && response.data.length > 0) {
+          const careers = response.data
+            .filter((c: { active?: boolean }) => c.active !== false)
+            .map((c: { _id?: string; id?: string; name: string; code?: string }) => ({
+              id: c._id ?? c.id ?? '',
+              name: c.name,
+              code: c.code ?? ''
+            }));
+          this.careersList.set(careers);
+          // NO establecer mensaje aquí - dejar null para mostrar el grid
+          this.careersSectionMessage.set(null);
+          
+          // Ejecutar callback si existe (para seleccionar carreras después de cargarlas)
+          if (onComplete) {
+            onComplete();
+          }
+        } else {
+          this.careersList.set([]);
+          this.careersSectionMessage.set('La IES seleccionada no tiene carreras registradas.');
+          if (onComplete) {
+            onComplete();
+          }
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error cargando carreras de la IES:', error);
+        this.careersList.set([]);
+        this.careersSectionMessage.set('Error al cargar carreras de la IES seleccionada.');
+        if (onComplete) {
+          onComplete();
+        }
       }
     });
   }
@@ -747,8 +809,7 @@ export class IesCampaignManagementComponent implements OnInit {
     this.filteredReachUnits.set(this.reachUnits);
 
     this.selectedCareers.set([]);
-    this.selectedIEMS.set(null);
-    this.selectedIEMSName.set('');
+    this.selectedIEMSList.set([]);
     this.iemsSearchQuery.set('');
     this.showIEMSDropdown.set(false);
     this.filteredIEMS.set(this.iemsList());
@@ -852,17 +913,17 @@ export class IesCampaignManagementComponent implements OnInit {
         this.reachUnitSearch.set(reachUnit);
         this.filteredReachUnits.set(this.reachUnits);
 
-        // Configurar IEMS si existe
+        // Configurar IEMS si existen (múltiples)
         if (campaign.targetedIEMS && campaign.targetedIEMS.length > 0) {
-          const iems = campaign.targetedIEMS[0];
-          this.selectedIEMS.set(iems.iemsId);
-          this.selectedIEMSName.set(iems.iemsName || '');
-          this.iemsSearchQuery.set(iems.iemsName || '');
+          const iemsList = (campaign.targetedIEMS as CampaignIEMS[]).map((iems: CampaignIEMS) => ({
+            id: iems.iemsId,
+            name: iems.iemsName || ''
+          }));
+          this.selectedIEMSList.set(iemsList);
         } else {
-          this.selectedIEMS.set(null);
-          this.selectedIEMSName.set('');
-          this.iemsSearchQuery.set('');
+          this.selectedIEMSList.set([]);
         }
+        this.iemsSearchQuery.set('');
         this.showIEMSDropdown.set(false);
 
         // Configurar IES si el usuario no tiene una asignada
@@ -872,10 +933,41 @@ export class IesCampaignManagementComponent implements OnInit {
             this.selectedIESForCampaign.set(iesId);
             this.selectedIESName.set(campaign.ies?.iesName || campaign.ies?.name || '');
             this.iesSearchQuery.set(campaign.ies?.iesName || campaign.ies?.name || '');
+            
+            // Actualizar el valor del formulario (necesario para que el formulario sea válido)
+            this.campaignForm.patchValue({
+              campaignIES: iesId
+            });
+            
+            // Si es Admin Nacional, cargar carreras de esta IES y después seleccionar las promocionadas
+            if (this.isAdminNacional()) {
+              const promotedCareers = campaign.promotedCareers || [];
+              const activeStatus = campaign.active !== undefined ? campaign.active : true;
+              
+              this.loadCareersForSpecificIES(iesId, () => {
+                // Este callback se ejecuta DESPUÉS de que las carreras se hayan cargado
+                if (promotedCareers.length > 0) {
+                  this.selectedCareers.set([...promotedCareers]);
+                } else {
+                  this.selectedCareers.set([]);
+                }
+                
+                // Estado activo
+                this.campaignForm.patchValue({
+                  active: activeStatus
+                });
+                
+                // Mostrar modal DESPUÉS de cargar las carreras
+                this.isLoading.set(false);
+                this.showModal.set(true);
+              });
+              // Salir temprano ya que el modal se mostrará en el callback
+              return;
+            }
           }
         }
 
-        // Configurar carreras promocionadas
+        // Configurar carreras promocionadas (solo si NO es Admin Nacional)
         if (campaign.promotedCareers && campaign.promotedCareers.length > 0) {
           this.selectedCareers.set([...campaign.promotedCareers]);
         } else {
@@ -973,11 +1065,12 @@ export class IesCampaignManagementComponent implements OnInit {
       costs: {
         total: Number(formValue.totalCost) || 0
       },
-      // targetedIEMS solo si es tipo Presencial y hay IEMS seleccionada
-      ...(formValue.type === 'Presencial' && this.selectedIEMS() ? {
-        targetedIEMS: [{
-          iemsId: this.selectedIEMS()!
-        }]
+      // targetedIEMS solo si es tipo Presencial y hay IEMS seleccionadas
+      ...(formValue.type === 'Presencial' && this.selectedIEMSList().length > 0 ? {
+        targetedIEMS: this.selectedIEMSList().map(iems => ({
+          iemsId: iems.id,
+          iemsName: iems.name
+        }))
       } : {}),
       // Carreras promocionadas
       promotedCareers: this.selectedCareers().length > 0 ? this.selectedCareers() : [],
@@ -1276,40 +1369,53 @@ export class IesCampaignManagementComponent implements OnInit {
   }
 
   /**
-   * Seleccionar IEMS (solo una)
+   * Seleccionar/Deseleccionar IEMS (múltiple)
    */
-  selectIEMS(iemsId: string, iemsName: string) {
-    this.selectedIEMS.set(iemsId);
-    this.selectedIEMSName.set(iemsName);
-    this.iemsSearchQuery.set(iemsName);
-
-    this.campaignForm.patchValue({
-      targetedIEMSId: iemsId,
-      targetedIEMS: iemsName
-    });
-
-    // Cerrar dropdown después de seleccionar
-    this.showIEMSDropdown.set(false);
+  toggleIEMS(iemsId: string, iemsName: string) {
+    const currentList = this.selectedIEMSList();
+    const index = currentList.findIndex(iems => iems.id === iemsId);
+    
+    if (index > -1) {
+      // Ya está seleccionado, removerlo
+      const newList = currentList.filter(iems => iems.id !== iemsId);
+      this.selectedIEMSList.set(newList);
+    } else {
+      // No está seleccionado, agregarlo
+      this.selectedIEMSList.set([...currentList, { id: iemsId, name: iemsName }]);
+    }
+    
+    // Limpiar campo de búsqueda
+    this.iemsSearchQuery.set('');
   }
 
   /**
    * Verificar si IEMS está seleccionada
    */
   isIEMSSelected(iemsId: string): boolean {
-    return this.selectedIEMS() === iemsId;
+    return this.selectedIEMSList().some(iems => iems.id === iemsId);
+  }
+
+  /**
+   * Remover un IEMS específico de la selección
+   */
+  removeIEMS(iemsId: string) {
+    const newList = this.selectedIEMSList().filter(iems => iems.id !== iemsId);
+    this.selectedIEMSList.set(newList);
+  }
+
+  /**
+   * Limpiar toda la selección de IEMS
+   */
+  clearAllIEMS() {
+    this.selectedIEMSList.set([]);
+    this.iemsSearchQuery.set('');
   }
 
   /**
    * Limpiar selección de IEMS
    */
   clearIEMSSelection() {
-    this.selectedIEMS.set(null);
-    this.selectedIEMSName.set('');
-    this.iemsSearchQuery.set('');
-    this.campaignForm.patchValue({
-      targetedIEMSId: '',
-      targetedIEMS: ''
-    });
+    this.clearAllIEMS();
     this.filteredIEMS.set(this.iemsList());
   }
 
@@ -1375,8 +1481,26 @@ export class IesCampaignManagementComponent implements OnInit {
     return campaign.promotedCareers ?? campaign.targetedCareers ?? [];
   }
 
+  /**
+   * Obtener nombre de carrera por ID
+   * Busca en la lista cargada, si no encuentra, devuelve el código/nombre abreviado
+   */
   getCareerName(careerId: string): string {
-    return this.careersList().find(c => c.id === careerId)?.name || careerId;
+    // Buscar en la lista cargada de carreras
+    const career = this.careersList().find(c => c.id === careerId);
+    if (career) {
+      return career.name;
+    }
+    
+    // Si no se encuentra, podría ser porque las carreras aún no se han cargado
+    // o porque el ID es antiguo. Devolver algo más legible que el ID completo
+    if (careerId.length > 20) {
+      // Es un ObjectId de MongoDB, mostrar abreviado
+      return `Carrera ${careerId.substring(careerId.length - 6)}`;
+    }
+    
+    // Si es corto, probablemente sea un código de carrera
+    return careerId;
   }
 
   /**
@@ -1439,6 +1563,28 @@ export class IesCampaignManagementComponent implements OnInit {
     return 'Sin nombre';
   }
 
+  /**
+   * Obtener nombre de IEMS para mostrar (maneja diferentes formatos)
+   */
+  getIEMSDisplayName(iems: any): string {
+    // Si es un objeto con iemsName
+    if (typeof iems === 'object' && iems !== null && 'iemsName' in iems) {
+      return iems.iemsName || 'Sin nombre';
+    }
+
+    // Si es un string (ID), buscar el nombre
+    if (typeof iems === 'string') {
+      return this.getIEMSName(iems);
+    }
+
+    // Si tiene iemsId
+    if (typeof iems === 'object' && iems !== null && 'iemsId' in iems) {
+      return this.getIEMSName(iems.iemsId);
+    }
+
+    return 'Sin nombre';
+  }
+
   // ==========================================
   // IES SELECTION METHODS (para usuarios sin IES asignada)
   // ==========================================
@@ -1473,6 +1619,13 @@ export class IesCampaignManagementComponent implements OnInit {
       campaignIES: ies._id
     });
     this.showIESDropdown.set(false);
+    
+    // Si es Admin Nacional, cargar carreras de la IES seleccionada
+    if (this.isAdminNacional() && ies._id) {
+      // Limpiar carreras seleccionadas al cambiar de IES
+      this.selectedCareers.set([]);
+      this.loadCareersForSpecificIES(ies._id);
+    }
   }
 
   /**
@@ -1486,6 +1639,13 @@ export class IesCampaignManagementComponent implements OnInit {
       campaignIES: ''
     });
     this.filteredIESForCampaign.set(this.iesList());
+    
+    // Si es Admin Nacional, volver a cargar todas las carreras
+    if (this.isAdminNacional()) {
+      this.loadAllCareers();
+      // No establecer mensaje para mostrar el grid de carreras
+      this.careersSectionMessage.set(null);
+    }
   }
 
   /**

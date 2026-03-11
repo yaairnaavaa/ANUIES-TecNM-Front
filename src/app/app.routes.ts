@@ -41,7 +41,7 @@ export const routes: Routes = [
       },
       {
         path: 'ies-gestion',
-        loadComponent: () => import('./pages/iems-gestion/iems-gestion').then((m) => m.IemsGestion),
+        loadComponent: () => import('./pages/ies-gestion/ies-gestion').then((m) => m.IesGestion),
       },
       {
         path: 'perfil-ies',
