@@ -52,7 +52,7 @@ export class Aspirant implements OnInit {
       (a) =>
         (a.fullName || '').toLowerCase().includes(term) ||
         (a.email || '').toLowerCase().includes(term) ||
-        (a.originIEMSName || a.originIEMS || '').toLowerCase().includes(term)
+        (a.originIEMSName || a.originIEMS || '').toLowerCase().includes(term),
     );
   });
 
@@ -82,9 +82,7 @@ export class Aspirant implements OnInit {
 
   // Aspirantes con registro completo
   completedAspirants = computed(() => {
-    return this.aspirants().filter(a =>
-      a.processStatus?.registrationComplete === true
-    ).length;
+    return this.aspirants().filter((a) => a.processStatus?.registrationComplete === true).length;
   });
 
   // Carrera más solicitada
@@ -95,8 +93,8 @@ export class Aspirant implements OnInit {
     // Contar todas las carreras de interés
     const careerCount: { [key: string]: number } = {};
 
-    aspirants.forEach(a => {
-      a.careerInterests?.forEach(interest => {
+    aspirants.forEach((a) => {
+      a.careerInterests?.forEach((interest) => {
         const career = interest.career;
         careerCount[career] = (careerCount[career] || 0) + 1;
       });
@@ -119,7 +117,7 @@ export class Aspirant implements OnInit {
   // Promedio general de calificaciones
   averageGrade = computed(() => {
     const aspirants = this.aspirants();
-    const withGrades = aspirants.filter(a => a.averageGrade && a.averageGrade > 0);
+    const withGrades = aspirants.filter((a) => a.averageGrade && a.averageGrade > 0);
 
     if (withGrades.length === 0) return 0;
 
@@ -231,15 +229,19 @@ export class Aspirant implements OnInit {
       return;
     }
     const rows = data.map((a) => ({
-      fullName: a.fullName ?? `${a.firstName ?? ''} ${a.lastName ?? ''} ${a.secondLastName ?? ''}`.trim(),
+      fullName:
+        a.fullName ?? `${a.firstName ?? ''} ${a.lastName ?? ''} ${a.secondLastName ?? ''}`.trim(),
       email: a.email ?? '',
       curp: a.curp ?? '',
       phone: (a.phone as { mobile?: string })?.mobile ?? '',
       originIEMS: a.originIEMSName ?? a.originIEMS ?? '',
       originCampaign: this.getOriginCampaignDisplay(a),
       status: this.getStatusLabel(a.processStatus),
-      careers: (a.careerInterests ?? []).map((i) => i.career).join('; ') || '',
-      cycleName: a.cycleName ?? ''
+      career1: a.careerInterests?.[0]?.career ?? '',
+      career2: a.careerInterests?.[1]?.career ?? '',
+      career3: a.careerInterests?.[2]?.career ?? '',
+
+      cycleName: a.cycleName ?? '',
     }));
     this.excelReport
       .downloadFormattedExcel({
@@ -254,10 +256,13 @@ export class Aspirant implements OnInit {
           { key: 'originIEMS', label: 'Origen IEMS', width: 22 },
           { key: 'originCampaign', label: 'Campaña origen', width: 24 },
           { key: 'status', label: 'Estatus', width: 14 },
-          { key: 'careers', label: 'Carreras de interés', width: 32 },
-          { key: 'cycleName', label: 'Ciclo', width: 16 }
+          { key: 'career1', label: 'Carrera de interés 1', width: 32 },
+          { key: 'career2', label: 'Carreras de interés 2', width: 32 },
+          { key: 'career3', label: 'Carreras de interés 3', width: 32 },
+
+          { key: 'cycleName', label: 'Ciclo', width: 16 },
         ],
-        rows
+        rows,
       })
       .catch((err) => {
         console.error('Error al exportar Excel:', err);
@@ -319,7 +324,11 @@ export class Aspirant implements OnInit {
       const date = new Date(fullYear, month - 1, day);
 
       // Validar que la fecha sea válida (por ejemplo, 31 de febrero no es válido)
-      if (date.getFullYear() !== fullYear || date.getMonth() !== month - 1 || date.getDate() !== day) {
+      if (
+        date.getFullYear() !== fullYear ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+      ) {
         return null;
       }
 

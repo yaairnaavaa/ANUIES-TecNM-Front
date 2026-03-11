@@ -42,7 +42,7 @@ export class CampaignService {
    */
   getCampaigns(filters?: CampaignFilters): Observable<ApiResponse<Campaign[]>> {
     let params = new HttpParams();
-    
+
     if (filters) {
       if (filters.ies) params = params.set('ies', filters.ies);
       if (filters.type) params = params.set('type', filters.type);
@@ -69,7 +69,10 @@ export class CampaignService {
   /**
    * Actualizar campaña
    */
-  updateCampaign(id: string, campaign: Partial<CreateCampaignDto>): Observable<ApiResponse<Campaign>> {
+  updateCampaign(
+    id: string,
+    campaign: Partial<CreateCampaignDto>,
+  ): Observable<ApiResponse<Campaign>> {
     return this.http.patch<ApiResponse<Campaign>>(`${this.baseUrl}/${id}`, campaign);
   }
 
@@ -84,8 +87,8 @@ export class CampaignService {
    * Actualizar estado de la campaña
    */
   updateStatus(
-    id: string, 
-    status: 'Planificada' | 'En Curso' | 'Finalizada' | 'Cancelada' | 'Pausada'
+    id: string,
+    status: 'Planificada' | 'En Curso' | 'Finalizada' | 'Cancelada' | 'Pausada',
   ): Observable<ApiResponse<Campaign>> {
     return this.http.put<ApiResponse<Campaign>>(`${this.baseUrl}/${id}/status`, { status });
   }
@@ -93,11 +96,14 @@ export class CampaignService {
   /**
    * Actualizar métricas de la campaña
    */
-  updateMetrics(id: string, metrics: {
-    impressions?: number;
-    clicks?: number;
-    conversions?: number;
-  }): Observable<ApiResponse<Campaign>> {
+  updateMetrics(
+    id: string,
+    metrics: {
+      impressions?: number;
+      clicks?: number;
+      conversions?: number;
+    },
+  ): Observable<ApiResponse<Campaign>> {
     return this.http.put<ApiResponse<Campaign>>(`${this.baseUrl}/${id}/metrics`, metrics);
   }
 
@@ -106,16 +112,40 @@ export class CampaignService {
    */
   getModalitiesByType(type: 'Presencial' | 'Digital'): string[] {
     const modalities = {
-      'Presencial': [
+      Presencial: [
         'Feria/Evento',
-        'Visita a escuela'
+        'Visita a escuela',
+        'Conferencias',
+        'Proyectos de innovación',
+        'Visitas a IEMS',
+        'Volanteo',
+        'Open House',
+        'Ferias universitarias',
+        'Conferencias tipo TED',
+        'Radio',
+        'TV',
+        'Tríptico / Periódico',
+        'Transporte (publicidad)',
+        'Barda / Crucero',
+        'Espectaculares (digitales y análogos)',
+        'Perifoneo / Revista',
+        'Barco / Avioneta',
       ],
-      'Digital': [
+      Digital: [
+        'Podcast',
+        'TikTok',
         'Facebook',
         'Instagram',
-        'TikTok',
+        'Telegram',
+        'WhatsApp',
         'YouTube',
-      ]
+        'SMS',
+        ' Videoblog',
+        'Trends / Reels',
+        'Fotos',
+        'Videoconferencias',
+        'Tríptico digital'
+      ],
     };
 
     return modalities[type] || [];
